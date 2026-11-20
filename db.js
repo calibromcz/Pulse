@@ -44,9 +44,53 @@ class PulseDB {
     return new Promise((resolve, reject) => {
       const tx = this.db.transaction(STORE_DOCS, 'readonly');
       const store = tx.objectStore(STORE_DOCS);
-      const req = store.get(id);
-      req.onsuccess = () => resolve(req.result);
+      // Prova con l'id così come passato
+      let req = store.get(id);
+      req.onsuccess = () => {
+        if (req.result) {
+          resolve(req.result);
+          return;
+        }
+        // Se non trovato e id è numerico in stringa, prova Number(id)
+        if (typeof id === 'string' && /^\d+$/.test(id)) {
+          const numReq = store.get(Number(id));
+          numReq.onsuccess = () => {
+            if (numReq.result) {
+              resolve(numReq.result);
+              return;
+            }
+            // Fallback con scansione getAll per corrispondenza flessibile
+            this._findDocFallback(store, id).then(resolve).catch(reject);
+          };
+          numReq.onerror = () => this._findDocFallback(store, id).then(resolve).catch(reject);
+        } else if (typeof id === 'number') {
+          // Se passato come number, prova String(id)
+          const strReq = store.get(String(id));
+          strReq.onsuccess = () => {
+            if (strReq.result) {
+              resolve(strReq.result);
+              return;
+            }
+            this._findDocFallback(store, id).then(resolve).catch(reject);
+          };
+          strReq.onerror = () => this._findDocFallback(store, id).then(resolve).catch(reject);
+        } else {
+          this._findDocFallback(store, id).then(resolve).catch(reject);
+        }
+      };
       req.onerror = () => reject(req.error);
+    });
+  }
+
+  async _findDocFallback(store, id) {
+    return new Promise((resolve) => {
+      const allReq = store.getAll();
+      allReq.onsuccess = () => {
+        const list = allReq.result || [];
+        const match = list.find(d => String(d.id) === String(id));
+        resolve(match || null);
+      };
+      allReq.onerror = () => resolve(null);
     });
   }
 

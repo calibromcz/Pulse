@@ -1242,8 +1242,8 @@
     </div>
   </div>
 
-  <!-- MODAL: DOCUMENT VIEWER SHEET -->
-  <div id="docViewerModalOverlay" class="modal-overlay" style="z-index: 3000;">
+  <!-- MODAL: DOCUMENT VIEWER SHEET (z-index 9999 per stare sopra la cartella e l'header) -->
+  <div id="docViewerModalOverlay" class="modal-overlay" style="z-index: 9999;">
     <div class="bottom-sheet" style="max-height: 92vh; padding-top: calc(16px + env(safe-area-inset-top));">
       <div class="sheet-handle"></div>
       <div class="sheet-header" style="margin-bottom: 12px;">
@@ -1553,8 +1553,12 @@
           <div id="feelingCabinetMatchList"></div>
         </div>
 
-        <!-- Sezione C: Azione Rapida Annota nel Diario (Pulsante CTA Full-Width) -->
-        <div style="width: 100%; box-sizing: border-box; margin-top: 4px;">
+        <!-- Sezione C: Azione Rapida Annota nel Diario (Layout Card Verticale) -->
+        <div class="feeling-diary-card">
+          <div class="feeling-diary-header-text">
+            <div class="feeling-diary-card-title">Annota nel Diario della Salute</div>
+            <div class="feeling-diary-card-subtitle">Salva questo sintomo nella tua cronologia con data e ora</div>
+          </div>
           <button id="btnSaveFeelingToDiary" type="button" class="feeling-diary-cta-btn">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
               <path d="M12 20h9"/>
