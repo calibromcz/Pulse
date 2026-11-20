@@ -796,24 +796,15 @@ async function renderBentoWidgets() {
     }
   }
 
-  // 3. Prevenzione
-  const radarStatusEl = document.getElementById('widgetRadarStatus');
-  if (radarStatusEl) {
-    const radarItems = JSON.parse(localStorage.getItem('pulse_radar') || '[]').filter(r => !r.profileId || r.profileId === activeProfile);
-    let dueCount = 0;
-    const now = new Date();
-    radarItems.forEach(r => {
-      if (r.lastDate && r.intervalMonths) {
-        const last = new Date(r.lastDate);
-        const nextDate = new Date(last.setMonth(last.getMonth() + r.intervalMonths));
-        if (nextDate <= now) dueCount++;
-      }
-    });
-
-    if (dueCount > 0) {
-      radarStatusEl.innerHTML = `<span style="color: var(--accent-coral); font-weight: 700;">● ${dueCount} da prenotare</span>`;
+  // 3. Lista Farmaci da Comprare
+  const shoppingStatusEl = document.getElementById('widgetShoppingStatus');
+  if (shoppingStatusEl) {
+    const shoppingList = JSON.parse(localStorage.getItem('pulse_shopping_list') || '[]').filter(s => !s.profileId || s.profileId === activeProfile);
+    const pendingItems = shoppingList.filter(s => !s.checked);
+    if (pendingItems.length > 0) {
+      shoppingStatusEl.innerHTML = `<span style="color: var(--accent-teal); font-weight: 700;">● ${pendingItems.length} da comprare</span>`;
     } else {
-      radarStatusEl.innerHTML = `<span style="color: var(--accent-teal); font-weight: 700;">✓ In regola</span> (${radarItems.length})`;
+      shoppingStatusEl.innerText = shoppingList.length > 0 ? 'Tutto acquistato ✓' : 'Lista vuota';
     }
   }
 
@@ -2037,8 +2028,8 @@ async function openPharmacyMode() {
             <div style="font-size: 15px; font-weight: 800; color: #000;">${escapeHTML(r.title)}</div>
             <div style="font-size: 11px; color: #636366;">Data: ${r.date ? new Date(r.date).toLocaleDateString('it-IT') : 'N/D'}</div>
           </div>
-          <button style="background: #E5E5EA; border: none; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; cursor: pointer; color: #1C1C1E;" onclick="markRecipeUsed('${r.id}')">
-            Segna ritirata
+          <button style="background: #1C1C1E; color: #FFFFFF; border: none; font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.18);" onclick="markRecipeUsed('${r.id}')">
+            <span>✓</span> Scansionata · Rimuovi
           </button>
         </div>
         <div style="background: #F2F2F7; padding: 8px; border-radius: 10px; margin: 10px 0; text-align: center;">
@@ -3048,6 +3039,7 @@ function renderDedicatedCabinet() {
     }
 
     const catBadge = item.category || 'Generale';
+    const isExhausted = (item.quantity && (item.quantity.includes('0 ') || item.quantity === '0' || item.quantity.includes('esaurit')));
 
     return `
       <div class="glass-card" style="padding: 12px 14px; border: ${borderStyle};">
@@ -3070,7 +3062,7 @@ function renderDedicatedCabinet() {
         </div>
 
         <!-- Riga Inferiore: Scatole e Compresse/Pillole con controlli rapidi -/+, Campanella .ics e Cestino -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-subtle); gap: 6px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-subtle); gap: 6px; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 6px;">
             <button onclick="updateCabinetQtyDelta('${item.id}', -1)" class="btn-secondary-sm" style="width: 26px; height: 26px; min-width: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px;" title="Riduci quantità">-</button>
             <span style="font-size: 12px; font-weight: 700; color: var(--text-primary); text-align: center;">
@@ -3080,6 +3072,11 @@ function renderDedicatedCabinet() {
           </div>
 
           <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+            ${isExhausted ? `
+              <button onclick="addItemToShoppingList('${escapeHTML(item.name).replace(/'/g, "\\'")}')" class="btn-secondary-sm" style="color: var(--accent-teal); font-size: 11px; padding: 4px 8px; border-color: rgba(0, 199, 190, 0.35); background: rgba(0, 199, 190, 0.10); font-weight: 700;" title="Aggiungi alla lista della spesa in farmacia">
+                🛒 In Lista
+              </button>
+            ` : ''}
             <button onclick="exportCabinetItemICS('${item.id}', true)" class="btn-secondary-sm" title="Aggiungi Promemoria Scadenza a Calendario iPhone (.ics)" style="padding: 5px 9px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--accent-amber);">
               <span>🔔</span>
               <span>.ics</span>
@@ -3136,6 +3133,157 @@ function openCalendarQuickSheet() {
   openModal('quickCalendarModalOverlay');
   renderCalendar();
 }
+
+// ----------------------------------------------------
+// 12. GESTIONE LISTA FARMACI DA COMPRARE (Shopping List Farmacia)
+// ----------------------------------------------------
+function openShoppingListModal() {
+  renderShoppingList();
+  openModal('shoppingListModalOverlay');
+  setTimeout(() => {
+    const input = document.getElementById('shoppingItemInput');
+    if (input) input.focus();
+  }, 150);
+}
+
+function renderShoppingList() {
+  const container = document.getElementById('shoppingItemsList');
+  const countEl = document.getElementById('shoppingItemsCount');
+  if (!container) return;
+
+  const activeProfile = getActiveProfileId();
+  const allItems = JSON.parse(localStorage.getItem('pulse_shopping_list') || '[]');
+  const profileItems = allItems.filter(i => !i.profileId || i.profileId === activeProfile);
+
+  const pending = profileItems.filter(i => !i.checked);
+  const checked = profileItems.filter(i => i.checked);
+
+  if (countEl) {
+    countEl.innerText = `${profileItems.length} ${profileItems.length === 1 ? 'prodotto' : 'prodotti'} (${pending.length} da comprare)`;
+  }
+
+  if (profileItems.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state" style="padding: 24px 12px; margin: 0;">
+        <div class="empty-icon" style="font-size: 28px; margin-bottom: 6px;">🛒</div>
+        <div class="empty-text">Lista della spesa vuota</div>
+        <div class="empty-sub">Aggiungi i farmaci e parafarmaci da acquistare alla prossima visita in farmacia.</div>
+      </div>
+    `;
+    return;
+  }
+
+  // Mostra prima quelli da comprare, poi quelli spuntati
+  const sorted = [...pending, ...checked];
+
+  container.innerHTML = sorted.map(item => `
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 12px; background: ${item.checked ? 'var(--bg-glass-input)' : 'var(--bg-glass-card)'}; border: 1px solid var(--border-glass); transition: all 0.2s ease;">
+      <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; min-width: 0;">
+        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleShoppingItem('${item.id}')" style="width: 18px; height: 18px; accent-color: var(--accent-teal); cursor: pointer; flex: none;">
+        <span style="font-size: 14px; font-weight: ${item.checked ? '500' : '700'}; color: ${item.checked ? 'var(--text-tertiary)' : 'var(--text-primary)'}; text-decoration: ${item.checked ? 'line-through' : 'none'}; word-break: break-word;">
+          ${escapeHTML(item.text)}
+        </span>
+      </label>
+      <button onclick="deleteShoppingItem('${item.id}')" class="btn-secondary-sm" style="width: 28px; height: 28px; padding: 0; min-width: 28px; display: inline-flex; align-items: center; justify-content: center; color: var(--accent-coral); font-size: 13px;" title="Elimina elemento">
+        ✕
+      </button>
+    </div>
+  `).join('');
+}
+
+function handleShoppingItemAdd(e) {
+  e.preventDefault();
+  const input = document.getElementById('shoppingItemInput');
+  if (!input) return;
+
+  const text = input.value.trim();
+  if (!text) return;
+
+  const activeProfile = getActiveProfileId();
+  const allItems = JSON.parse(localStorage.getItem('pulse_shopping_list') || '[]');
+
+  const newItem = {
+    id: 'shop_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+    profileId: activeProfile,
+    text: text,
+    checked: false,
+    createdAt: new Date().toISOString()
+  };
+
+  allItems.unshift(newItem);
+  localStorage.setItem('pulse_shopping_list', JSON.stringify(allItems));
+
+  input.value = '';
+  renderShoppingList();
+  renderBentoWidgets();
+  showToast('Aggiunto alla lista farmaci!', '🛍️');
+}
+
+function toggleShoppingItem(itemId) {
+  const allItems = JSON.parse(localStorage.getItem('pulse_shopping_list') || '[]');
+  const item = allItems.find(i => i.id === itemId);
+  if (item) {
+    item.checked = !item.checked;
+    localStorage.setItem('pulse_shopping_list', JSON.stringify(allItems));
+    renderShoppingList();
+    renderBentoWidgets();
+  }
+}
+
+function deleteShoppingItem(itemId) {
+  let allItems = JSON.parse(localStorage.getItem('pulse_shopping_list') || '[]');
+  allItems = allItems.filter(i => i.id !== itemId);
+  localStorage.setItem('pulse_shopping_list', JSON.stringify(allItems));
+  renderShoppingList();
+  renderBentoWidgets();
+}
+
+function clearCheckedShoppingItems() {
+  const activeProfile = getActiveProfileId();
+  let allItems = JSON.parse(localStorage.getItem('pulse_shopping_list') || '[]');
+  const countBefore = allItems.length;
+  allItems = allItems.filter(i => (i.profileId && i.profileId !== activeProfile) || !i.checked);
+  
+  if (allItems.length === countBefore) {
+    showToast('Nessun farmaco spuntato da rimuovere', 'ℹ️');
+    return;
+  }
+
+  localStorage.setItem('pulse_shopping_list', JSON.stringify(allItems));
+  renderShoppingList();
+  renderBentoWidgets();
+  showToast('Farmaci acquistati rimossi!', '✓');
+}
+
+function addItemToShoppingList(productName) {
+  if (!productName) return;
+  const activeProfile = getActiveProfileId();
+  const allItems = JSON.parse(localStorage.getItem('pulse_shopping_list') || '[]');
+
+  // Controlla se è già in lista e non spuntato
+  const existing = allItems.find(i => (!i.profileId || i.profileId === activeProfile) && i.text.toLowerCase() === productName.toLowerCase() && !i.checked);
+  if (existing) {
+    showToast(`"${productName}" è già presente nella lista spesa!`, '🛒');
+    openShoppingListModal();
+    return;
+  }
+
+  const newItem = {
+    id: 'shop_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+    profileId: activeProfile,
+    text: productName,
+    checked: false,
+    createdAt: new Date().toISOString()
+  };
+
+  allItems.unshift(newItem);
+  localStorage.setItem('pulse_shopping_list', JSON.stringify(allItems));
+
+  renderBentoWidgets();
+  showToast(`"${productName}" aggiunto alla Lista Farmaci!`, '🛒');
+  openShoppingListModal();
+}
+
 
 function renderMedicineCabinetInFolder() {
   const container = document.getElementById('pharmaCabinetViewWrap');

@@ -243,19 +243,20 @@
             <div id="widgetCabinetStatus" class="bento-widget-status">Controllo...</div>
           </div>
 
-          <!-- 3. In basso a sx: Prevenzione -->
-          <div id="widgetRadarCard" class="bento-widget-card" onclick="switchAgendaSubTab('radar')">
+          <!-- 3. In basso a sx: Lista Farmaci (Checklist acquisti da fare in farmacia) -->
+          <div id="widgetShoppingCard" class="bento-widget-card" onclick="openShoppingListModal()">
             <div class="bento-widget-top">
               <div class="squircle-icon-badge" style="width: 38px; height: 38px; min-width: 38px; border-radius: 12px; background: rgba(0, 199, 190, 0.14); border: 1px solid rgba(0, 199, 190, 0.25); color: var(--accent-teal);">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor" fill-opacity="0.16"/>
-                  <path d="M9 12l2 2 4-4"/>
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                  <line x1="3" y1="6" x2="21" y2="6"/>
+                  <path d="M16 10a4 4 0 0 1-8 0"/>
                 </svg>
               </div>
               <span class="bento-arrow">›</span>
             </div>
-            <div class="bento-widget-title">Prevenzione</div>
-            <div id="widgetRadarStatus" class="bento-widget-status">Controllo...</div>
+            <div class="bento-widget-title">Lista Farmaci</div>
+            <div id="widgetShoppingStatus" class="bento-widget-status">Controllo...</div>
           </div>
 
           <!-- 4. In basso a dx: Medico di Base -->
@@ -1626,6 +1627,46 @@
 
       <!-- Lista Farmaci -->
       <div id="dedicatedCabinetList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: LISTA FARMACI DA COMPRARE (Checklist Acquisti Farmacia) -->
+  <div id="shoppingListModalOverlay" class="modal-overlay">
+    <div class="bottom-sheet" style="max-height: 88vh;">
+      <div class="sheet-handle"></div>
+      
+      <!-- Header Dedicato Lista Farmaci -->
+      <div class="sheet-header" style="margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 22px;">🛍️</span>
+          <div>
+            <h2 class="sheet-title" style="font-size: 18px; margin: 0;">Lista Farmaci</h2>
+            <div id="shoppingListSubtitle" style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">Da comprare in farmacia</div>
+          </div>
+        </div>
+        <button class="sheet-close-btn" onclick="closeAllModals()">✕</button>
+      </div>
+
+      <!-- Form Rapido Inserimento Prodotto -->
+      <form id="addShoppingItemForm" onsubmit="handleShoppingItemAdd(event)" style="margin-bottom: 14px;">
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="shoppingItemInput" class="form-input" placeholder="Es. Cerotti, Oki task, Magnesio..." required style="padding: 10px 12px; font-size: 13px; flex: 1;">
+          <button type="submit" class="btn-primary" style="padding: 10px 16px; font-size: 13px; font-weight: 700; border-radius: var(--radius-md); flex: none; background: linear-gradient(135deg, var(--accent-teal) 0%, #00A8A0 100%);">
+            + Aggiungi
+          </button>
+        </div>
+      </form>
+
+      <!-- Barra Azioni: Spuntati / Svuota -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 2px;">
+        <span id="shoppingItemsCount" style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">0 elementi</span>
+        <button id="btnClearCheckedShoppingBtn" onclick="clearCheckedShoppingItems()" class="btn-secondary-sm" style="font-size: 11px; padding: 4px 8px; color: var(--text-secondary);">
+          Rimuovi spuntati
+        </button>
+      </div>
+
+      <!-- Checklist Items -->
+      <div id="shoppingItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 50vh; overflow-y: auto;"></div>
     </div>
   </div>
 
