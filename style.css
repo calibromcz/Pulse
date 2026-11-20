@@ -2075,3 +2075,94 @@ body::after {
   background: linear-gradient(90deg, transparent, rgba(180, 205, 255, 0.16) 20%, rgba(180, 205, 255, 0.16) 80%, transparent);
 }
 
+/* Fullscreen Image Lightbox Overlay */
+.doc-fullscreen-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  box-sizing: border-box;
+}
+
+.doc-fullscreen-lightbox.active {
+  display: flex;
+}
+
+.doc-fullscreen-img {
+  max-width: 96vw;
+  max-height: 92dvh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.doc-fullscreen-close-btn {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top) + 8px);
+  right: max(16px, env(safe-area-inset-right) + 8px);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #FFFFFF;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100000;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.doc-fullscreen-close-btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* CTA "Annota nel diario della salute" in Come ti senti oggi? */
+.feeling-diary-cta-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 199, 190, 0.35);
+  background: rgba(0, 199, 190, 0.12);
+  color: var(--accent-teal);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: transform 0.18s var(--spring-easing), background 0.2s ease, border-color 0.2s ease;
+}
+
+.feeling-diary-cta-btn:active {
+  transform: scale(0.98);
+}
+
+[data-theme="dark"] .feeling-diary-cta-btn {
+  background: rgba(86, 194, 188, 0.18);
+  border: 1px solid rgba(86, 194, 188, 0.35);
+  color: #EAF7F6;
+}
+
+

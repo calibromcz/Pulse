@@ -1141,6 +1141,7 @@ async function openZoneFolder(zoneId) {
 
 // 7. Viewer Modale
 let currentViewerObjectUrl = null;
+let currentActiveDocId = null;
 
 function cleanupViewerObjectUrl() {
   if (currentViewerObjectUrl) {
@@ -1149,20 +1150,39 @@ function cleanupViewerObjectUrl() {
   }
 }
 
+// Alias garantito richiesto per apertura visualizzatore
+async function openDocumentViewer(id) {
+  return await openDocById(id);
+}
+
 async function openDocById(id) {
-  const doc = await pulseDB.getDocument(id);
+  let doc = null;
+  try {
+    doc = await pulseDB.getDocument(id);
+  } catch (err) {
+    console.error('Errore recupero documento da DB:', err);
+  }
+
   if (!doc) {
-    showToast('Documento non trovato', '⚠️');
+    showToast('Documento non disponibile in locale. Ricaricalo nel Dossier.', '⚠️');
     return;
   }
 
+  currentActiveDocId = doc.id;
   cleanupViewerObjectUrl();
 
+  const titleHeaderEl = document.getElementById('docViewerTitle');
+  if (titleHeaderEl) {
+    titleHeaderEl.innerText = doc.title || 'Dettaglio Documento';
+  }
+
   let fileUrl = doc.imageData;
+  let isBlobReady = false;
+
   if (doc.imageData && doc.imageData.startsWith('data:')) {
     try {
       const parts = doc.imageData.split(',');
-      const mime = (parts[0].match(/:(.*?);/) || [])[1] || 'image/jpeg';
+      const mime = (parts[0].match(/:(.*?);/) || [])[1] || (doc.isPdf ? 'application/pdf' : 'image/jpeg');
       const bstr = atob(parts[1]);
       let n = bstr.length;
       const u8arr = new Uint8Array(n);
@@ -1172,14 +1192,34 @@ async function openDocById(id) {
       const blob = new Blob([u8arr], { type: mime });
       currentViewerObjectUrl = URL.createObjectURL(blob);
       fileUrl = currentViewerObjectUrl;
+      isBlobReady = true;
     } catch (e) {
+      console.warn('Fallback DataURI per anteprima:', e);
       fileUrl = doc.imageData;
+      isBlobReady = false;
     }
+  } else if (doc.imageData) {
+    isBlobReady = true;
   }
 
   const zone = getBodyZone(doc.bodyZone);
   const viewerContent = document.getElementById('docViewerContent');
   const dateFormatted = doc.date ? new Date(doc.date).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Non indicata';
+
+  if (!fileUrl) {
+    viewerContent.innerHTML = `
+      <div class="empty-state" style="padding: 24px 16px;">
+        <div style="font-size: 32px; margin-bottom: 8px;">⚠️</div>
+        <div class="empty-text">File non disponibile in locale</div>
+        <div class="empty-sub">Il file originale non è stato trovato in IndexedDB. Elimina e ricarica questo documento per ripristinare l'anteprima.</div>
+        <button type="button" onclick="deleteDocItem('${doc.id}')" class="btn-secondary-sm" style="color: var(--accent-coral); margin-top: 10px;">
+          🗑️ Elimina Documento
+        </button>
+      </div>
+    `;
+    openModal('docViewerModalOverlay');
+    return;
+  }
 
   viewerContent.innerHTML = `
     <!-- Intestazione Documento -->
@@ -1250,24 +1290,30 @@ async function openDocById(id) {
           </button>
         </div>
       ` : `
-        <div style="padding: 12px; width: 100%; display: flex; align-items: center; justify-content: center; min-height: 220px; max-height: 65vh; background: #000000;">
-          <img src="${fileUrl}" alt="${escapeHTML(doc.title)}" style="max-width: 100%; max-height: 60vh; object-fit: contain; border-radius: 10px;" />
+        <div style="padding: 12px; width: 100%; display: flex; align-items: center; justify-content: center; min-height: 220px; max-height: 70vh; background: #000000; cursor: pointer;" onclick="openDocFullscreen('${doc.id}')" title="Tocca per ingrandire a schermo intero">
+          <img src="${fileUrl}" alt="${escapeHTML(doc.title)}" style="max-width: 100%; max-height: 65vh; object-fit: contain; border-radius: 10px;" />
         </div>
       `}
     </div>
 
-    <!-- Barra Azioni: Scarica, Schermo Intero (se PDF), Elimina -->
+    <!-- Barra Azioni in Basso: Schermo Intero, Scarica, Elimina -->
     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-      ${doc.isPdf ? `
-        <button type="button" onclick="openDocFullscreen('${doc.id}')" class="btn-secondary-sm" style="flex: 1; min-width: 130px; padding: 12px; font-weight: 700; color: var(--accent-blue); display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
-          <span>↗</span> Schermo intero
-        </button>
-      ` : ''}
+      <button type="button" onclick="openDocFullscreen('${doc.id}')" class="btn-secondary-sm" style="flex: 1; min-width: 130px; padding: 12px; font-weight: 700; color: var(--accent-blue); display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 3 21 3 21 9"/>
+          <polyline points="9 21 3 21 3 15"/>
+          <line x1="21" y1="3" x2="14" y2="10"/>
+          <line x1="3" y1="21" x2="10" y2="14"/>
+        </svg>
+        <span>Schermo intero</span>
+      </button>
+
       <button type="button" onclick="downloadDocById('${doc.id}')" class="btn-primary" style="flex: 1; min-width: 130px; padding: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-teal) 100%);">
         <span>⬇️</span> Scarica File
       </button>
+
       <button type="button" onclick="deleteDocItem('${doc.id}')" class="btn-secondary-sm" style="padding: 12px 16px; font-weight: 700; color: var(--accent-coral); background: rgba(224, 108, 117, 0.12); border-color: rgba(224, 108, 117, 0.25);" title="Elimina definitivamente">
-        🗑️ Elimina
+        🗑️
       </button>
     </div>
   `;
@@ -1275,31 +1321,71 @@ async function openDocById(id) {
   openModal('docViewerModalOverlay');
 }
 
+function openActiveDocFullscreen() {
+  if (currentActiveDocId) {
+    openDocFullscreen(currentActiveDocId);
+  }
+}
+
 async function openDocFullscreen(id) {
   const doc = await pulseDB.getDocument(id);
-  if (!doc) return;
+  if (!doc) {
+    showToast('Documento non disponibile per schermo intero', '⚠️');
+    return;
+  }
   
-  if (doc.imageData && doc.imageData.startsWith('data:')) {
-    try {
-      const parts = doc.imageData.split(',');
-      const mime = (parts[0].match(/:(.*?);/) || [])[1] || (doc.isPdf ? 'application/pdf' : 'image/jpeg');
-      const bstr = atob(parts[1]);
-      let n = bstr.length;
-      const u8arr = new Uint8Array(n);
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
+  if (doc.isPdf) {
+    // PDF: Apri in nuova scheda garantito al 100% su iOS Safari e Desktop
+    let pdfUrl = doc.imageData;
+    if (doc.imageData && doc.imageData.startsWith('data:')) {
+      try {
+        const parts = doc.imageData.split(',');
+        const mime = (parts[0].match(/:(.*?);/) || [])[1] || 'application/pdf';
+        const bstr = atob(parts[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        const blob = new Blob([u8arr], { type: mime });
+        pdfUrl = URL.createObjectURL(blob);
+      } catch (e) {
+        pdfUrl = doc.imageData;
       }
-      const blob = new Blob([u8arr], { type: mime });
-      const fullUrl = URL.createObjectURL(blob);
-      const w = window.open(fullUrl, '_blank');
-      if (!w) {
-        window.location.href = fullUrl;
-      }
-    } catch (e) {
-      window.open(doc.imageData, '_blank');
     }
-  } else if (doc.imageData) {
-    window.open(doc.imageData, '_blank');
+
+    const a = document.createElement('a');
+    a.href = pdfUrl;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } else {
+    // Immagine: Mostra Lightbox Fullscreen edge-to-edge
+    let imgUrl = doc.imageData;
+    if (currentViewerObjectUrl) {
+      imgUrl = currentViewerObjectUrl;
+    }
+    const lightbox = document.getElementById('imageLightboxOverlay');
+    const lightboxImg = document.getElementById('imageLightboxImg');
+    if (lightbox && lightboxImg) {
+      lightboxImg.src = imgUrl;
+      lightbox.classList.add('active');
+      document.body.classList.add('modal-open');
+    }
+  }
+}
+
+function closeImageLightbox() {
+  const lightbox = document.getElementById('imageLightboxOverlay');
+  if (lightbox) {
+    lightbox.classList.remove('active');
+  }
+  // Se nessun altro modale è attivo rimuovi modal-open, altrimenti lascialo
+  const anyActive = document.querySelector('.modal-overlay.active');
+  if (!anyActive) {
+    document.body.classList.remove('modal-open');
   }
 }
 
