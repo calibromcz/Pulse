@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initPreventionRadar();
   initClinicalSummaryPDF();
   initProfile();
+  initDoctorModal();
   initQuickHub();
   initGlobalModalsHandler();
   await renderAllViews();
@@ -440,9 +441,19 @@ async function initSeedData() {
       cf: 'RSSMRA85M01H501Z',
       bloodType: '0 Rh+',
       allergies: 'Penicillina, Polline di Graminacee',
-      doctor: 'Dott.ssa Laura Bianchi',
-      doctorPhone: '+390511234567',
-      doctorEmail: 'dr.bianchi@medicina.it'
+      doctor: 'Dr. Marco Rossi',
+      doctorPhone: '+39 051 1234567',
+      doctorWa: '3401234567',
+      doctorEmail: 'dr.rossi@medicina.it',
+      doctorAddress: 'Via Roma 14, Bologna',
+      doctorNotes: 'Riceve su appuntamento • Segreteria attiva 08:30–11:30',
+      doctorHours: {
+        lun: '09:00 - 12:00',
+        mar: '15:00 - 18:00',
+        mer: '09:00 - 12:00',
+        gio: '15:00 - 18:00',
+        ven: '09:00 - 12:00'
+      }
     };
     localStorage.setItem('pulse_profile_me', JSON.stringify(defaultProfile));
     localStorage.setItem('pulse_profile', JSON.stringify(defaultProfile));
@@ -611,172 +622,280 @@ async function renderAllViews() {
 
 // 5. Home View
 async function renderHome() {
-  const heroContainer = document.getElementById('homeNextAppointment');
-  const alertsContainer = document.getElementById('homeSmartAlertsWrap');
+  const heroOggi = document.getElementById('homeHeroOggi');
   const recentContainer = document.getElementById('homeRecentDocs');
   const activeProfile = getActiveProfileId();
+  const profile = getProfileData(activeProfile);
+  const now = new Date();
 
+  // Calcola data estesa in italiano
+  const dateStrOggi = now.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
+  const capitalizedDate = dateStrOggi.charAt(0).toUpperCase() + dateStrOggi.slice(1);
+
+  // Calcola terapie e anello di oggi
+  const thers = JSON.parse(localStorage.getItem('pulse_therapies') || '[]');
+  const profileThers = thers.filter(t => !t.profileId || t.profileId === activeProfile);
+  const todayIso = now.toISOString().split('T')[0];
+
+  let totalDosesToday = 0;
+  let takenDosesToday = 0;
+  profileThers.forEach(t => {
+    totalDosesToday += t.dosesPerDay || 1;
+    const logs = (t.logs && t.logs[todayIso]) || [];
+    takenDosesToday += logs.filter(Boolean).length;
+  });
+
+  const ringPct = totalDosesToday > 0 ? Math.round((takenDosesToday / totalDosesToday) * 100) : 100;
+  const radius = 22;
+  const circ = 2 * Math.PI * radius;
+  const strokeDash = (ringPct / 100) * circ;
+
+  // Prossimo Appuntamento
   const allAppts = JSON.parse(localStorage.getItem('pulse_appointments') || '[]');
   const profileAppts = allAppts.filter(a => !a.profileId || a.profileId === activeProfile);
-  const now = new Date();
   const future = profileAppts
     .filter(a => new Date(a.datetime) >= now)
     .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
 
+  let apptHTML = '';
   if (future.length > 0) {
     const next = future[0];
     const dt = new Date(next.datetime);
     const diffDays = Math.ceil((dt - now) / (1000 * 60 * 60 * 24));
     let badgeText = diffDays === 0 ? "Oggi!" : (diffDays === 1 ? "Domani" : `Tra ${diffDays} giorni`);
-
     const dateFormatted = dt.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' });
     const timeFormatted = dt.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
 
-    heroContainer.innerHTML = `
-      <div class="hero-appointment">
-        <div class="badge-countdown ${diffDays > 5 ? 'far' : ''}">
-          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          ${badgeText}
+    apptHTML = `
+      <div style="margin-top: 6px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="badge-countdown ${diffDays > 5 ? 'far' : ''}" style="font-size: 10px; padding: 2px 7px;">${badgeText}</span>
+          <div class="hero-oggi-title">${escapeHTML(next.title)}</div>
         </div>
-        <div class="hero-app-title">${escapeHTML(next.title)}</div>
-        <div class="hero-meta-row">
-          <div class="hero-meta-item">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            ${dateFormatted}, ore ${timeFormatted}
-          </div>
-          <div class="hero-meta-item">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            ${escapeHTML(next.location || 'Ambulatorio')}
-          </div>
-        </div>
-        <div class="hero-actions">
-          ${next.docId ? `
-            <button class="btn-secondary-sm" onclick="openDocById('${next.docId}')">
-              📄 Doc allegato
-            </button>
-          ` : ''}
-          <button class="btn-secondary-sm" onclick="exportSingleICS('${next.id}')">
-            Salva .ics
-          </button>
-          <button class="btn-secondary-sm" onclick="switchTab('agenda')">
-            Domande (${(next.checklist || []).length})
-          </button>
+        <div class="hero-oggi-sub">
+          <span>📅 ${dateFormatted}, ${timeFormatted}</span>
+          <span>&bull;</span>
+          <span>📍 ${escapeHTML(next.location || 'Ambulatorio')}</span>
+          ${next.docId ? `<button onclick="openDocById('${next.docId}')" class="btn-secondary-sm" style="padding: 2px 6px; font-size: 10px; margin-left: 4px;">Doc 📄</button>` : ''}
         </div>
       </div>
     `;
   } else {
-    heroContainer.innerHTML = `
-      <div class="glass-card" style="text-align: center; padding: 22px 18px;">
-        <div style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">Nessuna visita in programma</div>
-        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">Pianifica un appuntamento per questo profilo.</div>
-        <button class="btn-secondary-sm" style="margin: 0 auto; max-width: 200px;" onclick="openNewApptModal()">
-          + Aggiungi Visita
-        </button>
+    apptHTML = `
+      <div style="margin-top: 6px; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <div class="hero-oggi-title" style="font-size: 15px; font-weight: 700;">Nessuna visita imminente</div>
+          <div class="hero-oggi-sub">Pianifica controlli o visite specialistiche</div>
+        </div>
+        <button class="btn-secondary-sm" onclick="openNewApptModal()" style="padding: 4px 10px; font-size: 12px; margin-left: 8px;">+ Aggiungi</button>
       </div>
     `;
   }
 
-  // BLOCCO B: Card Stato & Avvisi Smart
-  if (alertsContainer) {
-    const allDocs = await pulseDB.getAllDocuments();
-    const profileDocs = allDocs.filter(d => !d.profileId || d.profileId === activeProfile);
-
-    // 1. Ricette attive non ritirate
-    const pendingRx = profileDocs.filter(d => (d.category === 'Ricetta' || d.nre) && !d.isUsedRx);
-
-    // 2. Armadietto farmaci scaduti o in scadenza entro 60 giorni
-    const cabinetItems = JSON.parse(localStorage.getItem('pulse_cabinet') || '[]').filter(c => !c.profileId || c.profileId === activeProfile);
-    let expiringMeds = 0;
-    const nowTime = Date.now();
-    const thresholdTime = nowTime + 60 * 86400000;
-    cabinetItems.forEach(item => {
-      if (item.expiryDate) {
-        const exp = new Date(item.expiryDate).getTime();
-        if (exp <= thresholdTime) expiringMeds++;
-      }
-    });
-
-    // 3. Radar prevenzione controlli scaduti
-    const radarItems = JSON.parse(localStorage.getItem('pulse_radar') || '[]').filter(r => !r.profileId || r.profileId === activeProfile);
-    let dueRadar = [];
-    radarItems.forEach(r => {
-      if (r.lastDate && r.intervalMonths) {
-        const last = new Date(r.lastDate);
-        const nextDate = new Date(last.setMonth(last.getMonth() + r.intervalMonths));
-        if (nextDate <= now) dueRadar.push(r.name);
-      }
-    });
-
-    const alerts = [];
-    if (pendingRx.length > 0) {
-      alerts.push(`
-        <div class="smart-alert-item alert-rx" onclick="openPharmacyModal()">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span>💊</span>
-            <span style="font-size: 13px; font-weight: 600;">${pendingRx.length} ${pendingRx.length === 1 ? 'ricetta pronta' : 'ricette pronte'} da ritirare in farmacia</span>
-          </div>
-          <span style="font-size: 12px; font-weight: 700;">Mostra NRE ›</span>
+  // Render BLOCCO A: Hero Oggi
+  if (heroOggi) {
+    heroOggi.innerHTML = `
+      <div class="hero-oggi-inner">
+        <div class="hero-oggi-left">
+          <div class="hero-oggi-date">${capitalizedDate}</div>
+          ${apptHTML}
         </div>
-      `);
-    }
-
-    if (expiringMeds > 0) {
-      alerts.push(`
-        <div class="smart-alert-item alert-cab" onclick="openZoneFolder('pharma'); switchPharmaTab('cabinet');">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span>⚠️</span>
-            <span style="font-size: 13px; font-weight: 600;">${expiringMeds} ${expiringMeds === 1 ? 'farmaco' : 'farmaci'} in scadenza nell'armadietto</span>
+        <div class="hero-oggi-right">
+          <div class="therapy-ring-wrap" style="width: 54px; height: 54px;">
+            <svg width="54" height="54" viewBox="0 0 54 54">
+              <circle cx="27" cy="27" r="${radius}" fill="none" stroke="var(--bg-card-secondary)" stroke-width="5" />
+              <circle cx="27" cy="27" r="${radius}" fill="none" stroke="${totalDosesToday === 0 ? 'var(--accent-teal)' : 'var(--accent-coral)'}" stroke-width="5"
+                stroke-dasharray="${circ}" stroke-dashoffset="${circ - strokeDash}"
+                stroke-linecap="round" transform="rotate(-90 27 27)" style="transition: stroke-dashoffset 0.4s var(--spring-easing);" />
+            </svg>
+            <div style="position: absolute; font-size: ${totalDosesToday === 0 ? '16px' : '11px'}; font-weight: 800; color: ${totalDosesToday === 0 ? 'var(--accent-teal)' : 'var(--accent-coral)'};">
+              ${totalDosesToday === 0 ? '✓' : `${takenDosesToday}/${totalDosesToday}`}
+            </div>
           </div>
-          <span style="font-size: 12px; font-weight: 700;">Verifica ›</span>
-        </div>
-      `);
-    }
-
-    if (dueRadar.length > 0) {
-      alerts.push(`
-        <div class="smart-alert-item alert-radar" onclick="switchTab('agenda'); document.getElementById('segAgendaRadar').click();">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span>🛡️</span>
-            <span style="font-size: 13px; font-weight: 600;">${dueRadar[0]} consigliato da prenotare</span>
+          <div style="font-size: 10px; font-weight: 700; color: var(--text-secondary); margin-top: 4px; text-align: center;">
+            ${totalDosesToday === 0 ? 'In ordine' : 'Dosi oggi'}
           </div>
-          <span style="font-size: 12px; font-weight: 700;">Radar ›</span>
         </div>
-      `);
-    }
-
-    if (alerts.length === 0) {
-      alertsContainer.innerHTML = `
-        <div class="smart-alert-item alert-calm">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 15px;">✓</span>
-            <span style="font-size: 13px; font-weight: 600;">Tutto in ordine — nessuna scadenza imminente</span>
-          </div>
-          <span style="font-size: 11px; opacity: 0.8; font-weight: 600;">Profilo aggiornato</span>
-        </div>
-      `;
-    } else {
-      alertsContainer.innerHTML = alerts.join('');
-    }
+      </div>
+    `;
   }
 
-  // BLOCCO D: Ultimi Documenti nel Dossier (3 latest)
+  // Render BLOCCO B: Bento 2x2 Widgets
+  renderBentoWidgets();
+
+  // Render BLOCCO D: Check-in Rapido
+  renderCheckinStrip();
+
+  // Render BLOCCO E: Ultimi nel Dossier (3 latest)
   const allDocs = await pulseDB.getAllDocuments();
   const profileDocs = allDocs.filter(d => !d.profileId || d.profileId === activeProfile);
   profileDocs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   const recent = profileDocs.slice(0, 3);
 
-  if (recent.length === 0) {
-    recentContainer.innerHTML = `
-      <div class="empty-state" style="padding: 16px;">
-        <div class="empty-text">Nessun documento nel Dossier</div>
-        <div class="empty-sub">Scansiona o carica i tuoi referti per averli sempre con te.</div>
-        <button class="btn-secondary-sm" style="margin: 8px auto 0; max-width: 200px;" onclick="openAddDocModal()">
-          + Scansiona Referto
-        </button>
-      </div>
-    `;
+  if (recentContainer) {
+    if (recent.length === 0) {
+      recentContainer.innerHTML = `
+        <div class="empty-state" style="padding: 16px;">
+          <div class="empty-text">Nessun documento nel Dossier</div>
+          <div class="empty-sub">Scansiona o carica i tuoi referti per averli sempre con te.</div>
+          <button class="btn-secondary-sm" style="margin: 8px auto 0; max-width: 200px;" onclick="openAddDocModal()">
+            + Scansiona Referto
+          </button>
+        </div>
+      `;
+    } else {
+      recentContainer.innerHTML = recent.map(doc => renderDocCardHTML(doc)).join('');
+    }
+  }
+}
+
+// 5.1 Bento 2x2 Widgets Update
+async function renderBentoWidgets() {
+  const activeProfile = getActiveProfileId();
+  const allDocs = await pulseDB.getAllDocuments();
+  const profileDocs = allDocs.filter(d => !d.profileId || d.profileId === activeProfile);
+
+  // 1. Ricette & Farmacia
+  const rxStatusEl = document.getElementById('widgetRxStatus');
+  if (rxStatusEl) {
+    const pendingRx = profileDocs.filter(d => (d.category === 'Ricetta' || d.nre) && !d.isUsedRx);
+    if (pendingRx.length > 0) {
+      rxStatusEl.innerHTML = `<span style="color: #34C759; font-weight: 700;">${pendingRx.length} ${pendingRx.length === 1 ? 'pronta' : 'pronte'}</span> da ritirare`;
+    } else {
+      rxStatusEl.innerText = 'Nessuna ricetta attiva';
+    }
+  }
+
+  // 2. Armadietto
+  const cabStatusEl = document.getElementById('widgetCabinetStatus');
+  if (cabStatusEl) {
+    const cabinetItems = JSON.parse(localStorage.getItem('pulse_cabinet') || '[]').filter(c => !c.profileId || c.profileId === activeProfile);
+    const nowTime = Date.now();
+    const thresholdTime = nowTime + 60 * 86400000;
+    let expiringCount = 0;
+    cabinetItems.forEach(item => {
+      if (item.expiryDate && new Date(item.expiryDate).getTime() <= thresholdTime) expiringCount++;
+    });
+
+    if (expiringCount > 0) {
+      cabStatusEl.innerHTML = `<span style="color: var(--accent-amber); font-weight: 700;">● ${expiringCount} in scadenza</span>`;
+    } else {
+      cabStatusEl.innerText = `${cabinetItems.length} farmaci presenti`;
+    }
+  }
+
+  // 3. Prevenzione
+  const radarStatusEl = document.getElementById('widgetRadarStatus');
+  if (radarStatusEl) {
+    const radarItems = JSON.parse(localStorage.getItem('pulse_radar') || '[]').filter(r => !r.profileId || r.profileId === activeProfile);
+    let dueCount = 0;
+    const now = new Date();
+    radarItems.forEach(r => {
+      if (r.lastDate && r.intervalMonths) {
+        const last = new Date(r.lastDate);
+        const nextDate = new Date(last.setMonth(last.getMonth() + r.intervalMonths));
+        if (nextDate <= now) dueCount++;
+      }
+    });
+
+    if (dueCount > 0) {
+      radarStatusEl.innerHTML = `<span style="color: var(--accent-coral); font-weight: 700;">● ${dueCount} da prenotare</span>`;
+    } else {
+      radarStatusEl.innerHTML = `<span style="color: var(--accent-teal); font-weight: 700;">✓ In regola</span> (${radarItems.length})`;
+    }
+  }
+
+  // 4. Medico di Base
+  const docNameEl = document.getElementById('widgetDoctorName');
+  const docStatusEl = document.getElementById('widgetDoctorStatus');
+  if (docNameEl && docStatusEl) {
+    const profile = getProfileData(activeProfile);
+    docNameEl.innerText = profile.doctor || 'Configura Medico';
+
+    const schedule = calculateDoctorOpenStatus(profile);
+    if (schedule.isOpen) {
+      docStatusEl.innerHTML = `<span style="color: #34C759; font-weight: 700;">● Aperto</span> · fino alle ${schedule.closingTime}`;
+    } else {
+      docStatusEl.innerHTML = `<span style="color: var(--text-secondary);">Chiuso</span> · ${schedule.nextOpening}`;
+    }
+  }
+}
+
+// Calcola stato orario del medico in base all'ora corrente
+function calculateDoctorOpenStatus(profile) {
+  const hours = profile.doctorHours || {
+    lun: '09:00 - 12:00',
+    mar: '15:00 - 18:00',
+    mer: '09:00 - 12:00',
+    gio: '15:00 - 18:00',
+    ven: '09:00 - 12:00'
+  };
+
+  const daysMap = ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'];
+  const dayNames = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+  const now = new Date();
+  const dayIndex = now.getDay();
+  const dayKey = daysMap[dayIndex];
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+
+  const todayHours = hours[dayKey];
+  if (todayHours && todayHours.includes('-')) {
+    const [startStr, endStr] = todayHours.split('-').map(s => s.trim());
+    const [sh, sm] = startStr.split(':').map(Number);
+    const [eh, em] = endStr.split(':').map(Number);
+    const startMin = sh * 60 + (sm || 0);
+    const endMin = eh * 60 + (em || 0);
+
+    if (nowMin >= startMin && nowMin < endMin) {
+      return { isOpen: true, closingTime: endStr };
+    }
+    if (nowMin < startMin) {
+      return { isOpen: false, nextOpening: `Oggi ${startStr}` };
+    }
+  }
+
+  // Cerca prossimo turno aperto nei giorni successivi
+  for (let i = 1; i <= 7; i++) {
+    const nextIdx = (dayIndex + i) % 7;
+    const nextKey = daysMap[nextIdx];
+    const nHours = hours[nextKey];
+    if (nHours && nHours.includes('-')) {
+      const dayLabel = i === 1 ? 'Domani' : dayNames[nextIdx].substring(0, 3);
+      const startStr = nHours.split('-')[0].trim();
+      return { isOpen: false, nextOpening: `${dayLabel} ${startStr}` };
+    }
+  }
+
+  return { isOpen: false, nextOpening: 'Orario non impostato' };
+}
+
+// 5.2 Check-in Rapido
+function renderCheckinStrip() {
+  const displayVal = document.getElementById('checkinLatestValue');
+  if (!displayVal) return;
+  const activeProfile = getActiveProfileId();
+  const symptoms = JSON.parse(localStorage.getItem('pulse_symptoms') || '[]').filter(s => !s.profileId || s.profileId === activeProfile);
+  if (symptoms.length > 0) {
+    const latest = symptoms[0];
+    const dt = new Date(latest.datetime);
+    const diffDays = Math.floor((Date.now() - dt.getTime()) / 86400000);
+    const dayLabel = diffDays === 0 ? 'Oggi' : `${diffDays}g fa`;
+    displayVal.innerText = `${latest.type}: ${latest.val} (${dayLabel})`;
   } else {
-    recentContainer.innerHTML = recent.map(doc => renderDocCardHTML(doc)).join('');
+    displayVal.innerText = 'Nessun rilievo recente';
+  }
+}
+
+function quickAddSymptom(type) {
+  openModal('symptomsModalOverlay');
+  const typeSelect = document.getElementById('symptomTypeSelect');
+  if (typeSelect) {
+    typeSelect.value = type;
+    const valInput = document.getElementById('symptomValInput');
+    if (valInput) {
+      valInput.focus();
+      valInput.placeholder = type === 'Pressione' ? 'Es. 120/80' : (type === 'Febbre' ? 'Es. 37.5 °C' : 'Descrivi sintomo...');
+    }
   }
 }
 
@@ -2268,6 +2387,7 @@ function toggleTherapyDose(therId, doseIndex) {
   t.logs[todayStr][doseIndex] = !t.logs[todayStr][doseIndex];
   localStorage.setItem('pulse_therapies', JSON.stringify(thers));
   renderTherapies();
+  renderHome(); // aggiorna l'anello nella Hero Oggi all'istante
   showToast(t.logs[todayStr][doseIndex] ? 'Dose registrata!' : 'Dose rimossa', '💊');
 }
 
@@ -2705,9 +2825,19 @@ function getProfileData(profileId) {
     cf: '',
     bloodType: '0 Rh+',
     allergies: 'Nessuna',
-    doctor: '',
-    doctorPhone: '',
-    doctorEmail: ''
+    doctor: 'Dr. Marco Rossi',
+    doctorPhone: '+39 051 1234567',
+    doctorWa: '3401234567',
+    doctorEmail: 'dr.rossi@medicina.it',
+    doctorAddress: 'Via Roma 14, Bologna',
+    doctorNotes: 'Riceve su appuntamento • Segreteria attiva 08:30–11:30',
+    doctorHours: {
+      lun: '09:00 - 12:00',
+      mar: '15:00 - 18:00',
+      mer: '09:00 - 12:00',
+      gio: '15:00 - 18:00',
+      ven: '09:00 - 12:00'
+    }
   };
 }
 
@@ -2731,7 +2861,9 @@ function initProfile() {
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     const activeId = getActiveProfileId();
+    const existing = getProfileData(activeId);
     const updated = {
+      ...existing,
       name: document.getElementById('iceNameInput').value.trim() || 'Utente Pulse',
       cf: document.getElementById('iceCfInput').value.trim().toUpperCase(),
       bloodType: document.getElementById('iceBloodInput').value,
@@ -2752,6 +2884,7 @@ function initProfile() {
 
     closeAllModals();
     renderProfile();
+    renderBentoWidgets();
     showToast('Scheda ICE aggiornata', '💳');
   });
 
@@ -2772,6 +2905,7 @@ function renderProfile() {
 
   const docActions = document.getElementById('doctorActionsContainer');
   let actionsHTML = '';
+  actionsHTML += `<button onclick="openDoctorModal()" class="btn-secondary-sm" style="padding: 6px 10px;">📋 Scheda Medico</button>`;
   if (profile.doctorPhone) {
     actionsHTML += `<a href="tel:${profile.doctorPhone}" class="btn-secondary-sm" style="text-decoration: none; padding: 6px 10px;">📞 Chiama</a>`;
   }
@@ -2973,6 +3107,213 @@ function closeAllModals() {
   cleanupViewerObjectUrl();
   document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
   document.body.classList.remove('modal-open');
+}
+
+// ----------------------------------------------------
+// SCHEDA INTERATTIVA MEDICO DI BASE (iOS Contact Style)
+// ----------------------------------------------------
+const DAYS_OF_WEEK_MAP = [
+  { key: 'lun', label: 'Lunedì' },
+  { key: 'mar', label: 'Martedì' },
+  { key: 'mer', label: 'Mercoledì' },
+  { key: 'gio', label: 'Giovedì' },
+  { key: 'ven', label: 'Venerdì' }
+];
+
+function initDoctorModal() {
+  const btnEdit = document.getElementById('btnEditDoctor');
+  if (btnEdit) {
+    btnEdit.addEventListener('click', () => {
+      const isEditing = document.getElementById('doctorEditForm').style.display !== 'none';
+      toggleDoctorEditMode(!isEditing);
+    });
+  }
+
+  const editForm = document.getElementById('doctorEditForm');
+  if (editForm) {
+    editForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      saveDoctorData();
+    });
+  }
+}
+
+function toggleDoctorEditMode(showEdit) {
+  const viewSec = document.getElementById('doctorViewSection');
+  const editForm = document.getElementById('doctorEditForm');
+  const btnEdit = document.getElementById('btnEditDoctor');
+
+  if (showEdit) {
+    viewSec.style.display = 'none';
+    editForm.style.display = 'block';
+    if (btnEdit) btnEdit.innerText = 'Visualizza';
+    populateDoctorEditForm();
+  } else {
+    viewSec.style.display = 'block';
+    editForm.style.display = 'none';
+    if (btnEdit) btnEdit.innerText = 'Modifica';
+  }
+}
+
+function openDoctorModal() {
+  const activeId = getActiveProfileId();
+  const profile = getProfileData(activeId);
+
+  // Popola vista contatti
+  const nameEl = document.getElementById('docSheetName');
+  if (nameEl) nameEl.innerText = profile.doctor || 'Medico di Medicina Generale';
+
+  const addrLink = document.getElementById('docSheetAddressLink');
+  const addrText = document.getElementById('docSheetAddressText');
+  const address = profile.doctorAddress || 'Indirizzo non impostato';
+  if (addrText) addrText.innerText = address;
+  if (addrLink) {
+    addrLink.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+  }
+
+  // Azioni Chiamata, WhatsApp, Email
+  const phone = profile.doctorPhone || '';
+  const wa = profile.doctorWa || profile.doctorPhone || '';
+  const email = profile.doctorEmail || '';
+
+  const callBtn = document.getElementById('docCallBtn');
+  if (callBtn) {
+    callBtn.href = phone ? `tel:${phone.replace(/\s+/g, '')}` : '#';
+    callBtn.style.opacity = phone ? '1' : '0.4';
+    callBtn.style.pointerEvents = phone ? 'auto' : 'none';
+  }
+
+  const waBtn = document.getElementById('docWaBtn');
+  if (waBtn) {
+    const cleanWa = wa.replace(/[^0-9]/g, '');
+    const waNumber = cleanWa.startsWith('39') ? cleanWa : `39${cleanWa}`;
+    waBtn.href = cleanWa ? `https://wa.me/${waNumber}` : '#';
+    waBtn.style.opacity = cleanWa ? '1' : '0.4';
+    waBtn.style.pointerEvents = cleanWa ? 'auto' : 'none';
+  }
+
+  const mailBtn = document.getElementById('docMailBtn');
+  if (mailBtn) {
+    mailBtn.href = email ? `mailto:${email}` : '#';
+    mailBtn.style.opacity = email ? '1' : '0.4';
+    mailBtn.style.pointerEvents = email ? 'auto' : 'none';
+  }
+
+  // Badge live e calcolo apertura
+  const status = calculateDoctorOpenStatus(profile);
+  const liveBadge = document.getElementById('docLiveBadge');
+  if (liveBadge) {
+    if (status.isOpen) {
+      liveBadge.className = 'doc-live-badge live-open';
+      liveBadge.innerText = `● Aperto fino alle ${status.closingTime}`;
+    } else {
+      liveBadge.className = 'doc-live-badge live-closed';
+      liveBadge.innerText = `● Chiuso (Apre ${status.nextOpening})`;
+    }
+  }
+
+  // Lista Orari Lun-Ven
+  const hoursList = document.getElementById('docHoursList');
+  if (hoursList) {
+    const hours = profile.doctorHours || {
+      lun: '09:00 - 12:00',
+      mar: '15:00 - 18:00',
+      mer: '09:00 - 12:00',
+      gio: '15:00 - 18:00',
+      ven: '09:00 - 12:00'
+    };
+
+    const now = new Date();
+    const dayIndex = now.getDay(); // 0 Dom, 1 Lun, 2 Mar, ...
+    const dayKeyMap = ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'];
+    const currentKey = dayKeyMap[dayIndex];
+
+    let html = '';
+    DAYS_OF_WEEK_MAP.forEach(({ key, label }) => {
+      const isToday = key === currentKey;
+      const slot = hours[key] || 'Chiuso';
+      html += `
+        <div class="doc-hour-row ${isToday ? 'today' : ''}">
+          <span class="doc-hour-day">${label} ${isToday ? '<span style="font-size: 10px; background: rgba(0, 122, 255, 0.15); color: var(--accent-blue); padding: 2px 6px; border-radius: 6px; margin-left: 4px; font-weight: 700;">OGGI</span>' : ''}</span>
+          <span class="doc-hour-time">${escapeHTML(slot)}</span>
+        </div>
+      `;
+    });
+    hoursList.innerHTML = html;
+  }
+
+  // Note
+  const notesEl = document.getElementById('docNotesDisplay');
+  if (notesEl) {
+    notesEl.innerText = profile.doctorNotes || 'Riceve su appuntamento • Segreteria attiva negli orari di studio';
+  }
+
+  toggleDoctorEditMode(false);
+  openModal('doctorModalOverlay');
+}
+
+function populateDoctorEditForm() {
+  const activeId = getActiveProfileId();
+  const profile = getProfileData(activeId);
+
+  document.getElementById('docEditName').value = profile.doctor || '';
+  document.getElementById('docEditPhone').value = profile.doctorPhone || '';
+  document.getElementById('docEditWa').value = profile.doctorWa || '';
+  document.getElementById('docEditEmail').value = profile.doctorEmail || '';
+  document.getElementById('docEditAddress').value = profile.doctorAddress || '';
+  document.getElementById('docEditNotes').value = profile.doctorNotes || '';
+
+  const hours = profile.doctorHours || {
+    lun: '09:00 - 12:00',
+    mar: '15:00 - 18:00',
+    mer: '09:00 - 12:00',
+    gio: '15:00 - 18:00',
+    ven: '09:00 - 12:00'
+  };
+
+  const hoursGrid = document.getElementById('docEditHoursGrid');
+  if (hoursGrid) {
+    let html = '';
+    DAYS_OF_WEEK_MAP.forEach(({ key, label }) => {
+      const val = hours[key] || '09:00 - 12:00';
+      html += `
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+          <span style="font-size: 13px; font-weight: 600; width: 80px;">${label}</span>
+          <input type="text" id="docEditHour_${key}" class="form-input" style="padding: 6px 10px; font-size: 13px;" value="${escapeHTML(val)}" placeholder="Es. 09:00 - 12:00 oppure Chiuso">
+        </div>
+      `;
+    });
+    hoursGrid.innerHTML = html;
+  }
+}
+
+function saveDoctorData() {
+  const activeId = getActiveProfileId();
+  const existing = getProfileData(activeId);
+
+  const updatedHours = {};
+  DAYS_OF_WEEK_MAP.forEach(({ key }) => {
+    const inputEl = document.getElementById(`docEditHour_${key}`);
+    updatedHours[key] = inputEl ? inputEl.value.trim() : '09:00 - 12:00';
+  });
+
+  const updated = {
+    ...existing,
+    doctor: document.getElementById('docEditName').value.trim() || 'Dr. Medico Curante',
+    doctorPhone: document.getElementById('docEditPhone').value.trim(),
+    doctorWa: document.getElementById('docEditWa').value.trim(),
+    doctorEmail: document.getElementById('docEditEmail').value.trim(),
+    doctorAddress: document.getElementById('docEditAddress').value.trim(),
+    doctorNotes: document.getElementById('docEditNotes').value.trim(),
+    doctorHours: updatedHours
+  };
+
+  localStorage.setItem(`pulse_profile_${activeId}`, JSON.stringify(updated));
+
+  showToast('Scheda Medico salvata!', '👨‍⚕️');
+  openDoctorModal();
+  renderBentoWidgets();
+  renderProfile();
 }
 
 function escapeHTML(str) {

@@ -111,35 +111,119 @@
       </div>
     </header>
 
-    <!-- TAB 1: HOME (Panoramica) -->
+    <!-- TAB 1: HOME (Panoramica Apple Cupertino) -->
     <main id="tab-home" class="tab-content active">
-      <div class="home-bento-grid">
-        <!-- BLOCCO A: Hero Card Prossimo Appuntamento -->
-        <div class="home-bento-item bento-hero">
-          <section id="homeNextAppointment"></section>
-        </div>
+      <div class="home-layout-stack">
+        <!-- BLOCCO A: Hero Card "Oggi" -->
+        <section id="homeHeroOggi" class="hero-oggi-card"></section>
 
-        <!-- BLOCCO B: Card Stato & Avvisi Smart -->
-        <div class="home-bento-item bento-alerts">
-          <section id="homeSmartAlertsWrap" class="smart-alerts-card"></section>
-        </div>
-
-        <!-- BLOCCO C: Terapie in Corso con Slot Orari -->
-        <div class="home-bento-item bento-therapies">
-          <div class="section-header" style="margin-top: 4px;">
-            <span class="section-title">Terapie in corso</span>
-            <button id="btnNewTherapy" class="section-action" style="background: none; border: none;">+ Nuova Terapia</button>
+        <!-- BLOCCO B: Griglia Bento 2x2 (4 Widget Fissi) -->
+        <section class="bento-2x2-grid">
+          <!-- 1. In alto a sx: Ricette & Farmacia -->
+          <div id="widgetRxCard" class="bento-widget-card" onclick="openPharmacyModal()">
+            <div class="bento-widget-top">
+              <div class="squircle-icon-badge" style="width: 38px; height: 38px; min-width: 38px; border-radius: 12px; background: rgba(52, 199, 89, 0.14); border: 1px solid rgba(52, 199, 89, 0.25); color: #34C759;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="5.5" y="4" width="7" height="16" rx="3.5" transform="rotate(-45 9 12)" fill="currentColor" fill-opacity="0.16"/>
+                  <path d="M6.5 14.5L14.5 6.5"/>
+                </svg>
+              </div>
+              <span class="bento-arrow">›</span>
+            </div>
+            <div class="bento-widget-title">Ricette & Farmacia</div>
+            <div id="widgetRxStatus" class="bento-widget-status">Controllo...</div>
           </div>
-          <section id="homeTherapiesList"></section>
-        </div>
 
-        <!-- BLOCCO D: Ultimi Documenti nel Dossier -->
-        <div class="home-bento-item bento-docs">
-          <div class="section-header" style="margin-top: 4px;">
-            <span class="section-title">Ultimi nel Dossier</span>
-            <span class="section-action" onclick="switchTab('archive')">Vedi tutti</span>
+          <!-- 2. In alto a dx: Armadietto -->
+          <div id="widgetCabinetCard" class="bento-widget-card" onclick="openZoneFolder('pharma'); switchPharmaTab('cabinet');">
+            <div class="bento-widget-top">
+              <div class="squircle-icon-badge" style="width: 38px; height: 38px; min-width: 38px; border-radius: 12px; background: rgba(255, 149, 0, 0.14); border: 1px solid rgba(255, 149, 0, 0.25); color: var(--accent-amber);">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 4h16v16H4z" fill="currentColor" fill-opacity="0.16"/>
+                  <path d="M12 4v16"/><path d="M4 12h16"/>
+                </svg>
+              </div>
+              <span class="bento-arrow">›</span>
+            </div>
+            <div class="bento-widget-title">Armadietto</div>
+            <div id="widgetCabinetStatus" class="bento-widget-status">Controllo...</div>
           </div>
-          <section id="homeRecentDocs" class="doc-list"></section>
+
+          <!-- 3. In basso a sx: Prevenzione -->
+          <div id="widgetRadarCard" class="bento-widget-card" onclick="switchTab('agenda'); document.getElementById('segAgendaRadar').click();">
+            <div class="bento-widget-top">
+              <div class="squircle-icon-badge" style="width: 38px; height: 38px; min-width: 38px; border-radius: 12px; background: rgba(0, 199, 190, 0.14); border: 1px solid rgba(0, 199, 190, 0.25); color: var(--accent-teal);">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor" fill-opacity="0.16"/>
+                  <path d="M9 12l2 2 4-4"/>
+                </svg>
+              </div>
+              <span class="bento-arrow">›</span>
+            </div>
+            <div class="bento-widget-title">Prevenzione</div>
+            <div id="widgetRadarStatus" class="bento-widget-status">Controllo...</div>
+          </div>
+
+          <!-- 4. In basso a dx: Medico di Base -->
+          <div id="widgetDoctorCard" class="bento-widget-card" onclick="openDoctorModal()">
+            <div class="bento-widget-top">
+              <div class="squircle-icon-badge" style="width: 38px; height: 38px; min-width: 38px; border-radius: 12px; background: rgba(0, 122, 255, 0.14); border: 1px solid rgba(0, 122, 255, 0.25); color: var(--accent-blue);">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4" fill="currentColor" fill-opacity="0.16"/>
+                  <line x1="19" y1="8" x2="19" y2="14"/>
+                  <line x1="16" y1="11" x2="22" y2="11"/>
+                </svg>
+              </div>
+              <span class="bento-arrow">›</span>
+            </div>
+            <div id="widgetDoctorName" class="bento-widget-title">Medico di Base</div>
+            <div id="widgetDoctorStatus" class="bento-widget-status">Orario...</div>
+          </div>
+        </section>
+
+        <!-- Sezione 2 Colonne su Desktop: Terapie & Check-in / Dossier -->
+        <div class="home-bottom-columns">
+          <!-- BLOCCO C: Card "Terapie di Oggi" -->
+          <div class="home-col-item">
+            <div class="section-header" style="margin-top: 6px;">
+              <span class="section-title">Terapie di Oggi</span>
+              <button id="btnNewTherapy" class="section-action" style="background: none; border: none;">+ Aggiungi</button>
+            </div>
+            <section id="homeTherapiesList"></section>
+          </div>
+
+          <div class="home-col-item">
+            <!-- BLOCCO D: Strip "Check-in Rapido" -->
+            <div class="section-header" style="margin-top: 6px;">
+              <span class="section-title">Check-in Rapido</span>
+              <span class="section-action" onclick="openModal('symptomsModalOverlay')">Diario ›</span>
+            </div>
+            <section class="checkin-strip-card">
+              <div class="checkin-latest-row">
+                <span class="checkin-latest-label">Ultimo rilievo:</span>
+                <span id="checkinLatestValue" class="checkin-latest-val">Nessun dato recente</span>
+              </div>
+              <div class="checkin-pills-row">
+                <button class="checkin-pill" onclick="quickAddSymptom('Pressione')">
+                  <span>🩺</span> + Pressione
+                </button>
+                <button class="checkin-pill" onclick="quickAddSymptom('Febbre')">
+                  <span>🌡️</span> + Febbre
+                </button>
+                <button class="checkin-pill" onclick="quickAddSymptom('Sintomo')">
+                  <span>⚡</span> + Sintomo
+                </button>
+              </div>
+            </section>
+
+            <!-- BLOCCO E: Ultimi nel Dossier -->
+            <div class="section-header" style="margin-top: 14px;">
+              <span class="section-title">Ultimi nel Dossier</span>
+              <span class="section-action" onclick="switchTab('archive')">Vedi tutti</span>
+            </div>
+            <section id="homeRecentDocs" class="doc-list"></section>
+          </div>
         </div>
       </div>
     </main>
@@ -491,6 +575,106 @@
       </div>
 
       <div id="modalTaxExpensesList" style="max-height: 280px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: SCHEDA MEDICO DI BASE (iOS Contact Card Style) -->
+  <div id="doctorModalOverlay" class="modal-overlay">
+    <div class="bottom-sheet" style="max-height: 90vh;">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <h2 class="sheet-title">Medico di Base</h2>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button id="btnEditDoctor" class="btn-secondary-sm" style="padding: 4px 12px; font-size: 13px;">Modifica</button>
+          <button class="sheet-close-btn" onclick="closeAllModals()">✕</button>
+        </div>
+      </div>
+
+      <!-- VISTA INFO MEDICO -->
+      <div id="doctorViewSection">
+        <div class="doc-contact-hero">
+          <div class="squircle-icon-badge" style="width: 56px; height: 56px; min-width: 56px; border-radius: 18px; background: rgba(0, 122, 255, 0.14); border: 1.5px solid rgba(0, 122, 255, 0.28); color: var(--accent-blue); margin-bottom: 8px;">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4" fill="currentColor" fill-opacity="0.16"/>
+              <line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/>
+            </svg>
+          </div>
+          <div id="docSheetName" style="font-size: 20px; font-weight: 800; letter-spacing: -0.02em;">Dr. Marco Rossi</div>
+          <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Medico di Medicina Generale (SSN)</div>
+          
+          <a id="docSheetAddressLink" href="#" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--accent-blue); text-decoration: none; margin-top: 6px; font-weight: 500;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span id="docSheetAddressText">Via Roma 14, Bologna</span>
+          </a>
+        </div>
+
+        <!-- 3 Azioni Rapide Contatto iOS -->
+        <div class="doc-contact-actions">
+          <a id="docCallBtn" href="tel:" class="doc-action-btn action-call">
+            <div class="doc-action-icon">📞</div>
+            <span>Chiama</span>
+          </a>
+          <a id="docWaBtn" href="https://wa.me/" target="_blank" rel="noopener noreferrer" class="doc-action-btn action-wa">
+            <div class="doc-action-icon">💬</div>
+            <span>WhatsApp</span>
+          </a>
+          <a id="docMailBtn" href="mailto:" class="doc-action-btn action-mail">
+            <div class="doc-action-icon">✉️</div>
+            <span>Email</span>
+          </a>
+        </div>
+
+        <!-- Orari Ambulatorio Lun-Ven -->
+        <div class="doc-hours-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px;">Orari Ricevimento</span>
+            <span id="docLiveBadge" class="doc-live-badge live-open">● Aperto ora</span>
+          </div>
+          <div id="docHoursList" class="doc-hours-table"></div>
+          <div id="docNotesDisplay" style="margin-top: 12px; font-size: 12px; color: var(--text-secondary); background: var(--bg-card-secondary); padding: 8px 12px; border-radius: var(--radius-sm); line-height: 1.4;">
+            Riceve su appuntamento &bull; Segreteria attiva dalle 08:30 alle 11:30
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA MODIFICA DATI MEDICO -->
+      <form id="doctorEditForm" style="display: none; padding-bottom: 20px;">
+        <div class="form-group">
+          <label class="form-label">Nome e Cognome Medico</label>
+          <input type="text" id="docEditName" class="form-input" placeholder="Es. Dott.ssa Laura Bianchi" required>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label class="form-label">Telefono Ambulatorio</label>
+            <input type="tel" id="docEditPhone" class="form-input" placeholder="Es. +390511234567" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cellulare / WhatsApp</label>
+            <input type="tel" id="docEditWa" class="form-input" placeholder="Es. 3401234567">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Medico (Opzionale)</label>
+          <input type="email" id="docEditEmail" class="form-input" placeholder="Es. dr.bianchi@medicina.it">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Indirizzo Ambulatorio</label>
+          <input type="text" id="docEditAddress" class="form-input" placeholder="Es. Via Garibaldi 12, Milano">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Note Segreteria / Modalità Accesso</label>
+          <input type="text" id="docEditNotes" class="form-input" placeholder="Es. Riceve solo su appuntamento">
+        </div>
+
+        <div style="font-size: 13px; font-weight: 700; margin: 14px 0 8px 0;">Orari di Ricevimento (Lun–Ven)</div>
+        <div id="docEditHoursGrid" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;"></div>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn-secondary-sm" style="flex: 1;" onclick="toggleDoctorEditMode(false)">Annulla</button>
+          <button type="submit" class="btn-primary" style="flex: 2;">Salva Scheda Medico</button>
+        </div>
+      </form>
     </div>
   </div>
 

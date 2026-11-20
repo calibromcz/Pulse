@@ -1165,13 +1165,289 @@ body::after {
   animation: shake 0.4s ease;
 }
 
-/* Bento Grid Home & Smart Alerts */
-.home-bento-grid {
+/* Nuova Home Apple Bento 2x2 & Hero Oggi */
+.home-layout-stack {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
+/* Hero Oggi Card */
+.hero-oggi-card {
+  background: var(--bg-card);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  box-shadow: var(--glass-inset), var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-oggi-card::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0.1));
+}
+
+.hero-oggi-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.hero-oggi-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.hero-oggi-date {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.hero-oggi-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero-oggi-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hero-oggi-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Griglia Bento 2x2 */
+.bento-2x2-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.bento-widget-card {
+  background: var(--bg-card);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: 22px;
+  padding: 14px 16px;
+  box-shadow: var(--glass-inset), var(--shadow-sm);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.15s var(--spring-easing), box-shadow 0.15s ease;
+  user-select: none;
+}
+
+.bento-widget-card:active {
+  transform: scale(0.96);
+}
+
+.bento-widget-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.bento-arrow {
+  color: var(--text-tertiary);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.bento-widget-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.bento-widget-status {
+  font-size: 11px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Check-in Rapido Strip Card */
+.checkin-strip-card {
+  background: var(--bg-card);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  box-shadow: var(--glass-inset), var(--shadow-sm);
+}
+
+.checkin-latest-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.checkin-latest-label {
+  color: var(--text-secondary);
+}
+
+.checkin-latest-val {
+  font-weight: 700;
+  color: var(--accent-coral);
+}
+
+.checkin-pills-row {
+  display: flex;
+  gap: 8px;
+}
+
+.checkin-pill {
+  flex: 1;
+  background: var(--bg-card-secondary);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-full);
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: transform 0.15s var(--spring-easing);
+}
+
+.checkin-pill:active {
+  transform: scale(0.94);
+}
+
+/* Modale Medico di Base */
+.doc-contact-hero {
+  text-align: center;
+  padding: 14px 0 16px 0;
+  border-bottom: 1px solid var(--border-glass);
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.doc-contact-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.doc-action-btn {
+  background: var(--bg-card-secondary);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 10px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  gap: 4px;
+  transition: transform 0.15s var(--spring-easing);
+}
+
+.doc-action-btn:active {
+  transform: scale(0.94);
+}
+
+.doc-action-btn.action-call {
+  color: var(--accent-blue);
+  background: rgba(0, 122, 255, 0.10);
+  border-color: rgba(0, 122, 255, 0.22);
+}
+
+.doc-action-btn.action-wa {
+  color: #128C7E;
+  background: rgba(37, 211, 102, 0.14);
+  border-color: rgba(37, 211, 102, 0.28);
+}
+
+[data-theme="dark"] .doc-action-btn.action-wa {
+  color: #25D366;
+}
+
+.doc-hours-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+
+.doc-hours-table {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.doc-hour-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.doc-hour-row.today {
+  background: rgba(0, 122, 255, 0.12);
+  font-weight: 700;
+  color: var(--accent-blue);
+}
+
+.doc-live-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+
+.doc-live-badge.live-open {
+  background: rgba(52, 199, 89, 0.15);
+  color: #34C759;
+}
+
+.doc-live-badge.live-closed {
+  background: rgba(142, 142, 147, 0.15);
+  color: var(--text-secondary);
+}
+
+/* Desktop PC Layout >= 900px */
 @media (min-width: 900px) {
   body {
     display: flex;
@@ -1181,7 +1457,7 @@ body::after {
   }
 
   .app-viewport {
-    max-width: 860px;
+    max-width: 880px;
     min-height: calc(100vh - 64px);
     border-radius: 32px;
     border: 1px solid var(--border-glass);
@@ -1190,7 +1466,7 @@ body::after {
   }
 
   .bottom-nav {
-    max-width: 860px;
+    max-width: 880px;
     left: 50% !important;
     transform: translateX(-50%) !important;
     border-bottom-left-radius: 32px;
@@ -1202,81 +1478,19 @@ body::after {
     border-top-right-radius: 32px;
   }
 
-  .home-bento-grid {
+  /* 4 Widget in Fila su Desktop */
+  .bento-2x2-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  /* 2 Colonne Bilanciate in Basso */
+  .home-bottom-columns {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 18px;
+    gap: 20px;
     align-items: start;
   }
-
-  .home-bento-item.bento-hero {
-    grid-column: 1 / 2;
-  }
-
-  .home-bento-item.bento-alerts {
-    grid-column: 2 / 3;
-  }
-
-  .home-bento-item.bento-therapies {
-    grid-column: 1 / 2;
-  }
-
-  .home-bento-item.bento-docs {
-    grid-column: 2 / 3;
-  }
-}
-
-/* Smart Alerts Card */
-.smart-alerts-card {
-  background: var(--bg-card);
-  backdrop-filter: var(--blur-glass);
-  -webkit-backdrop-filter: var(--blur-glass);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-lg);
-  padding: 16px 18px;
-  box-shadow: var(--glass-inset), var(--shadow-sm);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.smart-alert-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: transform 0.15s var(--spring-easing), opacity 0.15s ease;
-}
-
-.smart-alert-item:active {
-  transform: scale(0.97);
-}
-
-.smart-alert-item.alert-rx {
-  background: rgba(255, 45, 85, 0.10);
-  border: 1px solid rgba(255, 45, 85, 0.22);
-  color: var(--accent-coral);
-}
-
-.smart-alert-item.alert-cab {
-  background: rgba(255, 149, 0, 0.10);
-  border: 1px solid rgba(255, 149, 0, 0.22);
-  color: var(--accent-amber);
-}
-
-.smart-alert-item.alert-radar {
-  background: rgba(0, 122, 255, 0.10);
-  border: 1px solid rgba(0, 122, 255, 0.22);
-  color: var(--accent-blue);
-}
-
-.smart-alert-item.alert-calm {
-  background: rgba(0, 199, 190, 0.10);
-  border: 1px solid rgba(0, 199, 190, 0.22);
-  color: var(--accent-teal);
-  cursor: default;
 }
 
 /* Time Slot Pills for Therapies */
