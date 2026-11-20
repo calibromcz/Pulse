@@ -62,7 +62,93 @@
     </div>
   </div>
 
-  <div class="app-viewport">
+  <!-- Desktop PC Wrapper (Sidebar + Main App Content) -->
+  <div class="pulse-desktop-layout">
+    <!-- Desktop Left Sidebar (Visible >= 900px) -->
+    <aside class="pulse-desktop-sidebar">
+      <div class="desktop-sidebar-header">
+        <div class="brand-wrapper">
+          <svg class="brand-logo-svg" viewBox="0 0 100 100" fill="none">
+            <circle cx="50" cy="50" r="44" stroke="#FF2D55" stroke-width="4.5" stroke-dasharray="210 50" stroke-linecap="round"/>
+            <path d="M26 52h14l6-13 8 26 6-17 5 9 9-5" stroke="#007AFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="75" cy="52" r="3.5" fill="#00C7BE"/>
+          </svg>
+          <div class="brand-title">PULSE</div>
+        </div>
+        <button id="desktopProfilePillBtn" class="profile-pill-btn" onclick="openProfileSwitcher()" title="Cambia Profilo">
+          <span id="desktopProfilePillName">Io</span>
+          <span style="font-size: 10px; opacity: 0.7;">▾</span>
+        </button>
+      </div>
+
+      <nav class="desktop-sidebar-nav">
+        <button class="desktop-nav-btn active" data-target="home" onclick="switchTab('home')">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10.5L12 3L21 10.5V20C21 20.6 20.6 21 20 21H4C3.4 21 3 20.6 3 20V10.5Z" fill="currentColor" fill-opacity="0.16"/>
+            <path d="M9 21V12H15V21"/>
+          </svg>
+          <span>Home</span>
+        </button>
+        <button class="desktop-nav-btn" data-target="archive" onclick="switchTab('archive')">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V7H3Z" fill="currentColor" fill-opacity="0.16"/>
+            <path d="M2 3H22V7H2V3Z"/>
+            <path d="M10 11H14"/>
+          </svg>
+          <span>Dossier</span>
+        </button>
+        <button class="desktop-nav-btn" data-target="agenda" onclick="switchTab('agenda')">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4.5" width="18" height="17" rx="3" fill="currentColor" fill-opacity="0.16"/>
+            <path d="M16 2.5V5.5"/><path d="M8 2.5V5.5"/><path d="M3 9.5H21"/>
+            <circle cx="8.5" cy="14" r="1" fill="currentColor"/><circle cx="12" cy="14" r="1" fill="currentColor"/><circle cx="15.5" cy="14" r="1" fill="currentColor"/>
+          </svg>
+          <span>Agenda</span>
+        </button>
+        <button class="desktop-nav-btn" data-target="profile" onclick="switchTab('profile')">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4.5" fill="currentColor" fill-opacity="0.16"/>
+            <path d="M4.5 20C4.5 16.5 8 15 12 15C16 15 19.5 16.5 19.5 20" stroke-linecap="round"/>
+          </svg>
+          <span>Profilo</span>
+        </button>
+      </nav>
+
+      <div class="desktop-sidebar-action">
+        <button class="btn-primary" style="width: 100%; border-radius: var(--radius-md); padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700;" onclick="openAddDocModal()">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span>+ Documento</span>
+        </button>
+      </div>
+
+      <div class="desktop-sidebar-footer">
+        <div class="desktop-tools-grid">
+          <button id="desktopCalendarBtn" class="icon-btn" onclick="openCalendarQuickSheet()" title="Calendario Visite">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4.5" width="18" height="17" rx="3" fill="currentColor" fill-opacity="0.16"/>
+              <path d="M16 2.5V5.5"/><path d="M8 2.5V5.5"/><path d="M3 9.5H21"/>
+            </svg>
+          </button>
+          <button id="desktopPharmacyBtn" class="icon-btn" onclick="openPharmacyMode()" title="Modalità Farmacia">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 5V19"/><path d="M6.5 5V19"/><path d="M10 5V19" stroke-width="2.5"/><path d="M14 5V19"/><path d="M17.5 5V19" stroke-width="2.5"/><path d="M21 5V19"/>
+            </svg>
+          </button>
+          <button id="desktopLockBtn" class="icon-btn" onclick="triggerManualLock()" title="Blocco PIN">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="10" width="16" height="12" rx="3" fill="currentColor" fill-opacity="0.16"/>
+              <path d="M8 10V6.5C8 4.5 9.8 3 12 3C14.2 3 16 4.5 16 6.5V10"/>
+            </svg>
+          </button>
+          <button id="desktopThemeBtn" class="icon-btn" onclick="toggleTheme()" title="Cambia Tema">🌓</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-viewport">
     <!-- Header Apple Cupertino Multi-Tool -->
     <header class="app-header">
       <div class="brand-wrapper">
@@ -135,7 +221,7 @@
           </div>
 
           <!-- 2. In alto a dx: Armadietto -->
-          <div id="widgetCabinetCard" class="bento-widget-card" onclick="openZoneFolder('pharma'); switchPharmaTab('cabinet');">
+          <div id="widgetCabinetCard" class="bento-widget-card" onclick="openCabinetView()">
             <div class="bento-widget-top">
               <div class="squircle-icon-badge" style="width: 38px; height: 38px; min-width: 38px; border-radius: 12px; background: rgba(255, 149, 0, 0.14); border: 1px solid rgba(255, 149, 0, 0.25); color: var(--accent-amber);">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -475,6 +561,7 @@
       </div>
     </nav>
   </div>
+</div>
 
   <!-- MODAL: PHARMACY MODE (FULLSCREEN HIGH CONTRAST) -->
   <div id="pharmacyModalOverlay" class="modal-overlay">

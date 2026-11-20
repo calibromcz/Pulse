@@ -61,11 +61,18 @@
   --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
-* {
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 body {
@@ -1243,11 +1250,12 @@ body::after {
 /* Griglia Bento 2x2 */
 .bento-2x2-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
 .bento-widget-card {
+  min-width: 0;
   background: var(--bg-card);
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
@@ -1284,6 +1292,9 @@ body::after {
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .bento-widget-status {
@@ -1447,49 +1458,164 @@ body::after {
   color: var(--text-secondary);
 }
 
+/* Desktop Layout Wrapper & Sidebar Styles */
+.pulse-desktop-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+}
+
+.pulse-desktop-sidebar {
+  display: none;
+}
+
 /* Desktop PC Layout >= 900px */
 @media (min-width: 900px) {
   body {
+    display: block;
+    padding: 0;
+  }
+
+  .pulse-desktop-layout {
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 32px 0;
+    min-height: 100vh;
+  }
+
+  .pulse-desktop-sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-glass);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+    border-right: 1px solid var(--border-glass);
+    box-shadow: var(--glass-inset), var(--shadow-sm);
+    padding: 24px 20px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 100;
+  }
+
+  .desktop-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .desktop-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .desktop-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s var(--spring-easing);
+  }
+
+  .desktop-nav-btn:hover {
+    background: var(--bg-card-secondary);
+    color: var(--text-primary);
+  }
+
+  .desktop-nav-btn.active {
+    background: var(--bg-card);
+    border-color: var(--border-glass);
+    color: var(--accent-coral);
+    box-shadow: var(--glass-inset), var(--shadow-sm);
+  }
+
+  .desktop-sidebar-action {
+    margin: 20px 0;
+  }
+
+  .desktop-sidebar-footer {
+    padding-top: 16px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .desktop-tools-grid {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
   }
 
   .app-viewport {
-    max-width: 880px;
-    min-height: calc(100vh - 64px);
-    border-radius: 32px;
-    border: 1px solid var(--border-glass);
-    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 100vh;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    padding: 32px 40px 60px 40px;
+    overflow-y: visible;
   }
 
-  .bottom-nav {
-    max-width: 880px;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    border-bottom-left-radius: 32px;
-    border-bottom-right-radius: 32px;
+  .home-layout-stack,
+  .tab-content {
+    max-width: 1080px;
+    margin: 0 auto;
+    width: 100%;
   }
 
-  .app-header {
-    border-top-left-radius: 32px;
-    border-top-right-radius: 32px;
+  /* Nascondi Header Mobile e Bottom Nav su PC */
+  .app-header,
+  .bottom-nav-container {
+    display: none !important;
   }
 
   /* 4 Widget in Fila su Desktop */
   .bento-2x2-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
   }
 
   /* 2 Colonne Bilanciate in Basso */
   .home-bottom-columns {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
     align-items: start;
+  }
+
+  .body-zones-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+/* Mobile & Tablet below 900px */
+@media (max-width: 899px) {
+  .pulse-desktop-sidebar {
+    display: none !important;
+  }
+  .app-viewport {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 0 calc(115px + var(--safe-bottom)) 0;
+  }
+  .tab-content {
+    padding: 16px 16px 20px 16px;
   }
 }
 

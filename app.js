@@ -172,6 +172,8 @@ function updateProfilePill() {
   const current = profiles.find(p => p.id === activeId) || profiles[0] || { id: 'me', name: 'Io' };
   const label = document.getElementById('profilePillName');
   if (label) label.innerText = current.name;
+  const desktopLabel = document.getElementById('desktopProfilePillName');
+  if (desktopLabel) desktopLabel.innerText = current.name;
 }
 
 function openProfileSwitcher() {
@@ -593,11 +595,14 @@ function initNavigation() {
 function switchTab(tabId) {
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.desktop-nav-btn').forEach(b => b.classList.remove('active'));
 
   const view = document.getElementById(`tab-${tabId}`);
   const btn = document.querySelector(`.nav-tab-btn[data-target="${tabId}"]`);
+  const desktopBtn = document.querySelector(`.desktop-nav-btn[data-target="${tabId}"]`);
   if (view) view.classList.add('active');
   if (btn) btn.classList.add('active');
+  if (desktopBtn) desktopBtn.classList.add('active');
 
   if (tabId === 'agenda') {
     renderCalendar();
@@ -2510,6 +2515,23 @@ function switchPharmaTab(tab) {
   }
 }
 
+// Aliases and Direct Views
+function openPharmacyModal() {
+  openPharmacyMode();
+}
+
+async function openCabinetView() {
+  switchTab('archive');
+  await openZoneFolder('pharma');
+  switchPharmaTab('cabinet');
+}
+
+function openCalendarQuickSheet() {
+  switchTab('agenda');
+  const calSegBtn = document.getElementById('segAgendaCal');
+  if (calSegBtn) calSegBtn.click();
+}
+
 function renderMedicineCabinetInFolder() {
   const container = document.getElementById('pharmaCabinetViewWrap');
   if (!container) return;
@@ -2522,14 +2544,44 @@ function renderMedicineCabinetInFolder() {
   const in60Days = new Date(Date.now() + 86400000 * 60);
 
   let html = `
+    <!-- Form Diretto Aggiunta Farmaco (Sempre Pronto) -->
+    <div class="glass-card" style="padding: 16px; margin-bottom: 16px; border: 1px solid var(--border-glass);">
+      <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--accent-amber); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+        <span>💊</span>
+        <span>Aggiungi Farmaco all'Armadietto</span>
+      </div>
+      <form id="addCabinetDirectForm" onsubmit="handleDirectCabinetAdd(event)">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div>
+            <label style="font-size: 11px; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 4px;">Nome Farmaco / Principio Attivo *</label>
+            <input type="text" id="directCabName" class="form-input" placeholder="Es. Tachipirina 500mg, Oki gocce..." required style="padding: 10px 12px; font-size: 13px;">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+              <label style="font-size: 11px; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 4px;">Data di Scadenza *</label>
+              <input type="date" id="directCabExpiry" class="form-input" required style="padding: 9px 10px; font-size: 13px;">
+            </div>
+            <div>
+              <label style="font-size: 11px; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 4px;">Quantità / Confezione</label>
+              <input type="text" id="directCabQty" class="form-input" placeholder="Es. 1 scatola, 16 cpr" value="1 confezione" style="padding: 9px 10px; font-size: 13px;">
+            </div>
+          </div>
+          <button type="submit" class="btn-primary" style="margin-top: 6px; padding: 11px; font-size: 13px; font-weight: 700;">
+            + Aggiungi all'Armadietto
+          </button>
+        </div>
+      </form>
+    </div>
+
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <span style="font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">Farmaci in Casa</span>
-      <button class="btn-secondary-sm" style="flex: none; padding: 4px 10px; font-size: 11px;" onclick="openAddCabinetModal()">+ Aggiungi Farmaco</button>
+      <span style="font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">
+        Farmaci in Casa (${profileCabinet.length})
+      </span>
     </div>
   `;
 
   if (profileCabinet.length === 0) {
-    html += `<div class="empty-state" style="padding: 16px;"><div class="empty-text">Nessun farmaco nell'armadietto</div><div class="empty-sub">Registra scadenze per evitare sprechi.</div></div>`;
+    html += `<div class="empty-state" style="padding: 16px;"><div class="empty-text">Nessun farmaco nell'armadietto</div><div class="empty-sub">Usa il form sopra per registrare le scadenze dei farmaci che hai in casa.</div></div>`;
   } else {
     html += profileCabinet.map(item => {
       const exp = new Date(item.expiryDate);
@@ -2543,22 +2595,28 @@ function renderMedicineCabinetInFolder() {
         badgeText = 'In scadenza';
       }
 
+      const formattedExp = !isNaN(exp.getTime()) ? exp.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }) : item.expiryDate;
+
       return `
-        <div class="glass-card" style="padding: 12px 14px; margin-bottom: 8px;">
+        <div class="glass-card" style="padding: 12px 14px; margin-bottom: 10px;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div>
-              <div style="font-size: 14px; font-weight: 700;">${escapeHTML(item.name)}</div>
-              <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
-                Confezione: ${escapeHTML(item.quantity || 'Disponibile')} ${item.notes ? `• ${escapeHTML(item.notes)}` : ''}
+            <div style="flex: 1; padding-right: 8px;">
+              <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">${escapeHTML(item.name)}</div>
+              <div style="font-size: 12px; color: var(--text-secondary); margin-top: 3px; display: flex; align-items: center; gap: 8px;">
+                <span>Disponibilità: <strong>${escapeHTML(item.quantity || '1')}</strong></span>
+                <div style="display: inline-flex; align-items: center; gap: 3px; margin-left: 4px;">
+                  <button class="btn-secondary-sm" style="padding: 1px 7px; font-size: 11px; min-width: 20px; height: 20px; line-height: 1;" onclick="updateCabinetQtyDelta('${item.id}', -1)" title="Riduci">-</button>
+                  <button class="btn-secondary-sm" style="padding: 1px 7px; font-size: 11px; min-width: 20px; height: 20px; line-height: 1;" onclick="updateCabinetQtyDelta('${item.id}', 1)" title="Aumenta">+</button>
+                </div>
               </div>
             </div>
-            <span style="font-size: 11px; font-weight: 700; background: ${badgeColor}22; color: ${badgeColor}; padding: 3px 8px; border-radius: 99px;">
+            <span style="font-size: 11px; font-weight: 700; background: ${badgeColor}22; color: ${badgeColor}; padding: 3px 8px; border-radius: 99px; white-space: nowrap;">
               ${badgeText}
             </span>
           </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 11px; color: var(--text-tertiary);">
-            <span>Scadenza: ${exp.toLocaleDateString('it-IT')}</span>
-            <button style="background: none; border: none; color: var(--accent-coral); cursor: pointer; font-size: 11px;" onclick="deleteCabinetItem('${item.id}')">Rimuovi</button>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 11px; color: var(--text-tertiary); border-top: 1px solid var(--border-subtle); padding-top: 8px;">
+            <span>Scadenza: <strong style="color: var(--text-primary);">${formattedExp}</strong></span>
+            <button style="background: none; border: none; color: var(--accent-coral); cursor: pointer; font-size: 11px; font-weight: 600;" onclick="deleteCabinetItem('${item.id}')">Elimina</button>
           </div>
         </div>
       `;
@@ -2566,14 +2624,30 @@ function renderMedicineCabinetInFolder() {
   }
 
   container.innerHTML = html;
+
+  // Imposta data minima a oggi nel date picker se presente
+  const expInput = document.getElementById('directCabExpiry');
+  if (expInput && !expInput.value) {
+    const nextYear = new Date();
+    nextYear.setFullYear(nextYear.getFullYear() + 1);
+    expInput.value = nextYear.toISOString().split('T')[0];
+  }
 }
 
-function openAddCabinetModal() {
-  const name = prompt('Nome del farmaco / principio attivo:');
-  if (!name) return;
-  const expiry = prompt('Data di scadenza (formato AAAA-MM-GG):', new Date().toISOString().split('T')[0]);
-  if (!expiry) return;
-  const qty = prompt('Quantità / Confezione (es. 12 compresse):', '1 confezione');
+function handleDirectCabinetAdd(event) {
+  event.preventDefault();
+  const nameInput = document.getElementById('directCabName');
+  const expiryInput = document.getElementById('directCabExpiry');
+  const qtyInput = document.getElementById('directCabQty');
+
+  const name = nameInput.value.trim();
+  const expiry = expiryInput.value;
+  const qty = qtyInput.value.trim() || '1 confezione';
+
+  if (!name || !expiry) {
+    alert('Inserisci il nome del farmaco e la data di scadenza.');
+    return;
+  }
 
   const newItem = {
     id: 'cab_' + Date.now(),
@@ -2587,8 +2661,38 @@ function openAddCabinetModal() {
   const cabinet = JSON.parse(localStorage.getItem('pulse_cabinet') || '[]');
   cabinet.push(newItem);
   localStorage.setItem('pulse_cabinet', JSON.stringify(cabinet));
+
   showToast('Farmaco aggiunto all\'armadietto', '💊');
   renderMedicineCabinetInFolder();
+  renderBentoWidgets();
+}
+
+function updateCabinetQtyDelta(id, delta) {
+  let cabinet = JSON.parse(localStorage.getItem('pulse_cabinet') || '[]');
+  const item = cabinet.find(c => c.id === id);
+  if (!item) return;
+
+  // Analizza numero nella quantità
+  const match = (item.quantity || '').match(/\d+/);
+  if (match) {
+    const currentNum = parseInt(match[0], 10);
+    const newNum = Math.max(0, currentNum + delta);
+    item.quantity = item.quantity.replace(/\d+/, newNum);
+  } else {
+    item.quantity = delta > 0 ? '2 confezioni' : '0 (esaurito)';
+  }
+
+  localStorage.setItem('pulse_cabinet', JSON.stringify(cabinet));
+  renderMedicineCabinetInFolder();
+  renderBentoWidgets();
+}
+
+function openAddCabinetModal() {
+  const formWrap = document.getElementById('addCabinetDirectForm');
+  if (formWrap) {
+    document.getElementById('directCabName').focus();
+    return;
+  }
 }
 
 function deleteCabinetItem(id) {
@@ -2596,6 +2700,7 @@ function deleteCabinetItem(id) {
   cabinet = cabinet.filter(c => c.id !== id);
   localStorage.setItem('pulse_cabinet', JSON.stringify(cabinet));
   renderMedicineCabinetInFolder();
+  renderBentoWidgets();
 }
 
 // 15. Scheda Vista & Lenti
