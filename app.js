@@ -210,7 +210,9 @@ let currentPinInput = '';
 
 function initPinSecurity() {
   const lockBtn = document.getElementById('headerLockBtn');
-  lockBtn.addEventListener('click', triggerManualLock);
+  if (lockBtn) {
+    lockBtn.addEventListener('click', triggerManualLock);
+  }
 
   document.querySelectorAll('.pin-key').forEach(key => {
     key.addEventListener('click', () => {
@@ -3662,8 +3664,8 @@ function renderProfile() {
   document.getElementById('profileAllergiesDisplay').innerText = profile.allergies || 'Nessuna';
   document.getElementById('profileDoctorDisplay').innerText = profile.doctor || 'Non indicato';
 
-  // 2 Pulsanti Rapidi a Sinistra del Medico (34x34) WhatsApp & Telefono
-  const docQuickBtns = document.getElementById('doctorQuickButtonsLeft');
+  // 2 Pulsanti Rapidi a Destra del Medico (34x34) WhatsApp & Telefono
+  const docQuickBtns = document.getElementById('doctorQuickButtonsRight');
   if (docQuickBtns) {
     docQuickBtns.innerHTML = `
       <button class="quick-doc-btn whatsapp" onclick="openDoctorWhatsApp()" title="Invia WhatsApp al Medico">

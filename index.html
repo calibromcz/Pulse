@@ -137,10 +137,10 @@
               <path d="M3 5V19"/><path d="M6.5 5V19"/><path d="M10 5V19" stroke-width="2.5"/><path d="M14 5V19"/><path d="M17.5 5V19" stroke-width="2.5"/><path d="M21 5V19"/>
             </svg>
           </button>
-          <button id="desktopLockBtn" class="icon-btn" onclick="triggerManualLock()" title="Blocco PIN">
+          <button id="desktopFirstAidBtn" class="icon-btn" onclick="openFirstAidModal()" title="Manuale Primo Soccorso" style="color: var(--accent-coral);">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="10" width="16" height="12" rx="3" fill="currentColor" fill-opacity="0.16"/>
-              <path d="M8 10V6.5C8 4.5 9.8 3 12 3C14.2 3 16 4.5 16 6.5V10"/>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor" fill-opacity="0.16"/>
+              <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
             </svg>
           </button>
           <button id="desktopThemeBtn" class="icon-btn" onclick="toggleTheme()" title="Cambia Tema">🌓</button>
@@ -183,12 +183,11 @@
           </svg>
         </button>
 
-        <!-- 3. Privacy Lock (Lucchetto) -->
-        <button id="headerLockBtn" class="icon-btn" title="Blocco Privacy PIN">
+        <!-- 3. Manuale Primo Soccorso -->
+        <button id="headerFirstAidBtn" class="icon-btn" title="Manuale Primo Soccorso" style="color: var(--accent-coral);">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="4" y="10" width="16" height="12" rx="3" fill="currentColor" fill-opacity="0.16"/>
-            <path d="M8 10V6.5C8 4.5 9.8 3 12 3C14.2 3 16 4.5 16 6.5V10"/>
-            <circle cx="12" cy="15.5" r="1.5" fill="currentColor"/>
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor" fill-opacity="0.16"/>
+            <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
           </svg>
         </button>
 
@@ -424,17 +423,17 @@
           </div>
         </div>
 
-        <!-- Riga Medico ICE con 2 Bottoni Rapidi WhatsApp & Telefono a Sinistra -->
-        <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <!-- 2 Pulsanti Rapidi (34x34) WhatsApp & Telefono a Sinistra del Medico -->
-            <div id="doctorQuickButtonsLeft" style="display: flex; align-items: center; gap: 6px;"></div>
-            <div>
-              <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px;">MEDICO DI BASE</div>
-              <div style="font-size: 14px; font-weight: 800;" id="profileDoctorDisplay">Dott.ssa Bianchi</div>
-            </div>
+        <!-- Riga Medico ICE con Dati a Sinistra e 2 Bottoni Rapidi (WhatsApp & Telefono) a Destra -->
+        <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+          <div style="min-width: 0;">
+            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px;">MEDICO DI BASE</div>
+            <div style="font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="profileDoctorDisplay">Dott.ssa Bianchi</div>
           </div>
-          <button onclick="openDoctorModal()" class="btn-secondary-sm" style="padding: 5px 10px; font-size: 11px; flex: none;">Scheda ›</button>
+          <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+            <!-- 2 Pulsanti Rapidi WhatsApp & Telefono a Destra -->
+            <div id="doctorQuickButtonsRight" style="display: flex; align-items: center; gap: 8px;"></div>
+            <button onclick="openDoctorModal()" class="btn-secondary-sm" style="padding: 5px 10px; font-size: 11px; flex: none;">Scheda ›</button>
+          </div>
         </div>
       </div>
 
@@ -501,52 +500,7 @@
       </div>
       <div id="healthHubGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px;"></div>
 
-      <!-- 5. Privacy & Sicurezza PIN -->
-      <div class="section-header">
-        <span class="section-title">Sicurezza & Privacy PIN</span>
-      </div>
-      <div class="glass-card" style="margin-bottom: 20px;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-          <div>
-            <div style="font-weight: 600;">Blocco PIN a 4 Cifre</div>
-            <div style="font-size: 12px; color: var(--text-secondary);">Richiedi PIN all'avvio e tocco lucchetto</div>
-          </div>
-          <input type="checkbox" id="pinSecurityToggle" style="width: 20px; height: 20px; accent-color: var(--accent-coral);">
-        </div>
-        <button class="btn-secondary-sm" style="width: 100%; margin-top: 12px;" onclick="openModal('setupPinModalOverlay')">
-          Imposta o Modifica PIN
-        </button>
-      </div>
-
-      <!-- 5. Local Data Management (Backup JSON) -->
-      <div class="section-header">
-        <span class="section-title">Privacy & Dati Locali</span>
-      </div>
-      <div class="glass-card" style="margin-bottom: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <div>
-            <div style="font-weight: 600;">Spazio Archiviazione Locale</div>
-            <div style="font-size: 12px; color: var(--text-secondary);" id="storageUsageDisplay">Calcolo in corso...</div>
-          </div>
-          <div style="font-size: 12px; background: rgba(52, 199, 89, 0.12); color: var(--accent-green); padding: 4px 8px; border-radius: var(--radius-full); font-weight: 700;">
-            100% Sul Dispositivo
-          </div>
-        </div>
-        <div style="display: flex; gap: 8px; margin-top: 14px;">
-          <button id="exportBackupBtn" class="btn-secondary-sm">
-            Esporta Backup (.json)
-          </button>
-          <label class="btn-secondary-sm" style="margin: 0; cursor: pointer;">
-            Importa Backup
-            <input type="file" id="importBackupInput" accept=".json" style="display: none;">
-          </label>
-        </div>
-        <button id="resetDataBtn" class="btn-secondary-sm" style="width: 100%; margin-top: 10px; color: var(--accent-coral);">
-          Svuota Dati / Reset Demo
-        </button>
-      </div>
-
-      <!-- 6. In fondo a tutto: Cassetto Fiscale 730 (Bloccato fino al 1° Gennaio 2027) -->
+      <!-- 5. Cassetto Fiscale 730 (Bloccato fino al 1° Gennaio 2027) -->
       <div class="section-header">
         <span class="section-title">Cassetto Fiscale 730</span>
       </div>
@@ -583,6 +537,51 @@
         <div id="tax730LockedContent" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-subtle); font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
           Il monitoraggio delle spese detraibili e la franchigia fiscale si attiveranno automaticamente con il nuovo anno fiscale.
         </div>
+      </div>
+
+      <!-- 6. Privacy & Sicurezza PIN (In fondo) -->
+      <div class="section-header">
+        <span class="section-title">Sicurezza & Privacy PIN</span>
+      </div>
+      <div class="glass-card" style="margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-weight: 600;">Blocco PIN a 4 Cifre</div>
+            <div style="font-size: 12px; color: var(--text-secondary);">Richiedi PIN all'avvio e tocco lucchetto</div>
+          </div>
+          <input type="checkbox" id="pinSecurityToggle" style="width: 20px; height: 20px; accent-color: var(--accent-coral);">
+        </div>
+        <button class="btn-secondary-sm" style="width: 100%; margin-top: 12px;" onclick="openModal('setupPinModalOverlay')">
+          Imposta o Modifica PIN
+        </button>
+      </div>
+
+      <!-- 7. Local Data Management (Backup JSON - In fondo a tutto) -->
+      <div class="section-header">
+        <span class="section-title">Privacy & Dati Locali</span>
+      </div>
+      <div class="glass-card" style="margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div>
+            <div style="font-weight: 600;">Spazio Archiviazione Locale</div>
+            <div style="font-size: 12px; color: var(--text-secondary);" id="storageUsageDisplay">Calcolo in corso...</div>
+          </div>
+          <div style="font-size: 12px; background: rgba(52, 199, 89, 0.12); color: var(--accent-green); padding: 4px 8px; border-radius: var(--radius-full); font-weight: 700;">
+            100% Sul Dispositivo
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 14px;">
+          <button id="exportBackupBtn" class="btn-secondary-sm">
+            Esporta Backup (.json)
+          </button>
+          <label class="btn-secondary-sm" style="margin: 0; cursor: pointer;">
+            Importa Backup
+            <input type="file" id="importBackupInput" accept=".json" style="display: none;">
+          </label>
+        </div>
+        <button id="resetDataBtn" class="btn-secondary-sm" style="width: 100%; margin-top: 10px; color: var(--accent-coral);">
+          Svuota Dati / Reset Demo
+        </button>
       </div>
     </main>
 
