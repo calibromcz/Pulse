@@ -4410,11 +4410,13 @@ function renderQuickHub() {
       </div>
     `;
   }).join('') + `
-    <div class="glass-card" onclick="openAddHubModal()" style="padding: 14px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-style: dashed; gap: 8px; border-radius: var(--radius-md);">
-      <div class="squircle-icon-badge" style="width: 44px; height: 44px; min-width: 44px; border-radius: 13px; background: var(--bg-card-secondary); color: var(--accent-coral); border: 1px solid rgba(224, 108, 117, 0.25);">
-        <span style="font-size: 22px; font-weight: 700;">+</span>
+    <div class="glass-card" onclick="openAddHubModal()" style="padding: 14px 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; border-style: dashed; border-radius: var(--radius-md); min-height: 98px;" aria-label="Aggiungi portale" title="Aggiungi portale o app">
+      <div class="squircle-icon-badge" style="width: 44px; height: 44px; min-width: 44px; border-radius: 13px; background: rgba(224, 108, 117, 0.12); color: var(--accent-coral); border: 1px solid rgba(224, 108, 117, 0.28);">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
       </div>
-      <div style="font-size: 12px; font-weight: 700; color: var(--accent-coral);">+ Aggiungi</div>
     </div>
   `;
 }
