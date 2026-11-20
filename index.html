@@ -6,7 +6,11 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Pulse">
-  <meta name="theme-color" content="#FF2D55">
+  <meta name="theme-color" content="#13203D">
+  <meta name="description" content="Pulse — Gestione salute personale 100% offline e privata: cartelle anatomiche, ricette, visite e farmaci.">
+  <meta property="og:title" content="Pulse — Salute Personale & Cartelle Sanitarie">
+  <meta property="og:description" content="Tutta la tua salute protetta sul tuo dispositivo. 100% offline, privacy totale, cartelle anatomiche e promemoria.">
+  <meta property="og:type" content="website">
   <title>Pulse — Salute Personale, Documenti & Agenda</title>
   <link rel="manifest" href="./manifest.json">
   <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='pbg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2313203D'/%3E%3Cstop offset='100%25' stop-color='%23090F1E'/%3E%3C/linearGradient%3E%3ClinearGradient id='pw' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%230A84FF'/%3E%3Cstop offset='50%25' stop-color='%2300C7BE'/%3E%3Cstop offset='100%25' stop-color='%23FF2D55'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='url(%23pbg)'/%3E%3Crect x='1' y='1' width='98' height='98' rx='21' fill='none' stroke='rgba(255,255,255,0.14)' stroke-width='1.5'/%3E%3Cpath d='M16 50h18l5-12 9 24 7-18 5 9 6-3h18' fill='none' stroke='url(%23pw)' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='84' cy='50' r='3.5' fill='%23FF2D55'/%3E%3C/svg%3E">
@@ -478,12 +482,12 @@
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
         </div>
-        <div class="ice-name" id="profileNameDisplay" style="font-size: 20px; font-weight: 800;">Mario Rossi</div>
+        <div class="ice-name" id="profileNameDisplay" style="font-size: 20px; font-weight: 800;">Il tuo nome</div>
 
         <div class="cf-box" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-card-secondary); border: 1px dashed var(--border-glass); border-radius: var(--radius-md); padding: 10px 14px; margin: 12px 0;">
           <div>
             <div style="font-size: 10px; color: var(--text-secondary); font-weight: 600;">CODICE FISCALE</div>
-            <div class="cf-text" id="profileCfDisplay" style="font-family: monospace; font-weight: 800; font-size: 15px; letter-spacing: 1px;">RSSMRA85M01H501Z</div>
+            <div class="cf-text" id="profileCfDisplay" style="font-family: monospace; font-weight: 800; font-size: 15px; letter-spacing: 1px;">Non impostato</div>
           </div>
           <button class="cf-copy-btn" onclick="copyFiscalCode()" style="background: var(--accent-blue); color: #fff; border: none; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: var(--radius-full); cursor: pointer; display: flex; align-items: center; gap: 4px;">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -498,7 +502,7 @@
           </div>
           <div style="font-size: 11px; color: var(--text-secondary);">
             ALLERGIE NOTIFICATE
-            <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-top: 2px;" id="profileAllergiesDisplay">Penicillina</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-top: 2px;" id="profileAllergiesDisplay">Nessuna indicata</div>
           </div>
         </div>
 
@@ -506,7 +510,7 @@
         <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; gap: 8px;">
           <div style="min-width: 0;">
             <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px;">MEDICO DI BASE</div>
-            <div style="font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="profileDoctorDisplay">Dott.ssa Bianchi</div>
+            <div style="font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="profileDoctorDisplay">Non configurato</div>
           </div>
           <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
             <!-- 2 Pulsanti Rapidi WhatsApp & Telefono a Destra -->
@@ -698,7 +702,7 @@
           </label>
         </div>
         <button id="resetDataBtn" class="btn-secondary-sm" style="width: 100%; margin-top: 10px; color: var(--accent-coral);">
-          Svuota Dati / Reset Demo
+          Ripristina App / Cancella Dati Locali
         </button>
       </div>
     </main>
@@ -834,10 +838,10 @@
           <span style="font-size: 11px; font-weight: 800; letter-spacing: 1px; opacity: 0.9;">TESSERA SANITARIA DIGITALE</span>
           <span style="font-size: 14px; font-weight: 800;">SSN ITALIA</span>
         </div>
-        <div style="font-size: 18px; font-weight: 800; margin-bottom: 4px;" id="pharmacyName">Mario Rossi</div>
+        <div style="font-size: 18px; font-weight: 800; margin-bottom: 4px;" id="pharmacyName">Il tuo nome</div>
         <div style="font-size: 12px; opacity: 0.8; margin-bottom: 12px;">CODICE FISCALE:</div>
         <div style="font-family: monospace; font-size: 16px; font-weight: 800; letter-spacing: 1.5px; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 8px; display: inline-block; margin-bottom: 14px;" id="pharmacyCf">
-          RSSMRA85M01H501Z
+          Non impostato
         </div>
         <div style="background: #FFFFFF; border-radius: 14px; padding: 12px 10px; text-align: center; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);" id="pharmacyBarcodeWrap"></div>
       </div>
@@ -942,12 +946,12 @@
               <line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/>
             </svg>
           </div>
-          <div id="docSheetName" style="font-size: 20px; font-weight: 800; letter-spacing: -0.02em;">Dr. Marco Rossi</div>
+          <div id="docSheetName" style="font-size: 20px; font-weight: 800; letter-spacing: -0.02em;">Nome Medico</div>
           <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Medico di Medicina Generale (SSN)</div>
           
           <a id="docSheetAddressLink" href="#" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--accent-blue); text-decoration: none; margin-top: 6px; font-weight: 500;">
             <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <span id="docSheetAddressText">Via Roma 14, Bologna</span>
+            <span id="docSheetAddressText">Indirizzo ambulatorio non impostato</span>
           </a>
         </div>
 
@@ -975,7 +979,7 @@
           </div>
           <div id="docHoursList" class="doc-hours-table"></div>
           <div id="docNotesDisplay" style="margin-top: 12px; font-size: 12px; color: var(--text-secondary); background: var(--bg-card-secondary); padding: 8px 12px; border-radius: var(--radius-sm); line-height: 1.4;">
-            Riceve su appuntamento &bull; Segreteria attiva dalle 08:30 alle 11:30
+            Riceve su appuntamento &bull; Configura orari e modalità di accesso
           </div>
         </div>
       </div>
@@ -984,7 +988,7 @@
       <form id="doctorEditForm" style="display: none; padding-bottom: 20px;">
         <div class="form-group">
           <label class="form-label">Nome e Cognome Medico</label>
-          <input type="text" id="docEditName" class="form-input" placeholder="Es. Dott.ssa Laura Bianchi" required>
+          <input type="text" id="docEditName" class="form-input" placeholder="Es. Dott.ssa Laura Bianchi o Dr. Rossi" required>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <div class="form-group">
@@ -998,15 +1002,15 @@
         </div>
         <div class="form-group">
           <label class="form-label">Email Medico (Opzionale)</label>
-          <input type="email" id="docEditEmail" class="form-input" placeholder="Es. dr.bianchi@medicina.it">
+          <input type="email" id="docEditEmail" class="form-input" placeholder="Es. studio.medico@email.it">
         </div>
         <div class="form-group">
           <label class="form-label">Indirizzo Ambulatorio</label>
-          <input type="text" id="docEditAddress" class="form-input" placeholder="Es. Via Garibaldi 12, Milano">
+          <input type="text" id="docEditAddress" class="form-input" placeholder="Es. Via Roma 14, Bologna">
         </div>
         <div class="form-group">
           <label class="form-label">Note Segreteria / Modalità Accesso</label>
-          <input type="text" id="docEditNotes" class="form-input" placeholder="Es. Riceve solo su appuntamento">
+          <input type="text" id="docEditNotes" class="form-input" placeholder="Es. Riceve su appuntamento • Segreteria 08:30–11:30">
         </div>
 
         <div style="font-size: 13px; font-weight: 700; margin: 14px 0 8px 0;">Orari di Ricevimento (Lun–Ven)</div>
@@ -1476,11 +1480,11 @@
       <form id="iceForm">
         <div class="form-group">
           <label class="form-label">Nome e Cognome</label>
-          <input type="text" id="iceNameInput" class="form-input" required>
+          <input type="text" id="iceNameInput" class="form-input" placeholder="Es. Nome e Cognome" required>
         </div>
         <div class="form-group">
           <label class="form-label">Codice Fiscale</label>
-          <input type="text" id="iceCfInput" class="form-input" style="text-transform: uppercase;" required>
+          <input type="text" id="iceCfInput" class="form-input" placeholder="Es. RSSMRA85M01H501Z" style="text-transform: uppercase;">
         </div>
         <div class="form-group">
           <label class="form-label">Gruppo Sanguigno</label>
@@ -1497,20 +1501,20 @@
         </div>
         <div class="form-group">
           <label class="form-label">Allergie o Patologie Croniche</label>
-          <input type="text" id="iceAllergiesInput" class="form-input">
+          <input type="text" id="iceAllergiesInput" class="form-input" placeholder="Es. Nessuna nota oppure Penicillina, Polline...">
         </div>
         <div class="form-group">
-          <label class="form-label">Medico di Base</label>
-          <input type="text" id="iceDocInput" class="form-input">
+          <label class="form-label">Nome Medico di Base</label>
+          <input type="text" id="iceDocInput" class="form-input" placeholder="Es. Dr. Nome Medico">
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
           <div class="form-group">
             <label class="form-label">Telefono Medico</label>
-            <input type="tel" id="icePhoneInput" class="form-input">
+            <input type="tel" id="icePhoneInput" class="form-input" placeholder="Es. +39 051 ...">
           </div>
           <div class="form-group">
             <label class="form-label">Email Medico</label>
-            <input type="email" id="iceEmailInput" class="form-input">
+            <input type="email" id="iceEmailInput" class="form-input" placeholder="Es. medico@email.it">
           </div>
         </div>
         <button type="submit" class="btn-primary">Salva Scheda Identità</button>

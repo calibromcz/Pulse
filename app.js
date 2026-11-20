@@ -115,8 +115,7 @@ function getProfiles() {
   const list = localStorage.getItem('pulse_profiles_list');
   if (!list) {
     const defaultList = [
-      { id: 'me', name: 'Io' },
-      { id: 'family_1', name: 'Familiare' }
+      { id: 'me', name: 'Io' }
     ];
     localStorage.setItem('pulse_profiles_list', JSON.stringify(defaultList));
     return defaultList;
@@ -312,234 +311,9 @@ function verifyPinCode() {
   }
 }
 
-// 4. Seed Demo Data
+// 4. Initial Seed Data (Produzione: Pulito di default per nuovi utenti)
 async function initSeedData() {
-  const docs = await pulseDB.getAllDocuments();
-  if (!docs || docs.length === 0) {
-    const demoDocs = [
-      {
-        id: 'doc_' + Date.now() + '_1',
-        profileId: 'me',
-        title: 'Analisi Sangue di Routine (Emocromo & Lipidi)',
-        bodyZone: 'blood',
-        category: 'Referto',
-        date: '2026-11-05',
-        nre: '',
-        notes: 'Tutti i valori nella norma. Colesterolo totale 178 mg/dl.',
-        isDeductible730: false,
-        amount: null,
-        imageData: generateDemoPlaceholder('ANALISI SANGUE - CLINICA SANT\'ORSOLA', 'Emocromo: globuli bianchi 6.4, glicemia 88, colesterolo 178.'),
-        createdAt: Date.now() - 86400000 * 14
-      },
-      {
-        id: 'doc_' + Date.now() + '_2',
-        profileId: 'me',
-        title: 'Prescrizione Amoxicillina 1g per Infezione',
-        bodyZone: 'pharma',
-        category: 'Ricetta',
-        date: '2026-11-12',
-        nre: '0800P9384729103',
-        isUsedRx: false,
-        notes: '1 compressa ogni 12 ore per 6 giorni.',
-        isDeductible730: false,
-        amount: null,
-        imageData: generateDemoPlaceholder('RICETTA SSN - DOTT.SSA BIANCHI', 'Prescrizione antibiotico: Amoxicillina e acido clavulanico.'),
-        createdAt: Date.now() - 86400000 * 7
-      },
-      {
-        id: 'doc_' + Date.now() + '_3',
-        profileId: 'me',
-        title: 'Fattura Igiene Orale & Radiografia Panoramica',
-        bodyZone: 'dental',
-        category: 'Fattura',
-        date: '2026-11-10',
-        nre: '',
-        notes: 'Studio Dentistico Rossi. Pagamento tracciato Bancomat.',
-        isDeductible730: true,
-        amount: 110.00,
-        refundedAmount: 40.00,
-        taxCategory: 'Visite Specialistiche',
-        paymentMethod: 'tracciabile',
-        imageData: generateDemoPlaceholder('FATTURA SANITARIA N. 42', 'Igiene orale e radiografia endorale. Totale € 110,00.'),
-        createdAt: Date.now() - 86400000 * 9
-      },
-      {
-        id: 'doc_' + Date.now() + '_4',
-        profileId: 'me',
-        title: 'Fattura Mappatura Nei Dermatologica',
-        bodyZone: 'derma',
-        category: 'Fattura',
-        date: '2026-10-15',
-        nre: '',
-        notes: 'Controllo nevi in epiluminescenza. Carta di credito.',
-        isDeductible730: true,
-        amount: 140.00,
-        refundedAmount: 0.00,
-        taxCategory: 'Visite Specialistiche',
-        paymentMethod: 'tracciabile',
-        imageData: generateDemoPlaceholder('FATTURA VISITA DERMATOLOGICA', 'Mappatura nei. Importo versato € 140,00 con POS.'),
-        createdAt: Date.now() - 86400000 * 35
-      },
-      {
-        id: 'doc_' + Date.now() + '_5',
-        profileId: 'me',
-        title: 'Scontrino Farmacia Comunale (Farmaci + Dispositivi)',
-        bodyZone: 'pharma',
-        category: 'Fattura',
-        date: '2026-11-02',
-        nre: '',
-        notes: 'Farmaci prescritti con CF parlante.',
-        isDeductible730: true,
-        amount: 45.50,
-        refundedAmount: 0.00,
-        taxCategory: 'Farmaci',
-        paymentMethod: 'tracciabile',
-        imageData: generateDemoPlaceholder('SCONTRINO PARLANTE FARMACIA', 'Totale farmaci detraibili € 45,50.'),
-        createdAt: Date.now() - 86400000 * 17
-      }
-    ];
-
-    for (const d of demoDocs) {
-      await pulseDB.saveDocument(d);
-    }
-  }
-
-  if (!localStorage.getItem('pulse_appointments')) {
-    const today = new Date();
-    const apptDate1 = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 3, 10, 30);
-    const apptDate2 = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 12, 16, 0);
-
-    const demoAppts = [
-      {
-        id: 'app_1',
-        profileId: 'me',
-        title: 'Visita Cardiologica & ECG',
-        datetime: apptDate1.toISOString(),
-        location: 'Ospedale Maggiore — Poliambulatorio B',
-        notes: 'Portare referti precedenti ed essere a digiuno da 2 ore.',
-        docId: docs && docs[1] ? docs[1].id : '',
-        checklist: [
-          { text: 'Chiedere se ridurre caffè a 1 al giorno', done: false },
-          { text: 'Confermare idoneità per corsa amatoriale', done: true },
-          { text: 'Mostrare esami sangue del 05/11', done: false }
-        ]
-      },
-      {
-        id: 'app_2',
-        profileId: 'me',
-        title: 'Controllo Oculistico Fondo Oculare',
-        datetime: apptDate2.toISOString(),
-        location: 'Centro Medico Santagostino',
-        notes: 'Portare occhiali attuali.',
-        docId: '',
-        checklist: [
-          { text: 'Verificare lieve calo visus occhio sinistro', done: false }
-        ]
-      }
-    ];
-    localStorage.setItem('pulse_appointments', JSON.stringify(demoAppts));
-  }
-
-  if (!localStorage.getItem('pulse_profile_me') && !localStorage.getItem('pulse_profile')) {
-    const defaultProfile = {
-      name: 'Mario Rossi',
-      cf: 'RSSMRA85M01H501Z',
-      bloodType: '0 Rh+',
-      allergies: 'Penicillina, Polline di Graminacee',
-      doctor: 'Dr. Marco Rossi',
-      doctorPhone: '+39 051 1234567',
-      doctorWa: '3401234567',
-      doctorEmail: 'dr.rossi@medicina.it',
-      doctorAddress: 'Via Roma 14, Bologna',
-      doctorNotes: 'Riceve su appuntamento • Segreteria attiva 08:30–11:30',
-      doctorHours: {
-        lun: '09:00 - 12:00',
-        mar: '15:00 - 18:00',
-        mer: '09:00 - 12:00',
-        gio: '15:00 - 18:00',
-        ven: '09:00 - 12:00'
-      }
-    };
-    localStorage.setItem('pulse_profile_me', JSON.stringify(defaultProfile));
-    localStorage.setItem('pulse_profile', JSON.stringify(defaultProfile));
-  }
-
-  if (!localStorage.getItem('pulse_therapies')) {
-    const todayStr = new Date().toISOString().split('T')[0];
-    const demoTherapies = [
-      {
-        id: 'ther_1',
-        profileId: 'me',
-        name: 'Amoxicillina 1g',
-        dosesPerDay: 2,
-        durationDays: 6,
-        startDate: todayStr,
-        notes: 'Dopo i pasti (ore 8:30 e 20:30)',
-        times: ['08:30', '20:30'],
-        logs: { [todayStr]: [true, false] }
-      }
-    ];
-    localStorage.setItem('pulse_therapies', JSON.stringify(demoTherapies));
-  }
-
-  if (!localStorage.getItem('pulse_cabinet')) {
-    const demoCabinet = [
-      {
-        id: 'cab_1',
-        profileId: 'me',
-        name: 'Tachipirina 1000mg',
-        quantity: '12 compresse',
-        expiryDate: '2027-08-31',
-        notes: 'Per febbre e dolori muscolari'
-      },
-      {
-        id: 'cab_2',
-        profileId: 'me',
-        name: 'Collirio Antistaminico',
-        quantity: 'Flaconcino aperto',
-        expiryDate: new Date(Date.now() + 86400000 * 25).toISOString().split('T')[0],
-        notes: 'Usare per allergia stagionale'
-      }
-    ];
-    localStorage.setItem('pulse_cabinet', JSON.stringify(demoCabinet));
-  }
-
-  if (!localStorage.getItem('pulse_vision_me')) {
-    const demoVision = {
-      odSph: '-1.50',
-      odCyl: '-0.50',
-      odAxis: '90°',
-      osSph: '-1.75',
-      osCyl: '-0.25',
-      osAxis: '85°',
-      dip: '63 mm',
-      date: '2026-05-18'
-    };
-    localStorage.setItem('pulse_vision_me', JSON.stringify(demoVision));
-  }
-
-  if (!localStorage.getItem('pulse_symptoms')) {
-    const today = new Date();
-    const demoSymptoms = [
-      {
-        id: 'sym_1',
-        profileId: 'me',
-        type: 'Pressione',
-        val: '120/80 mmHg',
-        note: 'Misurata a riposo',
-        datetime: new Date(today.getTime() - 86400000 * 2).toISOString()
-      },
-      {
-        id: 'sym_2',
-        profileId: 'me',
-        type: 'Febbre',
-        val: '37.8 °C',
-        note: 'Brividi serali',
-        datetime: new Date(today.getTime() - 86400000 * 1).toISOString()
-      }
-    ];
-    localStorage.setItem('pulse_symptoms', JSON.stringify(demoSymptoms));
-  }
+  // Nessun dato demo/fittizio precaricato: il database locale e il localStorage partono puliti
 }
 
 function generateDemoPlaceholder(title, text) {
@@ -2266,14 +2040,14 @@ async function openPharmacyMode() {
   const activeProfile = getActiveProfileId();
   const profile = getProfileData(activeProfile);
 
-  document.getElementById('pharmacyName').innerText = profile.name || 'Mario Rossi';
-  document.getElementById('pharmacyCf').innerText = profile.cf || 'RSSMRA85M01H501Z';
+  document.getElementById('pharmacyName').innerText = profile.name || 'Il tuo nome';
+  document.getElementById('pharmacyCf').innerText = profile.cf || 'Non impostato';
 
   const barcodeContainer = document.getElementById('pharmacyBarcodeWrap');
   if (profile.cf) {
     barcodeContainer.innerHTML = generateCode39SVG(profile.cf, 60, true);
   } else {
-    barcodeContainer.innerHTML = '<div style="color: red; font-size: 12px;">Codice Fiscale non impostato</div>';
+    barcodeContainer.innerHTML = '<div style="color: var(--text-secondary); font-size: 12px; padding: 12px 6px;">Imposta il tuo Codice Fiscale nel Profilo per generare il codice a barre della Tessera Sanitaria</div>';
   }
 
   const allDocs = await pulseDB.getAllDocuments();
@@ -4186,16 +3960,16 @@ function getProfileData(profileId) {
     if (old) return JSON.parse(old);
   }
   return {
-    name: 'Utente Pulse',
+    name: '',
     cf: '',
     bloodType: '0 Rh+',
-    allergies: 'Nessuna',
-    doctor: 'Dr. Marco Rossi',
-    doctorPhone: '+39 051 1234567',
-    doctorWa: '3401234567',
-    doctorEmail: 'dr.rossi@medicina.it',
-    doctorAddress: 'Via Roma 14, Bologna',
-    doctorNotes: 'Riceve su appuntamento • Segreteria attiva 08:30–11:30',
+    allergies: '',
+    doctor: '',
+    doctorPhone: '',
+    doctorWa: '',
+    doctorEmail: '',
+    doctorAddress: '',
+    doctorNotes: '',
     doctorHours: {
       lun: '09:00 - 12:00',
       mar: '15:00 - 18:00',
@@ -4262,22 +4036,24 @@ function renderProfile() {
   const activeId = getActiveProfileId();
   const profile = getProfileData(activeId);
 
-  document.getElementById('profileNameDisplay').innerText = profile.name || 'Mario Rossi';
-  document.getElementById('profileCfDisplay').innerText = profile.cf || 'RSSMRA85M01H501Z';
+  document.getElementById('profileNameDisplay').innerText = profile.name || 'Il tuo nome';
+  document.getElementById('profileCfDisplay').innerText = profile.cf || 'Non impostato';
   document.getElementById('profileBloodDisplay').innerText = profile.bloodType || '0 Rh+';
-  document.getElementById('profileAllergiesDisplay').innerText = profile.allergies || 'Nessuna';
-  document.getElementById('profileDoctorDisplay').innerText = profile.doctor || 'Non indicato';
+  document.getElementById('profileAllergiesDisplay').innerText = profile.allergies || 'Nessuna indicata';
+  document.getElementById('profileDoctorDisplay').innerText = profile.doctor || 'Non configurato';
 
   // 2 Pulsanti Rapidi a Destra del Medico (34x34) WhatsApp & Telefono
   const docQuickBtns = document.getElementById('doctorQuickButtonsRight');
   if (docQuickBtns) {
+    const hasPhone = !!(profile.doctorPhone || profile.doctorWa);
+    const hasWa = !!(profile.doctorWa || profile.doctorPhone);
     docQuickBtns.innerHTML = `
-      <button class="quick-doc-btn whatsapp" onclick="openDoctorWhatsApp()" title="Invia WhatsApp al Medico">
+      <button class="quick-doc-btn whatsapp" onclick="openDoctorWhatsApp()" title="Invia WhatsApp al Medico" style="opacity: ${hasWa ? '1' : '0.45'};">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.455 5.711 1.456h.005c6.554 0 11.89-5.336 11.893-11.893a11.821 11.821 0 00-3.48-8.414z"/>
         </svg>
       </button>
-      <button class="quick-doc-btn phone" onclick="openDoctorPhone()" title="Chiama il Medico">
+      <button class="quick-doc-btn phone" onclick="openDoctorPhone()" title="Chiama il Medico" style="opacity: ${hasPhone ? '1' : '0.45'};">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
           <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
         </svg>
@@ -4594,13 +4370,24 @@ function importFullBackup(e) {
 }
 
 async function resetAllData() {
-  if (confirm('Attenzione: Vuoi cancellare tutti i dati locali e ripristinare i valori demo?')) {
+  const confirm1 = confirm('ATTENZIONE: Sei sicuro di voler cancellare TUTTI i dati salvati su questo dispositivo (documenti, visite, farmaci, profilo)?');
+  if (!confirm1) return;
+
+  const confirm2 = confirm('Conferma definitiva: Questa operazione è IRREVERSIBILE. L\'app verrà completamente svuotata e riavviata allo stato iniziale di fabbrica.');
+  if (!confirm2) return;
+
+  try {
     await pulseDB.clearAll();
     localStorage.clear();
-    await initSeedData();
-    initProfilesState();
-    await renderAllViews();
-    showToast('Dati ripristinati allo stato iniziale', '🔄');
+    sessionStorage.clear();
+    showToast('Tutti i dati locali sono stati eliminati', '🗑️');
+    setTimeout(() => {
+      window.location.reload();
+    }, 600);
+  } catch (err) {
+    console.error('Errore durante la cancellazione dei dati:', err);
+    localStorage.clear();
+    window.location.reload();
   }
 }
 
