@@ -515,8 +515,9 @@
       </button>
 
       <!-- 4. Quick Health Hub: Portali & App Salute Collegate (Subito sotto Genera Riassunto) -->
-      <div class="section-header" style="margin-top: 8px;">
+      <div class="section-header" style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
         <span class="section-title">Portali & App Salute</span>
+        <button type="button" class="section-action" onclick="openAddHubModal()" style="background: none; border: none; font-size: 13px; font-weight: 700; color: var(--accent-coral); cursor: pointer;">+ Aggiungi</button>
       </div>
 
       <!-- Prime 3 Opzioni Rapide Emergenze & Continuità Assistenziale a Scorrimento Orizzontale -->
@@ -1211,12 +1212,12 @@
   </div>
 
   <!-- MODAL: DOCUMENT VIEWER SHEET -->
-  <div id="docViewerModalOverlay" class="modal-overlay">
-    <div class="bottom-sheet">
+  <div id="docViewerModalOverlay" class="modal-overlay" style="z-index: 2000;">
+    <div class="bottom-sheet" style="max-height: 92vh; padding-top: calc(16px + env(safe-area-inset-top));">
       <div class="sheet-handle"></div>
-      <div class="sheet-header">
-        <h2 class="sheet-title">Dettaglio Documento</h2>
-        <button class="sheet-close-btn" onclick="closeAllModals()">✕</button>
+      <div class="sheet-header" style="margin-bottom: 12px;">
+        <h2 class="sheet-title" id="docViewerTitle">Dettaglio Documento</h2>
+        <button class="sheet-close-btn" onclick="closeAllModals()" style="font-size: 18px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--bg-card-secondary); color: var(--text-primary); border: 1px solid var(--border-subtle); cursor: pointer;">✕</button>
       </div>
       <div id="docViewerContent"></div>
     </div>
@@ -1667,6 +1668,71 @@
 
       <!-- Checklist Items -->
       <div id="shoppingItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 50vh; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: MODIFICA NOTA DOCUMENTO -->
+  <div id="editDocNoteModalOverlay" class="modal-overlay" style="z-index: 2100;">
+    <div class="bottom-sheet" style="max-height: 80vh;">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header" style="margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 20px;">📝</span>
+          <h2 class="sheet-title" style="font-size: 18px; margin: 0;">Nota Documento</h2>
+        </div>
+        <button class="sheet-close-btn" onclick="closeModal('editDocNoteModalOverlay')">✕</button>
+      </div>
+      <div id="editDocNoteDocTitle" style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 10px;"></div>
+      <form id="editDocNoteForm" onsubmit="handleSaveDocNote(event)">
+        <input type="hidden" id="editDocNoteId">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <textarea id="editDocNoteInput" class="form-textarea" rows="4" placeholder="Es. Valori nella norma, portare alla visita del 12/03..." style="font-size: 14px; line-height: 1.4;"></textarea>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn-secondary-sm" onclick="closeModal('editDocNoteModalOverlay')" style="flex: 1; padding: 12px;">Annulla</button>
+          <button type="submit" class="btn-primary" style="flex: 2; padding: 12px; font-weight: 700; background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-teal) 100%);">Salva Nota</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: AGGIUNGI PORTALE O APP SALUTE -->
+  <div id="addHubModalOverlay" class="modal-overlay" style="z-index: 2050;">
+    <div class="bottom-sheet" style="max-height: 88vh;">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header" style="margin-bottom: 14px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 22px;">🔗</span>
+          <div>
+            <h2 class="sheet-title" style="font-size: 18px; margin: 0;">Aggiungi Portale o App</h2>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Collegamento rapido alle tue app sanitarie</div>
+          </div>
+        </div>
+        <button class="sheet-close-btn" onclick="closeModal('addHubModalOverlay')">✕</button>
+      </div>
+
+      <form id="addHubPortalForm" onsubmit="handleAddHubPortal(event)">
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label" style="font-size: 12px; font-weight: 700; margin-bottom: 6px;">1. Nome</label>
+          <input type="text" id="hubPortalNameInput" class="form-input" placeholder="Es. Portale Analisi, Assicurazione..." required style="padding: 10px 12px; font-size: 14px;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" style="font-size: 12px; font-weight: 700; margin-bottom: 6px;">2. Link (URL)</label>
+          <input type="url" id="hubPortalUrlInput" class="form-input" placeholder="https://..." required style="padding: 10px 12px; font-size: 14px;">
+          <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Se non includi <code>https://</code>, verrà aggiunto automaticamente.</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 18px;">
+          <label class="form-label" style="font-size: 12px; font-weight: 700; margin-bottom: 8px;">3. Icona Rapida</label>
+          <div id="hubIconSelectorGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;"></div>
+          <input type="hidden" id="hubPortalSelectedIcon" value="globe">
+        </div>
+
+        <button type="submit" class="btn-primary" style="width: 100%; padding: 13px; font-size: 14px; font-weight: 700; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-teal) 100%);">
+          Salva Portale
+        </button>
+      </form>
     </div>
   </div>
 

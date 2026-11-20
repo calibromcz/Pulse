@@ -908,23 +908,57 @@ function renderDocCardHTML(doc) {
   const dateStr = doc.date ? new Date(doc.date).toLocaleDateString('it-IT') : 'Data non specificata';
 
   return `
-    <div class="doc-item-card" onclick="openDocById('${doc.id}')">
-      <div class="doc-left">
-        <div class="squircle-icon-badge" style="background: ${zone.bg}; border: 1px solid ${zone.border}; color: ${zone.color};">
+    <div class="doc-item-card" onclick="openDocById('${doc.id}')" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 14px;">
+      <div class="doc-left" style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px;">
+        <div class="squircle-icon-badge" style="background: ${zone.bg}; border: 1px solid ${zone.border}; color: ${zone.color}; flex-shrink: 0; width: 42px; height: 42px; min-width: 42px;">
           ${zone.svg}
         </div>
-        <div class="doc-info" style="overflow: hidden;">
-          <div class="doc-title">${escapeHTML(doc.title)}</div>
-          <div class="doc-sub">
+        <div class="doc-info" style="overflow: hidden; flex: 1; min-width: 0;">
+          <div class="doc-title" style="font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHTML(doc.title)}</div>
+          <div class="doc-sub" style="font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 2px;">
             <span class="doc-tag ${tagClass}">${escapeHTML(doc.category || 'Referto')}</span>
+            ${doc.isPdf ? '<span style="font-size: 10px; font-weight: 800; background: rgba(0, 122, 255, 0.12); color: var(--accent-blue); padding: 1px 5px; border-radius: 4px;">PDF</span>' : ''}
             ${doc.amount ? `<span style="font-weight: 700; color: var(--accent-amber);">€ ${Number(doc.amount).toFixed(2)}</span>` : ''}
             <span>•</span>
             <span>${dateStr}</span>
           </div>
+          ${doc.notes ? `
+            <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px;">
+              <span>📝</span>
+              <span>${escapeHTML(doc.notes)}</span>
+            </div>
+          ` : ''}
         </div>
       </div>
-      <div style="color: var(--text-tertiary);">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+
+      <!-- Azioni Rapide Riga: Nota, Scarica, Elimina (Stop Propagation) -->
+      <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;" onclick="event.stopPropagation()">
+        <!-- Tasto Nota -->
+        <button type="button" class="btn-secondary-sm" onclick="openEditDocNote('${doc.id}')" style="min-width: 36px; min-height: 36px; width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px;" title="Aggiungi / Modifica Nota">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </button>
+
+        <!-- Tasto Scarica -->
+        <button type="button" class="btn-secondary-sm" onclick="downloadDocById('${doc.id}')" style="min-width: 36px; min-height: 36px; width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px;" title="Scarica File">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </button>
+
+        <!-- Tasto Elimina Corallo Tenue -->
+        <button type="button" class="btn-secondary-sm" onclick="deleteDocItem('${doc.id}')" style="min-width: 36px; min-height: 36px; width: 36px; height: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; color: var(--accent-coral); background: rgba(224, 108, 117, 0.12); border-color: rgba(224, 108, 117, 0.25);" title="Elimina documento">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            <line x1="10" y1="11" x2="10" y2="17"/>
+            <line x1="14" y1="11" x2="14" y2="17"/>
+          </svg>
+        </button>
       </div>
     </div>
   `;
@@ -1161,63 +1195,92 @@ async function openDocById(id) {
   const dateFormatted = doc.date ? new Date(doc.date).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Non indicata';
 
   viewerContent.innerHTML = `
-    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
-      <div class="squircle-icon-badge" style="background: ${zone.bg}; border: 1px solid ${zone.border}; color: ${zone.color};">
-        ${zone.svg}
-      </div>
-      <div>
-        <h3 style="font-size: 17px; font-weight: 700;">${escapeHTML(doc.title)}</h3>
-        <span class="doc-tag tag-${(doc.category || 'referto').toLowerCase()}">${escapeHTML(doc.category || 'Referto')}</span>
-        ${doc.isDeductible730 ? '<span class="doc-tag" style="background: rgba(255,149,0,0.15); color: var(--accent-amber); margin-left: 4px;">Detraibile 730</span>' : ''}
-      </div>
-    </div>
-
-    ${doc.amount ? `
-      <div style="background: var(--bg-card-secondary); padding: 10px 14px; border-radius: var(--radius-md); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 13px; color: var(--text-secondary);">Importo:</span>
-        <strong style="font-size: 16px; color: var(--accent-amber);">€ ${Number(doc.amount).toFixed(2)}</strong>
-      </div>
-    ` : ''}
-
-    ${doc.nre ? `
-      <div style="background: var(--bg-card-secondary); padding: 12px 14px; border-radius: var(--radius-md); margin-bottom: 14px; text-align: center;">
-        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">CODICE RICETTA NRE:</div>
-        <div style="font-family: monospace; font-size: 16px; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px;">${escapeHTML(doc.nre)}</div>
-        <div style="background: #fff; padding: 8px; border-radius: 8px;">
-          ${generateCode39SVG(doc.nre, 50, false)}
+    <!-- Intestazione Documento -->
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle);">
+      <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+        <div class="squircle-icon-badge" style="background: ${zone.bg}; border: 1px solid ${zone.border}; color: ${zone.color}; width: 44px; height: 44px; min-width: 44px;">
+          ${zone.svg}
+        </div>
+        <div style="min-width: 0;">
+          <h3 style="font-size: 17px; font-weight: 800; color: var(--text-primary); margin: 0 0 4px 0; line-height: 1.2;">${escapeHTML(doc.title)}</h3>
+          <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+            <span class="doc-tag tag-${(doc.category || 'referto').toLowerCase()}">${escapeHTML(doc.category || 'Referto')}</span>
+            ${doc.isPdf ? '<span style="font-size: 10px; font-weight: 800; background: rgba(0, 122, 255, 0.14); color: var(--accent-blue); padding: 1px 6px; border-radius: 4px;">PDF</span>' : ''}
+            ${doc.isDeductible730 ? '<span class="doc-tag" style="background: rgba(255,149,0,0.15); color: var(--accent-amber);">Detraibile 730</span>' : ''}
+          </div>
         </div>
       </div>
-    ` : ''}
-
-    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
-      📅 Data documento: <strong style="color: var(--text-primary);">${dateFormatted}</strong>
     </div>
 
-    ${doc.notes ? `
-      <div style="background: var(--bg-card-secondary); padding: 12px; border-radius: var(--radius-md); font-size: 13px; line-height: 1.4; margin-bottom: 16px;">
-        <div style="font-weight: 600; color: var(--text-secondary); margin-bottom: 4px;">NOTE CLINICHE:</div>
-        <div>${escapeHTML(doc.notes)}</div>
+    <!-- Dettagli: Data, Importo, NRE -->
+    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
+      <div style="font-size: 13px; color: var(--text-secondary); display: flex; justify-content: space-between; align-items: center; background: var(--bg-card-secondary); padding: 8px 12px; border-radius: var(--radius-sm);">
+        <span>📅 Data documento:</span>
+        <strong style="color: var(--text-primary);">${dateFormatted}</strong>
       </div>
-    ` : ''}
 
-    <div style="background: #000; border-radius: var(--radius-md); overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 200px; max-height: 360px; margin-bottom: 16px;">
+      ${doc.amount ? `
+        <div style="background: var(--bg-card-secondary); padding: 8px 12px; border-radius: var(--radius-sm); display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 13px; color: var(--text-secondary);">Importo Spesa 730:</span>
+          <strong style="font-size: 15px; color: var(--accent-amber);">€ ${Number(doc.amount).toFixed(2)}</strong>
+        </div>
+      ` : ''}
+
+      ${doc.nre ? `
+        <div style="background: var(--bg-card-secondary); padding: 10px 12px; border-radius: var(--radius-sm); text-align: center;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 2px;">CODICE RICETTA NRE:</div>
+          <div style="font-family: monospace; font-size: 15px; font-weight: 800; letter-spacing: 1px; color: var(--text-primary); margin-bottom: 6px;">${escapeHTML(doc.nre)}</div>
+          <div style="background: #fff; padding: 6px; border-radius: 8px;">
+            ${generateCode39SVG(doc.nre, 46, false)}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+
+    <!-- Blocco Note con Tasto Modifica Rapida -->
+    <div style="background: var(--bg-card-secondary); border: 1px solid var(--border-glass); padding: 12px; border-radius: var(--radius-md); margin-bottom: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">NOTE CLINICHE / PROMEMORIA</span>
+        <button type="button" class="btn-secondary-sm" onclick="openEditDocNote('${doc.id}')" style="font-size: 11px; padding: 3px 8px; font-weight: 700; color: var(--accent-blue);">
+          ✏️ ${doc.notes ? 'Modifica nota' : '+ Aggiungi nota'}
+        </button>
+      </div>
+      <div style="font-size: 13px; line-height: 1.4; color: ${doc.notes ? 'var(--text-primary)' : 'var(--text-tertiary)'}; font-style: ${doc.notes ? 'normal' : 'italic'};">
+        ${doc.notes ? escapeHTML(doc.notes) : 'Nessuna nota personale associata.'}
+      </div>
+    </div>
+
+    <!-- Anteprima File (Immagine nitida centrata o PDF Viewer incorporato) -->
+    <div style="background: #000000; border-radius: var(--radius-md); overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 14px; position: relative; border: 1px solid var(--border-glass);">
       ${doc.isPdf ? `
-        <div style="text-align: center; color: #fff; padding: 30px;">
-          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 8px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          <div style="font-weight: 600;">Documento PDF Protetto</div>
-          <div style="font-size: 12px; opacity: 0.8;">Clicca 'Scarica' per visualizzare</div>
+        <div style="width: 100%; height: 50vh; min-height: 280px; max-height: 60vh; background: #2A2A2E; position: relative;">
+          <iframe src="${fileUrl}#view=FitH" style="width: 100%; height: 100%; border: none;" title="${escapeHTML(doc.title)}"></iframe>
+        </div>
+        <div style="width: 100%; background: #1C1C1E; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 12px; color: #AEAEB2;">Visualizzazione PDF</span>
+          <button type="button" onclick="openDocFullscreen('${doc.id}')" style="background: linear-gradient(135deg, #0A84FF 0%, #007AFF 100%); color: #FFFFFF; border: none; font-size: 12px; font-weight: 700; padding: 6px 12px; border-radius: 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+            <span>↗</span> Apri a schermo intero
+          </button>
         </div>
       ` : `
-        <img src="${fileUrl}" alt="${escapeHTML(doc.title)}" style="max-width: 100%; max-height: 340px; object-fit: contain;" />
+        <div style="padding: 12px; width: 100%; display: flex; align-items: center; justify-content: center; min-height: 220px; max-height: 65vh; background: #000000;">
+          <img src="${fileUrl}" alt="${escapeHTML(doc.title)}" style="max-width: 100%; max-height: 60vh; object-fit: contain; border-radius: 10px;" />
+        </div>
       `}
     </div>
 
-    <div style="display: flex; gap: 10px;">
-      <a href="${fileUrl}" download="${doc.title.replace(/[^a-zA-Z0-9]/g, '_')}${doc.isPdf ? '.pdf' : '.jpg'}" class="btn-secondary-sm" style="flex: 1; text-decoration: none; padding: 12px;" onclick="showToast('Download avviato', '⬇️')">
-        Scarica File
-      </a>
-      <button class="btn-secondary-sm" style="color: var(--accent-coral); padding: 12px;" onclick="deleteDocItem('${doc.id}')">
-        Elimina
+    <!-- Barra Azioni: Scarica, Schermo Intero (se PDF), Elimina -->
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      ${doc.isPdf ? `
+        <button type="button" onclick="openDocFullscreen('${doc.id}')" class="btn-secondary-sm" style="flex: 1; min-width: 130px; padding: 12px; font-weight: 700; color: var(--accent-blue); display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>↗</span> Schermo intero
+        </button>
+      ` : ''}
+      <button type="button" onclick="downloadDocById('${doc.id}')" class="btn-primary" style="flex: 1; min-width: 130px; padding: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-teal) 100%);">
+        <span>⬇️</span> Scarica File
+      </button>
+      <button type="button" onclick="deleteDocItem('${doc.id}')" class="btn-secondary-sm" style="padding: 12px 16px; font-weight: 700; color: var(--accent-coral); background: rgba(224, 108, 117, 0.12); border-color: rgba(224, 108, 117, 0.25);" title="Elimina definitivamente">
+        🗑️ Elimina
       </button>
     </div>
   `;
@@ -1225,12 +1288,139 @@ async function openDocById(id) {
   openModal('docViewerModalOverlay');
 }
 
+async function openDocFullscreen(id) {
+  const doc = await pulseDB.getDocument(id);
+  if (!doc) return;
+  
+  if (doc.imageData && doc.imageData.startsWith('data:')) {
+    try {
+      const parts = doc.imageData.split(',');
+      const mime = (parts[0].match(/:(.*?);/) || [])[1] || (doc.isPdf ? 'application/pdf' : 'image/jpeg');
+      const bstr = atob(parts[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      const blob = new Blob([u8arr], { type: mime });
+      const fullUrl = URL.createObjectURL(blob);
+      const w = window.open(fullUrl, '_blank');
+      if (!w) {
+        window.location.href = fullUrl;
+      }
+    } catch (e) {
+      window.open(doc.imageData, '_blank');
+    }
+  } else if (doc.imageData) {
+    window.open(doc.imageData, '_blank');
+  }
+}
+
+async function downloadDocById(id) {
+  const doc = await pulseDB.getDocument(id);
+  if (!doc) {
+    showToast('Documento non trovato', '⚠️');
+    return;
+  }
+
+  let downloadUrl = doc.imageData;
+  let revokeNeeded = false;
+
+  if (doc.imageData && doc.imageData.startsWith('data:')) {
+    try {
+      const parts = doc.imageData.split(',');
+      const mime = (parts[0].match(/:(.*?);/) || [])[1] || (doc.isPdf ? 'application/pdf' : 'image/jpeg');
+      const bstr = atob(parts[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      const blob = new Blob([u8arr], { type: mime });
+      downloadUrl = URL.createObjectURL(blob);
+      revokeNeeded = true;
+    } catch (e) {
+      downloadUrl = doc.imageData;
+    }
+  }
+
+  const ext = doc.isPdf ? '.pdf' : (doc.fileName && doc.fileName.includes('.') ? '.' + doc.fileName.split('.').pop() : '.jpg');
+  const safeName = (doc.fileName || doc.title || 'documento').replace(/[^a-zA-Z0-9_\-\.]/g, '_');
+  const finalFilename = safeName.endsWith(ext) ? safeName : (safeName + ext);
+
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+  a.download = finalFilename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  if (revokeNeeded) {
+    setTimeout(() => URL.revokeObjectURL(downloadUrl), 4000);
+  }
+  showToast('Download avviato!', '⬇️');
+}
+
+async function openEditDocNote(docId) {
+  const doc = await pulseDB.getDocument(docId);
+  if (!doc) return;
+
+  document.getElementById('editDocNoteId').value = doc.id;
+  document.getElementById('editDocNoteDocTitle').innerText = doc.title;
+  document.getElementById('editDocNoteInput').value = doc.notes || '';
+
+  openModal('editDocNoteModalOverlay');
+  setTimeout(() => {
+    const input = document.getElementById('editDocNoteInput');
+    if (input) input.focus();
+  }, 150);
+}
+
+async function handleSaveDocNote(e) {
+  e.preventDefault();
+  const docId = document.getElementById('editDocNoteId').value;
+  const newNote = document.getElementById('editDocNoteInput').value.trim();
+
+  const doc = await pulseDB.getDocument(docId);
+  if (!doc) return;
+
+  doc.notes = newNote;
+  await pulseDB.saveDocument(doc);
+  closeModal('editDocNoteModalOverlay');
+  showToast('Nota salvata con successo!', '📝');
+
+  // Aggiorna viste
+  await renderAllViews();
+
+  // Se il visualizzatore era aperto su questo documento, aggiornalo
+  const viewerOverlay = document.getElementById('docViewerModalOverlay');
+  if (viewerOverlay && viewerOverlay.classList.contains('active')) {
+    await openDocById(docId);
+  }
+
+  // Se la cartella aperta conteneva questo documento, ricarica la cartella
+  const folderOverlay = document.getElementById('folderModalOverlay');
+  if (folderOverlay && folderOverlay.classList.contains('active') && doc.bodyZone) {
+    await openZoneFolder(doc.bodyZone);
+  }
+}
+
 async function deleteDocItem(id) {
-  if (confirm('Sei sicuro di voler eliminare questo documento da Pulse?')) {
+  if (confirm('Sei sicuro di voler eliminare definitivamente questo documento?')) {
+    const doc = await pulseDB.getDocument(id);
+    const bodyZone = doc ? doc.bodyZone : null;
+
     await pulseDB.deleteDocument(id);
-    closeAllModals();
-    showToast('Documento eliminato', '🗑️');
+    closeModal('docViewerModalOverlay');
+    showToast('Documento eliminato definitivamente', '🗑️');
+
     await renderAllViews();
+
+    // Se la cartella è aperta, ricaricala immediatamente
+    const folderOverlay = document.getElementById('folderModalOverlay');
+    if (folderOverlay && folderOverlay.classList.contains('active') && bodyZone) {
+      await openZoneFolder(bodyZone);
+    }
   }
 }
 
@@ -1319,7 +1509,9 @@ function initAddDocumentModal() {
     reader.onload = async (e) => {
       rawUploadedImage = {
         dataUrl: e.target.result,
-        isPdf: isPdf
+        isPdf: isPdf,
+        fileName: file.name,
+        mimeType: file.type || (isPdf ? 'application/pdf' : 'image/jpeg')
       };
       if (isPdf) {
         previewWrap.style.display = 'block';
@@ -1366,7 +1558,7 @@ function initAddDocumentModal() {
     const taxCat = document.getElementById('docTaxCategorySelect').value;
     const payment = document.getElementById('docPaymentMethodSelect').value;
 
-    let finalImg = rawUploadedImage ? previewImg.src : generateDemoPlaceholder(title || 'REFERTO CLINICO', notes || 'Documento registrato su Pulse');
+    let finalImg = rawUploadedImage ? (rawUploadedImage.isPdf ? rawUploadedImage.dataUrl : previewImg.src) : generateDemoPlaceholder(title || 'REFERTO CLINICO', notes || 'Documento registrato su Pulse');
 
     const newDoc = {
       id: 'doc_' + Date.now(),
@@ -1385,6 +1577,8 @@ function initAddDocumentModal() {
       isUsedRx: false,
       imageData: finalImg,
       isPdf: rawUploadedImage ? rawUploadedImage.isPdf : false,
+      fileName: rawUploadedImage ? rawUploadedImage.fileName : (title || 'documento') + '.jpg',
+      mimeType: rawUploadedImage ? rawUploadedImage.mimeType : (rawUploadedImage && rawUploadedImage.isPdf ? 'application/pdf' : 'image/jpeg'),
       createdAt: Date.now()
     };
 
@@ -4113,6 +4307,7 @@ function renderProfile() {
   }
 
   estimateStorage();
+  renderQuickHub();
 }
 
 function openDoctorWhatsApp() {
@@ -4177,58 +4372,143 @@ async function estimateStorage() {
 
 // Quick Hub
 const DEFAULT_HUB_LINKS = [
-  { id: 'fse', name: 'Fascicolo Sanitario', url: 'https://www.fascicolosanitario.regione.emilia-romagna.it/', iconColor: '#007AFF', letter: 'FSE' },
-  { id: 'cup', name: 'CUPWeb Prenotazioni', url: 'https://www.cupweb.it/', iconColor: '#00C7BE', letter: 'CUP' },
-  { id: 'miodottore', name: 'MioDottore', url: 'https://www.miodottore.it/', iconColor: '#34C759', letter: 'MD' },
-  { id: 'farmacie', name: 'Farmacie di Turno', url: 'https://www.farmaciediturno.org/', iconColor: '#FF9500', letter: 'Rx' },
-  { id: 'apple', name: 'Apple Salute', url: 'https://www.apple.com/it/ios/health/', iconColor: '#FF2D55', letter: '❤️' },
-  { id: '730', name: 'Spese Sanitarie 730', url: 'https://sistemats1.sanita.finanze.it/', iconColor: '#AF52DE', letter: '730' }
+  { id: 'fse', name: 'Fascicolo Sanitario', url: 'https://www.fascicolosanitario.regione.emilia-romagna.it/', iconColor: '#007AFF', letter: 'FSE', iconKey: 'folder' },
+  { id: 'cup', name: 'CUPWeb Prenotazioni', url: 'https://www.cupweb.it/', iconColor: '#00C7BE', letter: 'CUP', iconKey: 'calendar' },
+  { id: 'miodottore', name: 'MioDottore', url: 'https://www.miodottore.it/', iconColor: '#34C759', letter: 'MD', iconKey: 'hospital' },
+  { id: 'farmacie', name: 'Farmacie di Turno', url: 'https://www.farmaciediturno.org/', iconColor: '#FF9500', letter: 'Rx', iconKey: 'pharmacy' },
+  { id: 'apple', name: 'Apple Salute', url: 'https://www.apple.com/it/ios/health/', iconColor: '#FF2D55', letter: '❤️', iconKey: 'heart' },
+  { id: '730', name: 'Spese Sanitarie 730', url: 'https://sistemats1.sanita.finanze.it/', iconColor: '#AF52DE', letter: '730', iconKey: 'shield' }
 ];
+
+const HUB_ICONS_CONFIG = [
+  { key: 'globe', label: 'Web', emoji: '🌐', color: '#007AFF' },
+  { key: 'hospital', label: 'Ospedale', emoji: '🏥', color: '#34C759' },
+  { key: 'folder', label: 'Dossier', emoji: '📁', color: '#AF52DE' },
+  { key: 'heart', label: 'Salute', emoji: '❤️', color: '#FF2D55' },
+  { key: 'pharmacy', label: 'Farmacia', emoji: '💊', color: '#FF9500' },
+  { key: 'calendar', label: 'Visite', emoji: '📅', color: '#00C7BE' },
+  { key: 'shield', label: 'Polizza', emoji: '🛡️', color: '#5856D6' },
+  { key: 'phone', label: 'App', emoji: '📱', color: '#64A8F0' }
+];
+
+let selectedHubIconKey = 'globe';
 
 function initQuickHub() {
   renderQuickHub();
-  const form = document.getElementById('customHubForm');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const name = document.getElementById('customHubName').value.trim();
-    let url = document.getElementById('customHubUrl').value.trim();
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      url = 'https://' + url;
-    }
-    const customLinks = JSON.parse(localStorage.getItem('pulse_custom_hub') || '[]');
-    customLinks.push({
-      id: 'custom_' + Date.now(),
-      name: name,
-      url: url,
-      iconColor: '#007AFF',
-      letter: name.substring(0, 2).toUpperCase()
-    });
-    localStorage.setItem('pulse_custom_hub', JSON.stringify(customLinks));
-    closeAllModals();
-    form.reset();
-    renderQuickHub();
-    showToast('Collegamento aggiunto', '🔗');
+  renderHubIconSelector();
+}
+
+function renderHubIconSelector() {
+  const grid = document.getElementById('hubIconSelectorGrid');
+  if (!grid) return;
+
+  grid.innerHTML = HUB_ICONS_CONFIG.map(item => {
+    const isSelected = item.key === selectedHubIconKey;
+    return `
+      <div onclick="selectHubIcon('${item.key}')" class="glass-card" style="padding: 10px 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border: ${isSelected ? '2px solid var(--accent-blue)' : '1px solid var(--border-glass)'}; background: ${isSelected ? 'rgba(0, 122, 255, 0.12)' : 'var(--bg-card-secondary)'}; border-radius: 12px; transition: all 0.2s ease;">
+        <span style="font-size: 22px; margin-bottom: 2px;">${item.emoji}</span>
+        <span style="font-size: 11px; font-weight: 700; color: ${isSelected ? 'var(--accent-blue)' : 'var(--text-secondary)'};">${item.label}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectHubIcon(iconKey) {
+  selectedHubIconKey = iconKey;
+  const hiddenInput = document.getElementById('hubPortalSelectedIcon');
+  if (hiddenInput) hiddenInput.value = iconKey;
+  renderHubIconSelector();
+}
+
+function openAddHubModal() {
+  selectedHubIconKey = 'globe';
+  const nameInput = document.getElementById('hubPortalNameInput');
+  const urlInput = document.getElementById('hubPortalUrlInput');
+  if (nameInput) nameInput.value = '';
+  if (urlInput) urlInput.value = '';
+  renderHubIconSelector();
+  openModal('addHubModalOverlay');
+  setTimeout(() => {
+    if (nameInput) nameInput.focus();
+  }, 150);
+}
+
+function handleAddHubPortal(e) {
+  e.preventDefault();
+  const name = document.getElementById('hubPortalNameInput').value.trim();
+  let url = document.getElementById('hubPortalUrlInput').value.trim();
+  if (!name || !url) return;
+
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    url = 'https://' + url;
+  }
+
+  const activeProfile = getActiveProfileId();
+  const customLinks = JSON.parse(localStorage.getItem('pulse_custom_hub') || '[]');
+  const iconConfig = HUB_ICONS_CONFIG.find(c => c.key === selectedHubIconKey) || HUB_ICONS_CONFIG[0];
+
+  customLinks.push({
+    id: 'custom_' + Date.now(),
+    profileId: activeProfile,
+    name: name,
+    url: url,
+    iconKey: iconConfig.key,
+    emoji: iconConfig.emoji,
+    iconColor: iconConfig.color,
+    letter: iconConfig.emoji || name.substring(0, 2).toUpperCase()
   });
+
+  localStorage.setItem('pulse_custom_hub', JSON.stringify(customLinks));
+  closeModal('addHubModalOverlay');
+  renderQuickHub();
+  showToast(`"${name}" aggiunto ai Portali Salute!`, '🔗');
+}
+
+function deleteCustomHubLink(linkId, e) {
+  if (e) e.stopPropagation();
+  if (confirm('Rimuovere questo portale dai collegamenti rapidi?')) {
+    let customLinks = JSON.parse(localStorage.getItem('pulse_custom_hub') || '[]');
+    customLinks = customLinks.filter(l => l.id !== linkId);
+    localStorage.setItem('pulse_custom_hub', JSON.stringify(customLinks));
+    renderQuickHub();
+    showToast('Collegamento rimosso', '🗑️');
+  }
 }
 
 function renderQuickHub() {
   const container = document.getElementById('healthHubGrid');
-  const customLinks = JSON.parse(localStorage.getItem('pulse_custom_hub') || '[]');
-  const allLinks = [...DEFAULT_HUB_LINKS, ...customLinks];
+  if (!container) return;
 
-  container.innerHTML = allLinks.map(link => `
-    <a href="${escapeHTML(link.url)}" target="_blank" rel="noopener noreferrer" class="glass-card" style="padding: 14px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; text-align: center; gap: 8px;">
-      <div class="squircle-icon-badge" style="width: 44px; height: 44px; min-width: 44px; border-radius: 13px; background: ${link.iconColor}18; border: 1px solid ${link.iconColor}33; color: ${link.iconColor};">
-        <span style="font-weight: 800; font-size: 15px;">${link.letter}</span>
+  const activeProfile = getActiveProfileId();
+  const allCustom = JSON.parse(localStorage.getItem('pulse_custom_hub') || '[]');
+  const profileCustom = allCustom.filter(l => !l.profileId || l.profileId === activeProfile);
+  const allLinks = [...DEFAULT_HUB_LINKS, ...profileCustom];
+
+  container.innerHTML = allLinks.map(link => {
+    const isCustom = link.id && link.id.startsWith('custom_');
+    const displayBadge = link.emoji ? `<span style="font-size: 20px;">${link.emoji}</span>` : `<span style="font-weight: 800; font-size: 15px;">${link.letter}</span>`;
+    
+    return `
+      <div style="position: relative;">
+        <a href="${escapeHTML(link.url)}" target="_blank" rel="noopener noreferrer" class="glass-card" style="padding: 14px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; text-align: center; gap: 8px; border-radius: var(--radius-md); height: 100%;">
+          <div class="squircle-icon-badge" style="width: 44px; height: 44px; min-width: 44px; border-radius: 13px; background: ${link.iconColor}18; border: 1px solid ${link.iconColor}33; color: ${link.iconColor};">
+            ${displayBadge}
+          </div>
+          <div style="font-size: 12px; font-weight: 600; color: var(--text-primary); line-height: 1.2; word-break: break-word;">${escapeHTML(link.name)}</div>
+        </a>
+        ${isCustom ? `
+          <button type="button" onclick="deleteCustomHubLink('${link.id}', event)" style="position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; background: var(--bg-card-solid); border: 1px solid rgba(224, 108, 117, 0.4); color: var(--accent-coral); font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm); z-index: 5;" title="Elimina portale">
+            ×
+          </button>
+        ` : ''}
       </div>
-      <div style="font-size: 12px; font-weight: 600; color: var(--text-primary); line-height: 1.2;">${escapeHTML(link.name)}</div>
-    </a>
-  `).join('') + `
-    <div class="glass-card" onclick="openModal('addHubModalOverlay')" style="padding: 14px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-style: dashed; gap: 8px;">
-      <div class="squircle-icon-badge" style="width: 44px; height: 44px; min-width: 44px; border-radius: 13px; background: var(--bg-card-secondary); color: var(--text-secondary);">
-        <span style="font-size: 22px;">+</span>
+    `;
+  }).join('') + `
+    <div class="glass-card" onclick="openAddHubModal()" style="padding: 14px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; border-style: dashed; gap: 8px; border-radius: var(--radius-md);">
+      <div class="squircle-icon-badge" style="width: 44px; height: 44px; min-width: 44px; border-radius: 13px; background: var(--bg-card-secondary); color: var(--accent-coral); border: 1px solid rgba(224, 108, 117, 0.25);">
+        <span style="font-size: 22px; font-weight: 700;">+</span>
       </div>
-      <div style="font-size: 12px; font-weight: 600; color: var(--text-primary);">Aggiungi</div>
+      <div style="font-size: 12px; font-weight: 700; color: var(--accent-coral);">+ Aggiungi</div>
     </div>
   `;
 }
@@ -4336,6 +4616,17 @@ function openModal(modalId) {
   if (el) {
     el.classList.add('active');
     document.body.classList.add('modal-open');
+  }
+}
+
+function closeModal(modalId) {
+  const el = document.getElementById(modalId);
+  if (el) {
+    el.classList.remove('active');
+  }
+  const anyActive = document.querySelector('.modal-overlay.active');
+  if (!anyActive) {
+    document.body.classList.remove('modal-open');
   }
 }
 
