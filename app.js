@@ -2909,24 +2909,44 @@ function switchCabinetFilter(filter) {
 function handleDedicatedCabinetAdd(e) {
   e.preventDefault();
   const nameInput = document.getElementById('dedicatedCabName');
+  const catInput = document.getElementById('dedicatedCabCategory');
   const expiryInput = document.getElementById('dedicatedCabExpiry');
-  const qtyInput = document.getElementById('dedicatedCabQty');
+  const boxesInput = document.getElementById('dedicatedCabBoxes');
+  const pillsInput = document.getElementById('dedicatedCabPills');
+  const reminderToggle = document.getElementById('dedicatedCabReminderToggle');
 
   const name = nameInput.value.trim();
+  const category = (catInput && catInput.value) || 'Generale';
   const expiry = expiryInput.value;
-  const qty = qtyInput.value.trim() || '1 confezione';
+  const boxes = parseInt(boxesInput ? boxesInput.value : '1', 10) || 1;
+  const pills = parseInt(pillsInput ? pillsInput.value : '0', 10) || 0;
+  const wantReminder = reminderToggle ? reminderToggle.checked : true;
 
   if (!name || !expiry) {
     alert('Inserisci il nome del farmaco e la data di scadenza.');
     return;
   }
 
+  // Costruisci stringa descrittiva quantità (es. "1 scatola · 16 compresse")
+  let qtyParts = [];
+  if (boxes > 0) {
+    qtyParts.push(`${boxes} ${boxes === 1 ? 'scatola' : 'scatole'}`);
+  }
+  if (pills > 0) {
+    qtyParts.push(`${pills} ${pills === 1 ? 'compressa' : 'compresse'}`);
+  }
+  const qtyStr = qtyParts.length > 0 ? qtyParts.join(' · ') : '1 confezione';
+
   const newItem = {
     id: 'cab_' + Date.now(),
     profileId: getActiveProfileId(),
     name: name,
+    category: category,
     expiryDate: expiry,
-    quantity: qty,
+    boxes: boxes,
+    pills: pills,
+    quantity: qtyStr,
+    hasReminder: wantReminder,
     notes: ''
   };
 
@@ -2934,11 +2954,20 @@ function handleDedicatedCabinetAdd(e) {
   cabinet.push(newItem);
   localStorage.setItem('pulse_cabinet', JSON.stringify(cabinet));
 
+  // Reset form
   nameInput.value = '';
+  if (catInput) catInput.value = 'Generale';
   expiryInput.value = '';
-  qtyInput.value = '1 confezione';
+  if (boxesInput) boxesInput.value = '1';
+  if (pillsInput) pillsInput.value = '';
 
   showToast('Farmaco aggiunto all\'armadietto', '💊');
+
+  // Se toggle promemoria attivo, genera subito .ics
+  if (wantReminder) {
+    exportCabinetItemICS(newItem.id, false);
+  }
+
   renderDedicatedCabinet();
   renderMedicineCabinetInFolder();
   renderBentoWidgets();
@@ -3018,14 +3047,20 @@ function renderDedicatedCabinet() {
       }
     }
 
+    const catBadge = item.category || 'Generale';
+
     return `
       <div class="glass-card" style="padding: 12px 14px; border: ${borderStyle};">
+        <!-- Riga Superiore: Nome + Badge Categoria a Sinistra, Semaforo Scadenza a Destra -->
         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
           <div style="min-width: 0;">
-            <div style="font-size: 15px; font-weight: 800; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-              ${escapeHTML(item.name)}
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <span style="font-size: 15px; font-weight: 800; color: var(--text-primary);">${escapeHTML(item.name)}</span>
+              <span style="font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: rgba(0, 122, 255, 0.10); color: var(--accent-blue); border: 1px solid rgba(0, 122, 255, 0.2);">
+                ${escapeHTML(catBadge)}
+              </span>
             </div>
-            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 3px;">
               Scadenza: <strong>${item.expiryDate || 'Non indicata'}</strong>
             </div>
           </div>
@@ -3034,22 +3069,23 @@ function renderDedicatedCabinet() {
           </span>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-subtle);">
-          <!-- Controlli Quantità - / + -->
+        <!-- Riga Inferiore: Scatole e Compresse/Pillole con controlli rapidi -/+, Campanella .ics e Cestino -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-subtle); gap: 6px;">
           <div style="display: flex; align-items: center; gap: 6px;">
             <button onclick="updateCabinetQtyDelta('${item.id}', -1)" class="btn-secondary-sm" style="width: 26px; height: 26px; min-width: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px;" title="Riduci quantità">-</button>
-            <span style="font-size: 12px; font-weight: 700; color: var(--text-primary); min-width: 50px; text-align: center;">${escapeHTML(item.quantity || '1 cnf')}</span>
+            <span style="font-size: 12px; font-weight: 700; color: var(--text-primary); text-align: center;">
+              ${escapeHTML(item.quantity || '1 cnf')}
+            </span>
             <button onclick="updateCabinetQtyDelta('${item.id}', 1)" class="btn-secondary-sm" style="width: 26px; height: 26px; min-width: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px;" title="Aumenta quantità">+</button>
           </div>
 
-          <!-- Azioni: Campanella .ics & Elimina -->
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <button onclick="exportCabinetItemICS('${item.id}')" class="btn-secondary-sm" title="Aggiungi Promemoria Scadenza a Calendario iPhone (.ics)" style="padding: 5px 9px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--accent-amber);">
+          <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+            <button onclick="exportCabinetItemICS('${item.id}', true)" class="btn-secondary-sm" title="Aggiungi Promemoria Scadenza a Calendario iPhone (.ics)" style="padding: 5px 9px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--accent-amber);">
               <span>🔔</span>
-              <span>Allarme .ics</span>
+              <span>.ics</span>
             </button>
             <button onclick="deleteCabinetItem('${item.id}')" class="btn-secondary-sm" style="padding: 5px 8px; font-size: 11px; color: var(--accent-coral);" title="Elimina farmaco">
-              ✕
+              🗑️
             </button>
           </div>
         </div>
@@ -3058,11 +3094,11 @@ function renderDedicatedCabinet() {
   }).join('');
 }
 
-function exportCabinetItemICS(itemId) {
+function exportCabinetItemICS(itemId, showFeedback = true) {
   const allCabinet = JSON.parse(localStorage.getItem('pulse_cabinet') || '[]');
   const item = allCabinet.find(c => c.id === itemId);
   if (!item || !item.expiryDate) {
-    showToast('Nessuna data di scadenza impostata', '⚠️');
+    if (showFeedback) showToast('Nessuna data di scadenza impostata', '⚠️');
     return;
   }
 
@@ -3091,7 +3127,9 @@ function exportCabinetItemICS(itemId) {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
-  showToast('Promemoria scadenza .ics generato (allarme 30gg prima)!', '🔔');
+  if (showFeedback) {
+    showToast('Promemoria scadenza .ics generato (allarme 30gg prima)!', '🔔');
+  }
 }
 
 function openCalendarQuickSheet() {
@@ -5182,7 +5220,24 @@ function renderFeelingRemedyModal() {
     const matched = profileCabinet.filter(item => {
       const name = (item.name || '').toLowerCase();
       const notes = (item.notes || '').toLowerCase();
-      return keywords.some(k => name.includes(k) || notes.includes(k));
+      const cat = (item.category || '').toLowerCase();
+      const symptomTitle = (data.title || '').toLowerCase();
+
+      // Corrispondenza per categoria farmaco
+      const matchCat = cat && (
+        (symptomTitle.includes('testa') && cat.includes('testa')) ||
+        (symptomTitle.includes('gola') && cat.includes('gola')) ||
+        (symptomTitle.includes('febbre') && cat.includes('febbre')) ||
+        (symptomTitle.includes('stomaco') && cat.includes('stomaco')) ||
+        (symptomTitle.includes('cervicale') && (cat.includes('dolori') || cat.includes('testa'))) ||
+        (symptomTitle.includes('muscol') && cat.includes('dolori')) ||
+        (symptomTitle.includes('allergia') && cat.includes('allergie')) ||
+        (symptomTitle.includes('stanchezza') && cat.includes('integratori')) ||
+        (symptomTitle.includes('insonnia') && (cat.includes('integratori') || cat.includes('generale'))) ||
+        (symptomTitle.includes('raffreddore') && cat.includes('respiro'))
+      );
+
+      return matchCat || keywords.some(k => name.includes(k) || notes.includes(k));
     });
 
     if (matched.length > 0) {
