@@ -366,12 +366,11 @@
       </div>
     </main>
 
-    <!-- TAB 3: AGENDA (Timeline Visite + Diario + Prevenzione) -->
+    <!-- TAB 3: AGENDA (Timeline Visite + Diario) -->
     <main id="tab-agenda" class="tab-content">
-      <div class="segmented-control" id="agendaSegmentedControl">
+      <div class="segmented-control" id="agendaSegmentedControl" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
         <button id="segAgendaVisits" class="seg-btn active" onclick="switchAgendaSubTab('visits')">Visite</button>
         <button id="segAgendaNotes" class="seg-btn" onclick="switchAgendaSubTab('notes')">Diario</button>
-        <button id="segAgendaRadar" class="seg-btn" onclick="switchAgendaSubTab('radar')">Prevenzione</button>
       </div>
 
       <!-- VISTA 1: TIMELINE VISITE -->
@@ -429,14 +428,6 @@
           I Tuoi Appunti & Sintomi
         </div>
         <div id="healthNotesList"></div>
-      </div>
-
-      <!-- VISTA 3: RADAR PREVENZIONE -->
-      <div id="agendaRadarView" style="display: none;">
-        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">
-          Controlli periodici raccomandati per la salute preventiva con avvisi a semaforo.
-        </div>
-        <div id="preventionRadarList"></div>
       </div>
     </main>
 
@@ -1633,7 +1624,7 @@
 
   <!-- MODAL: LISTA FARMACI DA COMPRARE (Checklist Acquisti Farmacia) -->
   <div id="shoppingListModalOverlay" class="modal-overlay">
-    <div class="bottom-sheet" style="max-height: 88vh;">
+    <div class="bottom-sheet" style="max-height: 88vh; overflow-x: hidden; padding-bottom: calc(20px + env(safe-area-inset-bottom));">
       <div class="sheet-handle"></div>
       
       <!-- Header Dedicato Lista Farmaci -->
@@ -1648,12 +1639,15 @@
         <button class="sheet-close-btn" onclick="closeAllModals()">✕</button>
       </div>
 
-      <!-- Form Rapido Inserimento Prodotto -->
-      <form id="addShoppingItemForm" onsubmit="handleShoppingItemAdd(event)" style="margin-bottom: 14px;">
-        <div style="display: flex; gap: 8px;">
-          <input type="text" id="shoppingItemInput" class="form-input" placeholder="Es. Cerotti, Oki task, Magnesio..." required style="padding: 10px 12px; font-size: 13px; flex: 1;">
-          <button type="submit" class="btn-primary" style="padding: 10px 16px; font-size: 13px; font-weight: 700; border-radius: var(--radius-md); flex: none; background: linear-gradient(135deg, var(--accent-teal) 0%, #00A8A0 100%);">
-            + Aggiungi
+      <!-- Form Rapido Inserimento Prodotto (Un'unica riga perfettamente allineata) -->
+      <form id="addShoppingItemForm" onsubmit="handleShoppingItemAdd(event)" style="margin-bottom: 14px; width: 100%; box-sizing: border-box;">
+        <div style="display: flex; align-items: center; gap: 8px; width: 100%; box-sizing: border-box;">
+          <input type="text" id="shoppingItemInput" class="form-input" placeholder="Aggiungi farmaco o prodotto..." required style="flex: 1; min-width: 0; height: 44px; padding: 0 14px; font-size: 16px; border-radius: 12px; box-sizing: border-box;">
+          <button type="submit" id="btnSubmitShoppingItem" aria-label="Aggiungi alla lista" style="width: 44px; height: 44px; min-width: 44px; flex-shrink: 0; border: none; border-radius: 12px; background: linear-gradient(135deg, var(--accent-teal) 0%, #00A8A0 100%); color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; box-shadow: 0 2px 8px rgba(0, 199, 190, 0.25);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
           </button>
         </div>
       </form>
@@ -1667,7 +1661,7 @@
       </div>
 
       <!-- Checklist Items -->
-      <div id="shoppingItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 50vh; overflow-y: auto;"></div>
+      <div id="shoppingItemsList" style="display: flex; flex-direction: column; gap: 8px; max-height: 52vh; overflow-y: auto; overflow-x: hidden;"></div>
     </div>
   </div>
 

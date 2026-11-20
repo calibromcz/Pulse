@@ -48,7 +48,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   initPharmacyMode();
   initTherapyTracker();
   initSymptomsDiary();
-  initPreventionRadar();
   initClinicalSummaryPDF();
   initProfile();
   initDoctorModal();
@@ -541,16 +540,6 @@ async function initSeedData() {
     ];
     localStorage.setItem('pulse_symptoms', JSON.stringify(demoSymptoms));
   }
-
-  if (!localStorage.getItem('pulse_radar')) {
-    const demoRadar = [
-      { id: 'rad_dent', profileId: 'me', name: 'Igiene Dentale', months: 6, lastDate: '2026-05-10', iconId: 'dental' },
-      { id: 'rad_blood', profileId: 'me', name: 'Analisi del Sangue', months: 12, lastDate: '2026-11-05', iconId: 'blood' },
-      { id: 'rad_eyes', profileId: 'me', name: 'Visita Oculistica', months: 12, lastDate: '2025-10-12', iconId: 'eyes' },
-      { id: 'rad_derma', profileId: 'me', name: 'Mappatura Nei', months: 12, lastDate: '2026-10-15', iconId: 'derma' }
-    ];
-    localStorage.setItem('pulse_radar', JSON.stringify(demoRadar));
-  }
 }
 
 function generateDemoPlaceholder(title, text) {
@@ -636,7 +625,6 @@ function switchTab(tabId) {
   if (tabId === 'agenda') {
     renderAgendaVisits();
     renderHealthNotes();
-    renderPreventionRadar();
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -654,7 +642,6 @@ async function renderAllViews() {
   renderTax730Dashboard();
   renderTherapies();
   renderSymptoms();
-  renderPreventionRadar();
 }
 
 // 5. Home View
@@ -3367,19 +3354,22 @@ function renderShoppingList() {
     return;
   }
 
-  // Mostra prima quelli da comprare, poi quelli spuntati
+  // Mostra prima quelli da comprare, poi quelli spuntati che scivolano in fondo
   const sorted = [...pending, ...checked];
 
   container.innerHTML = sorted.map(item => `
-    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 12px; background: ${item.checked ? 'var(--bg-glass-input)' : 'var(--bg-glass-card)'}; border: 1px solid var(--border-glass); transition: all 0.2s ease;">
-      <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; min-width: 0;">
-        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleShoppingItem('${item.id}')" style="width: 18px; height: 18px; accent-color: var(--accent-teal); cursor: pointer; flex: none;">
-        <span style="font-size: 14px; font-weight: ${item.checked ? '500' : '700'}; color: ${item.checked ? 'var(--text-tertiary)' : 'var(--text-primary)'}; text-decoration: ${item.checked ? 'line-through' : 'none'}; word-break: break-word;">
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 12px; background: ${item.checked ? 'var(--bg-card-secondary)' : 'var(--bg-glass-card)'}; border: 1px solid var(--border-glass); transition: all 0.25s ease; gap: 8px;">
+      <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; min-width: 0; margin: 0;">
+        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleShoppingItem('${item.id}')" style="width: 24px; height: 24px; min-width: 24px; accent-color: var(--accent-teal); cursor: pointer; flex-shrink: 0; border-radius: 50%;">
+        <span style="font-size: 15px; font-weight: ${item.checked ? '500' : '700'}; color: var(--text-primary); text-decoration: ${item.checked ? 'line-through' : 'none'}; opacity: ${item.checked ? '0.55' : '1'}; word-break: break-word; line-height: 1.3; transition: all 0.2s ease;">
           ${escapeHTML(item.text)}
         </span>
       </label>
-      <button onclick="deleteShoppingItem('${item.id}')" class="btn-secondary-sm" style="width: 28px; height: 28px; padding: 0; min-width: 28px; display: inline-flex; align-items: center; justify-content: center; color: var(--accent-coral); font-size: 13px;" title="Elimina elemento">
-        ✕
+      <button type="button" onclick="deleteShoppingItem('${item.id}')" class="btn-secondary-sm" style="width: 36px; height: 36px; min-width: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: var(--accent-coral); background: rgba(224, 108, 117, 0.10); border-color: rgba(224, 108, 117, 0.20); border-radius: 10px; flex-shrink: 0;" title="Elimina prodotto">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        </svg>
       </button>
     </div>
   `).join('');
@@ -3718,35 +3708,28 @@ function openEditVisionModal() {
   renderVisionCardInFolder();
 }
 
-// 16. Agenda SubTabs & Radar Prevenzione
+// 16. Agenda SubTabs (Visite | Diario)
 function switchAgendaSubTab(subTab) {
   const btnVisits = document.getElementById('segAgendaVisits');
   const btnNotes = document.getElementById('segAgendaNotes');
-  const btnRadar = document.getElementById('segAgendaRadar');
   const visitsView = document.getElementById('agendaVisitsView');
   const notesView = document.getElementById('agendaNotesView');
-  const radarView = document.getElementById('agendaRadarView');
 
   if (btnVisits) btnVisits.classList.remove('active');
   if (btnNotes) btnNotes.classList.remove('active');
-  if (btnRadar) btnRadar.classList.remove('active');
 
   if (visitsView) visitsView.style.display = 'none';
   if (notesView) notesView.style.display = 'none';
-  if (radarView) radarView.style.display = 'none';
 
-  if (subTab === 'visits') {
-    if (btnVisits) btnVisits.classList.add('active');
-    if (visitsView) visitsView.style.display = 'block';
-    renderAgendaVisits();
-  } else if (subTab === 'notes') {
+  if (subTab === 'notes') {
     if (btnNotes) btnNotes.classList.add('active');
     if (notesView) notesView.style.display = 'block';
     renderHealthNotes();
-  } else if (subTab === 'radar') {
-    if (btnRadar) btnRadar.classList.add('active');
-    if (radarView) radarView.style.display = 'block';
-    renderPreventionRadar();
+  } else {
+    // Default: 'visits'
+    if (btnVisits) btnVisits.classList.add('active');
+    if (visitsView) visitsView.style.display = 'block';
+    renderAgendaVisits();
   }
 }
 
@@ -4052,83 +4035,6 @@ function deleteHealthNote(id) {
     showToast('Appunto eliminato', '🗑️');
     renderHealthNotes();
   }
-}
-
-function initPreventionRadar() {
-  // Gestito da switchAgendaSubTab
-}
-
-function renderPreventionRadar() {
-  const container = document.getElementById('preventionRadarList');
-  if (!container) return;
-
-  const activeProfile = getActiveProfileId();
-  const radar = JSON.parse(localStorage.getItem('pulse_radar') || '[]');
-  const profileRadar = radar.filter(r => !r.profileId || r.profileId === activeProfile);
-
-  const now = new Date();
-
-  container.innerHTML = profileRadar.map(item => {
-    const lastDate = new Date(item.lastDate);
-    const nextDate = new Date(lastDate);
-    nextDate.setMonth(nextDate.getMonth() + item.months);
-
-    const diffDays = Math.round((nextDate - now) / 86400000);
-
-    let statusColor = 'var(--accent-teal)';
-    let statusText = `Tra ${Math.max(0, Math.round(diffDays / 30))} mesi`;
-    if (diffDays < 0) {
-      statusColor = 'var(--accent-coral)';
-      statusText = `SCADUTO da ${Math.abs(diffDays)} gg`;
-    } else if (diffDays <= 45) {
-      statusColor = 'var(--accent-amber)';
-      statusText = `A breve (${diffDays} gg)`;
-    }
-
-    const zone = getBodyZone(item.iconId || 'blood');
-
-    return `
-      <div class="glass-card" style="margin-bottom: 12px; padding: 14px 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div class="squircle-icon-badge" style="width: 42px; height: 42px; min-width: 42px; border-radius: 13px; background: ${zone.bg}; border: 1px solid ${zone.border}; color: ${zone.color};">
-              ${zone.svg}
-            </div>
-            <div>
-              <div style="font-size: 15px; font-weight: 700;">${escapeHTML(item.name)}</div>
-              <div style="font-size: 12px; color: var(--text-secondary);">Ogni ${item.months} mesi • Ultimo: ${lastDate.toLocaleDateString('it-IT')}</div>
-            </div>
-          </div>
-          <span style="font-size: 11px; font-weight: 800; background: ${statusColor}22; color: ${statusColor}; padding: 4px 10px; border-radius: 99px;">
-            ${statusText}
-          </span>
-        </div>
-        <div style="display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
-          <button class="btn-secondary-sm" style="font-size: 11px;" onclick="markRadarDoneToday('${item.id}')">✓ Fatto oggi</button>
-          <button class="btn-secondary-sm" style="font-size: 11px; color: var(--accent-blue);" onclick="bookRadarAppointment('${item.name}')">Prenota in Agenda</button>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function markRadarDoneToday(radarId) {
-  const radar = JSON.parse(localStorage.getItem('pulse_radar') || '[]');
-  const item = radar.find(r => r.id === radarId);
-  if (item) {
-    item.lastDate = new Date().toISOString().split('T')[0];
-    localStorage.setItem('pulse_radar', JSON.stringify(radar));
-    showToast('Controllo registrato oggi!', '🎉');
-    renderPreventionRadar();
-  }
-}
-
-function bookRadarAppointment(name) {
-  switchTab('agenda');
-  switchAgendaSubTab('visits');
-  openNewApptModal();
-  const input = document.getElementById('apptTitleInput');
-  if (input) input.value = `Controllo ${name}`;
 }
 
 // 17. Riassunto Clinico "Nuovo Medico"
