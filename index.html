@@ -198,8 +198,8 @@
     </header>
 
     <!-- TAB 1: HOME (Panoramica Apple Cupertino) -->
-    <main id="tab-home" class="tab-content active">
-      <div class="home-layout-stack">
+    <main id="tab-home" class="tab-content active" style="padding-top: 10px;">
+      <div class="home-layout-stack" style="gap: 12px;">
         <!-- BLOCCO A: Hero Card "Oggi" -->
         <section id="homeHeroOggi" class="hero-oggi-card"></section>
 
@@ -236,7 +236,7 @@
           </div>
 
           <!-- 3. In basso a sx: Prevenzione -->
-          <div id="widgetRadarCard" class="bento-widget-card" onclick="switchTab('agenda'); document.getElementById('segAgendaRadar').click();">
+          <div id="widgetRadarCard" class="bento-widget-card" onclick="switchAgendaSubTab('radar')">
             <div class="bento-widget-top">
               <div class="squircle-icon-badge" style="width: 38px; height: 38px; min-width: 38px; border-radius: 12px; background: rgba(0, 199, 190, 0.14); border: 1px solid rgba(0, 199, 190, 0.25); color: var(--accent-teal);">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -268,43 +268,20 @@
           </div>
         </section>
 
-        <!-- Sezione 2 Colonne su Desktop: Terapie & Check-in / Dossier -->
+        <!-- Sezione 2 Colonne su Desktop / 1 Colonna Mobile: Terapie & Ultimi Documenti -->
         <div class="home-bottom-columns">
           <!-- BLOCCO C: Card "Terapie di Oggi" -->
           <div class="home-col-item">
-            <div class="section-header" style="margin-top: 6px;">
+            <div class="section-header" style="margin-top: 4px;">
               <span class="section-title">Terapie di Oggi</span>
               <button id="btnNewTherapy" class="section-action" style="background: none; border: none;">+ Aggiungi</button>
             </div>
             <section id="homeTherapiesList"></section>
           </div>
 
+          <!-- BLOCCO D: Ultimi nel Dossier -->
           <div class="home-col-item">
-            <!-- BLOCCO D: Strip "Check-in Rapido" -->
-            <div class="section-header" style="margin-top: 6px;">
-              <span class="section-title">Check-in Rapido</span>
-              <span class="section-action" onclick="openModal('symptomsModalOverlay')">Diario ›</span>
-            </div>
-            <section class="checkin-strip-card">
-              <div class="checkin-latest-row">
-                <span class="checkin-latest-label">Ultimo rilievo:</span>
-                <span id="checkinLatestValue" class="checkin-latest-val">Nessun dato recente</span>
-              </div>
-              <div class="checkin-pills-row">
-                <button class="checkin-pill" onclick="quickAddSymptom('Pressione')">
-                  <span>🩺</span> + Pressione
-                </button>
-                <button class="checkin-pill" onclick="quickAddSymptom('Febbre')">
-                  <span>🌡️</span> + Febbre
-                </button>
-                <button class="checkin-pill" onclick="quickAddSymptom('Sintomo')">
-                  <span>⚡</span> + Sintomo
-                </button>
-              </div>
-            </section>
-
-            <!-- BLOCCO E: Ultimi nel Dossier -->
-            <div class="section-header" style="margin-top: 14px;">
+            <div class="section-header" style="margin-top: 4px;">
               <span class="section-title">Ultimi nel Dossier</span>
               <span class="section-action" onclick="switchTab('archive')">Vedi tutti</span>
             </div>
@@ -315,7 +292,7 @@
     </main>
 
     <!-- TAB 2: DOSSIER (Cartelle Anatomiche) -->
-    <main id="tab-archive" class="tab-content">
+    <main id="tab-archive" class="tab-content" style="padding-top: 12px;">
       <div class="search-bar-wrap">
         <svg class="search-icon-left" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"/>
@@ -335,47 +312,76 @@
       <!-- Search results view -->
       <section id="archiveFilterResults" style="display: none;"></section>
 
-      <!-- Anatomical Body Zones 2-column Grid -->
+      <!-- Anatomical Body Zones 2-column Grid (Sempre 10 cartelle fisse) -->
       <section id="bodyZonesGrid" class="body-zones-grid"></section>
     </main>
 
-    <!-- TAB 3: AGENDA (Calendario & Radar Prevenzione) -->
-    <main id="tab-agenda" class="tab-content">
-      <div class="segmented-control">
-        <button id="segAgendaCal" class="seg-btn active">Calendario Visite</button>
-        <button id="segAgendaRadar" class="seg-btn">Radar Prevenzione</button>
+    <!-- TAB 3: AGENDA (Timeline Visite + Diario + Prevenzione) -->
+    <main id="tab-agenda" class="tab-content" style="padding-top: 12px;">
+      <div class="segmented-control" id="agendaSegmentedControl">
+        <button id="segAgendaVisits" class="seg-btn active" onclick="switchAgendaSubTab('visits')">Visite</button>
+        <button id="segAgendaNotes" class="seg-btn" onclick="switchAgendaSubTab('notes')">Diario</button>
+        <button id="segAgendaRadar" class="seg-btn" onclick="switchAgendaSubTab('radar')">Prevenzione</button>
       </div>
 
-      <!-- VISTA 1: CALENDARIO INTERATTIVO -->
-      <div id="agendaCalendarView">
-        <div class="calendar-card">
-          <div class="cal-header-row">
-            <div class="cal-month-title" id="calMonthTitle">Mese Anno</div>
-            <div class="cal-nav-buttons">
-              <button id="calTodayBtn" class="cal-today-btn">Oggi</button>
-              <button id="calPrevMonthBtn" class="cal-nav-arrow">‹</button>
-              <button id="calNextMonthBtn" class="cal-nav-arrow">›</button>
-            </div>
-          </div>
-
-          <div class="cal-weekdays-grid">
-            <div>LUN</div><div>MAR</div><div>MER</div><div>GIO</div><div>VEN</div><div>SAB</div><div>DOM</div>
-          </div>
-
-          <div id="calDaysGrid" class="cal-days-grid"></div>
-        </div>
-
-        <div class="selected-day-banner" style="display: flex; justify-content: space-between; align-items: center; margin: 16px 0 10px 0;">
-          <div class="selected-day-title" id="selectedDayBannerTitle" style="font-size: 15px; font-weight: 700;">Appuntamenti</div>
-          <button class="btn-secondary-sm" style="flex: none; padding: 6px 12px;" onclick="openNewApptModalWithDate(calSelectedDate)">
+      <!-- VISTA 1: TIMELINE VISITE -->
+      <div id="agendaVisitsView">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <span style="font-size: 13px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Prossimi Appuntamenti</span>
+          <button class="btn-primary" style="padding: 7px 14px; font-size: 12px; border-radius: var(--radius-full); width: auto;" onclick="openNewApptModal()">
             + Nuova Visita
           </button>
         </div>
+        <div id="agendaVisitsTimelineList"></div>
 
-        <section id="selectedDayApptsList"></section>
+        <!-- Sezione Visite Passate Richiudibile -->
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+          <button class="btn-secondary-sm" id="btnTogglePastVisits" onclick="togglePastVisits()" style="width: 100%; justify-content: space-between; padding: 10px 14px;">
+            <span>🕘 Visite Passate</span>
+            <span id="pastVisitsArrow">▾</span>
+          </button>
+          <div id="agendaPastVisitsList" style="display: none; margin-top: 12px;"></div>
+        </div>
       </div>
 
-      <!-- VISTA 2: RADAR PREVENZIONE -->
+      <!-- VISTA 2: DIARIO APPUNTI SALUTE (Stile Apple Note) -->
+      <div id="agendaNotesView" style="display: none;">
+        <!-- Form Rapido Aggiunta Appunto -->
+        <div class="glass-card" style="padding: 14px 16px; margin-bottom: 16px; border: 1px solid var(--border-glass);">
+          <div style="font-size: 13px; font-weight: 700; color: var(--accent-blue); text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+            <span>📝</span>
+            <span>Nuovo Appunto Salute</span>
+          </div>
+          <form id="healthNoteForm" onsubmit="handleSaveHealthNote(event)">
+            <input type="hidden" id="noteEditId" value="">
+            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+              <input type="text" id="noteTitleInput" class="form-input" placeholder="Titolo appunto (es. Mal di testa post-prandiale)..." style="flex: 2; padding: 8px 12px; font-size: 13px;">
+              <select id="noteTagSelect" class="form-select" style="flex: 1; padding: 8px 10px; font-size: 13px;">
+                <option value="Nota">Nota</option>
+                <option value="Sintomo">Sintomo</option>
+                <option value="Farmaco">Farmaco</option>
+                <option value="Visita">Visita</option>
+              </select>
+            </div>
+            <textarea id="noteTextInput" class="form-textarea" rows="2" placeholder="Scrivi dettagli, reazioni o promemoria per il medico..." required style="padding: 8px 12px; font-size: 13px; margin-bottom: 8px;"></textarea>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span id="noteCancelBtnWrap" style="display: none;">
+                <button type="button" class="btn-secondary-sm" style="padding: 6px 12px; font-size: 12px;" onclick="cancelEditHealthNote()">Annulla</button>
+              </span>
+              <button type="submit" class="btn-primary" id="btnSaveHealthNote" style="padding: 8px 16px; font-size: 13px; width: auto; margin-left: auto;">
+                Salva Appunto
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 10px;">
+          I Tuoi Appunti & Sintomi
+        </div>
+        <div id="healthNotesList"></div>
+      </div>
+
+      <!-- VISTA 3: RADAR PREVENZIONE -->
       <div id="agendaRadarView" style="display: none;">
         <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">
           Controlli periodici raccomandati per la salute preventiva con avvisi a semaforo.
@@ -385,7 +391,7 @@
     </main>
 
     <!-- TAB 4: PROFILO & HUB SALUTE -->
-    <main id="tab-profile" class="tab-content">
+    <main id="tab-profile" class="tab-content" style="padding-top: 12px;">
       <!-- ICE Identity Card -->
       <div class="ice-card" style="background: linear-gradient(135deg, rgba(255,45,85,0.08) 0%, rgba(175,82,222,0.08) 100%), var(--bg-card); border: 1px solid rgba(255,45,85,0.2); border-radius: var(--radius-lg); padding: 18px; box-shadow: var(--shadow-md); margin-bottom: 18px;">
         <div class="ice-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -418,13 +424,36 @@
           </div>
         </div>
 
+        <!-- Riga Medico ICE con 2 Bottoni Rapidi WhatsApp & Telefono a Sinistra -->
         <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="font-size: 11px; color: var(--text-secondary);">MEDICO DI BASE</div>
-            <div style="font-size: 13px; font-weight: 700;" id="profileDoctorDisplay">Dott.ssa Bianchi</div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <!-- 2 Pulsanti Rapidi (34x34) WhatsApp & Telefono a Sinistra del Medico -->
+            <div id="doctorQuickButtonsLeft" style="display: flex; align-items: center; gap: 6px;"></div>
+            <div>
+              <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.5px;">MEDICO DI BASE</div>
+              <div style="font-size: 14px; font-weight: 800;" id="profileDoctorDisplay">Dott.ssa Bianchi</div>
+            </div>
           </div>
-          <div id="doctorActionsContainer" style="display: flex; gap: 6px;"></div>
+          <button onclick="openDoctorModal()" class="btn-secondary-sm" style="padding: 5px 10px; font-size: 11px; flex: none;">Scheda ›</button>
         </div>
+      </div>
+
+      <!-- Card "Trova la farmacia più vicina" Elegante Liquid Glass -->
+      <div id="findNearestPharmacyCard" class="glass-card" onclick="openNearestPharmacyMap()" style="padding: 14px 16px; margin-bottom: 18px; cursor: pointer; border: 1px solid rgba(52, 199, 89, 0.28); background: linear-gradient(135deg, rgba(52, 199, 89, 0.10) 0%, rgba(0, 199, 190, 0.08) 100%), var(--bg-card); display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="squircle-icon-badge" style="width: 44px; height: 44px; min-width: 44px; border-radius: 14px; background: rgba(52, 199, 89, 0.16); color: #34C759; border: 1px solid rgba(52, 199, 89, 0.3);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 21s-6-5.33-6-10a6 6 0 0 1 12 0c0 4.67-6 10-6 10z" fill="currentColor" fill-opacity="0.16"/>
+              <circle cx="12" cy="11" r="2.5" fill="currentColor"/>
+              <path d="M12 7v8M8 11h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <div style="font-size: 14px; font-weight: 800; color: var(--text-primary);">Trova la farmacia più vicina</div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Apri Mappe e imposta il percorso dalla tua posizione</div>
+          </div>
+        </div>
+        <span style="font-size: 18px; color: #34C759; font-weight: 700; margin-left: 8px;">›</span>
       </div>
 
       <!-- Riassunto Clinico "Nuovo Medico" 1-Tap PDF -->
@@ -1008,6 +1037,44 @@
         <button class="sheet-close-btn" onclick="closeAllModals()">✕</button>
       </div>
       <div id="folderViewContent"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: QUICK CALENDAR SHEET (Icona Calendario Header) -->
+  <div id="quickCalendarModalOverlay" class="modal-overlay">
+    <div class="bottom-sheet" style="max-height: 88vh;">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <h2 class="sheet-title">Calendario Visite</h2>
+        <button class="sheet-close-btn" onclick="closeAllModals()">✕</button>
+      </div>
+      <div id="quickCalendarContent">
+        <div class="calendar-card" style="margin-bottom: 14px;">
+          <div class="cal-header-row">
+            <div class="cal-month-title" id="calMonthTitle">Mese Anno</div>
+            <div class="cal-nav-buttons">
+              <button id="calTodayBtn" class="cal-today-btn">Oggi</button>
+              <button id="calPrevMonthBtn" class="cal-nav-arrow">‹</button>
+              <button id="calNextMonthBtn" class="cal-nav-arrow">›</button>
+            </div>
+          </div>
+
+          <div class="cal-weekdays-grid">
+            <div>LUN</div><div>MAR</div><div>MER</div><div>GIO</div><div>VEN</div><div>SAB</div><div>DOM</div>
+          </div>
+
+          <div id="calDaysGrid" class="cal-days-grid"></div>
+        </div>
+
+        <div class="selected-day-banner" style="display: flex; justify-content: space-between; align-items: center; margin: 12px 0 8px 0;">
+          <div class="selected-day-title" id="selectedDayBannerTitle" style="font-size: 15px; font-weight: 700;">Appuntamenti del Giorno</div>
+          <button class="btn-secondary-sm" style="flex: none; padding: 6px 12px;" onclick="closeAllModals(); openNewApptModalWithDate(calSelectedDate)">
+            + Aggiungi
+          </button>
+        </div>
+
+        <section id="selectedDayApptsList" style="margin-bottom: 16px;"></section>
+      </div>
     </div>
   </div>
 

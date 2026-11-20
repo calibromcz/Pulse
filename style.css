@@ -1615,11 +1615,110 @@ body::after {
     padding: 0 0 calc(115px + var(--safe-bottom)) 0;
   }
   .tab-content {
-    padding: 16px 16px 20px 16px;
+    padding: 10px 16px 20px 16px;
+  }
+  #tab-home {
+    padding-top: 6px !important;
   }
 }
 
-/* Time Slot Pills for Therapies */
+/* Doctor ICE Quick Action Buttons */
+.quick-doc-btn {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s var(--spring-easing), opacity 0.2s ease;
+  color: #ffffff;
+}
+
+.quick-doc-btn:active {
+  transform: scale(0.92);
+}
+
+.quick-doc-btn.whatsapp {
+  background: #25D366;
+  border-color: rgba(37, 211, 102, 0.5);
+}
+
+.quick-doc-btn.phone {
+  background: #007AFF;
+  border-color: rgba(0, 122, 255, 0.5);
+}
+
+/* Timeline Visite & Notes Styles */
+.timeline-section-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 16px 0 8px 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timeline-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 99px;
+  text-transform: uppercase;
+}
+
+.timeline-badge.urgent {
+  background: rgba(255, 45, 85, 0.15);
+  color: var(--accent-coral);
+  border: 1px solid rgba(255, 45, 85, 0.3);
+}
+
+.timeline-badge.soon {
+  background: rgba(0, 122, 255, 0.15);
+  color: var(--accent-blue);
+  border: 1px solid rgba(0, 122, 255, 0.3);
+}
+
+.timeline-badge.later {
+  background: rgba(142, 142, 147, 0.15);
+  color: var(--text-secondary);
+  border: 1px solid rgba(142, 142, 147, 0.25);
+}
+
+.health-note-tag-pill {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.tag-nota {
+  background: rgba(0, 122, 255, 0.14);
+  color: var(--accent-blue);
+}
+
+.tag-sintomo {
+  background: rgba(255, 45, 85, 0.14);
+  color: var(--accent-coral);
+}
+
+.tag-farmaco {
+  background: rgba(52, 199, 89, 0.14);
+  color: var(--accent-green);
+}
+
+.tag-visita {
+  background: rgba(175, 82, 222, 0.14);
+  color: var(--accent-purple);
+}
+
 .therapy-slots-row {
   display: flex;
   flex-wrap: wrap;

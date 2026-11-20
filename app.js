@@ -578,9 +578,7 @@ function initNavigation() {
   const headerCalBtn = document.getElementById('headerCalendarBtn');
   if (headerCalBtn) {
     headerCalBtn.addEventListener('click', () => {
-      switchTab('agenda');
-      const calSegBtn = document.getElementById('segAgendaCal');
-      if (calSegBtn) calSegBtn.click();
+      openCalendarQuickSheet();
     });
   }
 
@@ -604,8 +602,22 @@ function switchTab(tabId) {
   if (btn) btn.classList.add('active');
   if (desktopBtn) desktopBtn.classList.add('active');
 
+  if (tabId === 'archive') {
+    const searchInput = document.getElementById('docSearchInput');
+    if (searchInput) {
+      searchInput.value = '';
+      currentSearch = '';
+    }
+    const filterResults = document.getElementById('archiveFilterResults');
+    if (filterResults) filterResults.style.display = 'none';
+    const grid = document.getElementById('bodyZonesGrid');
+    if (grid) grid.style.display = 'grid';
+    renderArchiveGrid();
+  }
+
   if (tabId === 'agenda') {
-    renderCalendar();
+    renderAgendaVisits();
+    renderHealthNotes();
     renderPreventionRadar();
   }
 
@@ -617,6 +629,8 @@ async function renderAllViews() {
   await renderHome();
   await renderArchiveGrid();
   renderAppointments();
+  renderAgendaVisits();
+  renderHealthNotes();
   renderCalendar();
   renderProfile();
   renderTax730Dashboard();
@@ -728,10 +742,7 @@ async function renderHome() {
   // Render BLOCCO B: Bento 2x2 Widgets
   renderBentoWidgets();
 
-  // Render BLOCCO D: Check-in Rapido
-  renderCheckinStrip();
-
-  // Render BLOCCO E: Ultimi nel Dossier (3 latest)
+  // Render BLOCCO D: Ultimi nel Dossier (3 latest)
   const allDocs = await pulseDB.getAllDocuments();
   const profileDocs = allDocs.filter(d => !d.profileId || d.profileId === activeProfile);
   profileDocs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -1569,6 +1580,7 @@ function initCalendar() {
 function renderCalendar() {
   const monthTitle = document.getElementById('calMonthTitle');
   const grid = document.getElementById('calDaysGrid');
+  if (!grid || !monthTitle) return;
   const activeProfile = getActiveProfileId();
 
   const monthNames = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
@@ -1728,6 +1740,7 @@ function toggleChecklistItem(apptId, index) {
     appt.checklist[index].done = !appt.checklist[index].done;
     localStorage.setItem('pulse_appointments', JSON.stringify(allAppts));
     renderCalendar();
+    renderAgendaVisits();
   }
 }
 
@@ -1742,6 +1755,7 @@ function addChecklistItem(apptId) {
     localStorage.setItem('pulse_appointments', JSON.stringify(allAppts));
     input.value = '';
     renderCalendar();
+    renderAgendaVisits();
     showToast('Domanda aggiunta!', '📝');
   }
 }
@@ -1779,6 +1793,7 @@ function initAppointments() {
     form.reset();
     showToast('Promemoria aggiunto', '🗓️');
     renderAppointments();
+    renderAgendaVisits();
     renderCalendar();
     renderHome();
   });
@@ -1812,6 +1827,7 @@ async function deleteAppt(id) {
     localStorage.setItem('pulse_appointments', JSON.stringify(appts));
     showToast('Promemoria eliminato', '🗑️');
     await renderAppointments();
+    renderAgendaVisits();
     renderCalendar();
     await renderHome();
   }
@@ -2527,9 +2543,8 @@ async function openCabinetView() {
 }
 
 function openCalendarQuickSheet() {
-  switchTab('agenda');
-  const calSegBtn = document.getElementById('segAgendaCal');
-  if (calSegBtn) calSegBtn.click();
+  openModal('quickCalendarModalOverlay');
+  renderCalendar();
 }
 
 function renderMedicineCabinetInFolder() {
@@ -2767,28 +2782,344 @@ function openEditVisionModal() {
   renderVisionCardInFolder();
 }
 
-// 16. Radar Prevenzione
-function initPreventionRadar() {
-  const btnCal = document.getElementById('segAgendaCal');
+// 16. Agenda SubTabs & Radar Prevenzione
+function switchAgendaSubTab(subTab) {
+  const btnVisits = document.getElementById('segAgendaVisits');
+  const btnNotes = document.getElementById('segAgendaNotes');
   const btnRadar = document.getElementById('segAgendaRadar');
-  const calView = document.getElementById('agendaCalendarView');
+  const visitsView = document.getElementById('agendaVisitsView');
+  const notesView = document.getElementById('agendaNotesView');
   const radarView = document.getElementById('agendaRadarView');
 
-  if (btnCal && btnRadar) {
-    btnCal.addEventListener('click', () => {
-      btnCal.classList.add('active');
-      btnRadar.classList.remove('active');
-      calView.style.display = 'block';
-      radarView.style.display = 'none';
-    });
-    btnRadar.addEventListener('click', () => {
-      btnRadar.classList.add('active');
-      btnCal.classList.remove('active');
-      calView.style.display = 'none';
-      radarView.style.display = 'block';
-      renderPreventionRadar();
-    });
+  if (btnVisits) btnVisits.classList.remove('active');
+  if (btnNotes) btnNotes.classList.remove('active');
+  if (btnRadar) btnRadar.classList.remove('active');
+
+  if (visitsView) visitsView.style.display = 'none';
+  if (notesView) notesView.style.display = 'none';
+  if (radarView) radarView.style.display = 'none';
+
+  if (subTab === 'visits') {
+    if (btnVisits) btnVisits.classList.add('active');
+    if (visitsView) visitsView.style.display = 'block';
+    renderAgendaVisits();
+  } else if (subTab === 'notes') {
+    if (btnNotes) btnNotes.classList.add('active');
+    if (notesView) notesView.style.display = 'block';
+    renderHealthNotes();
+  } else if (subTab === 'radar') {
+    if (btnRadar) btnRadar.classList.add('active');
+    if (radarView) radarView.style.display = 'block';
+    renderPreventionRadar();
   }
+}
+
+let pastVisitsExpanded = false;
+function togglePastVisits() {
+  pastVisitsExpanded = !pastVisitsExpanded;
+  const list = document.getElementById('agendaPastVisitsList');
+  const arrow = document.getElementById('pastVisitsArrow');
+  if (list) list.style.display = pastVisitsExpanded ? 'block' : 'none';
+  if (arrow) arrow.innerText = pastVisitsExpanded ? '▴' : '▾';
+}
+
+function toggleVisitCardDetails(cardId) {
+  const el = document.getElementById(cardId);
+  if (!el) return;
+  const isHidden = el.style.display === 'none';
+  el.style.display = isHidden ? 'block' : 'none';
+  const arrow = document.getElementById(`arrow_${cardId}`);
+  if (arrow) arrow.innerText = isHidden ? '▴' : '▾';
+}
+
+function renderAgendaVisits() {
+  const timelineContainer = document.getElementById('agendaVisitsTimelineList');
+  const pastContainer = document.getElementById('agendaPastVisitsList');
+  if (!timelineContainer) return;
+
+  const activeProfile = getActiveProfileId();
+  const allAppts = JSON.parse(localStorage.getItem('pulse_appointments') || '[]');
+  const profileAppts = allAppts.filter(a => !a.profileId || a.profileId === activeProfile);
+
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+
+  const upcoming = [];
+  const past = [];
+
+  profileAppts.forEach(a => {
+    const apptDate = new Date(a.datetime);
+    if (apptDate < now && a.datetime.split('T')[0] !== todayStr) {
+      past.push(a);
+    } else {
+      upcoming.push(a);
+    }
+  });
+
+  upcoming.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+  past.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+
+  if (upcoming.length === 0) {
+    timelineContainer.innerHTML = `
+      <div class="empty-state" style="padding: 24px 16px;">
+        <div class="empty-text">Nessun appuntamento futuro</div>
+        <div class="empty-sub">Pianifica le tue prossime visite mediche per ricevere promemoria.</div>
+        <button class="btn-primary" style="margin: 12px auto 0; width: auto; padding: 8px 18px;" onclick="openNewApptModal()">
+          + Aggiungi Visita
+        </button>
+      </div>
+    `;
+  } else {
+    const thisWeek = [];
+    const thisMonth = [];
+    const later = [];
+
+    const weekFromNow = new Date(now.getTime() + 7 * 86400000);
+    const monthFromNow = new Date(now.getTime() + 30 * 86400000);
+
+    upcoming.forEach(a => {
+      const dt = new Date(a.datetime);
+      if (dt <= weekFromNow) {
+        thisWeek.push(a);
+      } else if (dt <= monthFromNow) {
+        thisMonth.push(a);
+      } else {
+        later.push(a);
+      }
+    });
+
+    let html = '';
+    if (thisWeek.length > 0) {
+      html += `<div class="timeline-section-title"><span>⚡</span> Questa settimana (${thisWeek.length})</div>`;
+      html += thisWeek.map(a => renderAgendaVisitCardHTML(a, 'urgent')).join('');
+    }
+    if (thisMonth.length > 0) {
+      html += `<div class="timeline-section-title" style="margin-top: 20px;"><span>🗓️</span> Questo mese (${thisMonth.length})</div>`;
+      html += thisMonth.map(a => renderAgendaVisitCardHTML(a, 'soon')).join('');
+    }
+    if (later.length > 0) {
+      html += `<div class="timeline-section-title" style="margin-top: 20px;"><span>⏳</span> Più avanti (${later.length})</div>`;
+      html += later.map(a => renderAgendaVisitCardHTML(a, 'later')).join('');
+    }
+
+    timelineContainer.innerHTML = html;
+  }
+
+  if (pastContainer) {
+    if (past.length === 0) {
+      pastContainer.innerHTML = `<div style="font-size: 13px; color: var(--text-secondary); text-align: center; padding: 12px;">Nessuna visita passata archiviata.</div>`;
+    } else {
+      pastContainer.innerHTML = past.map(a => renderAgendaVisitCardHTML(a, 'past')).join('');
+    }
+  }
+}
+
+function renderAgendaVisitCardHTML(a, timeBadgeType) {
+  const dt = new Date(a.datetime);
+  const now = new Date();
+  const diffDays = Math.ceil((dt - now) / 86400000);
+
+  let badgeLabel = '';
+  let badgeClass = 'timeline-badge later';
+  if (timeBadgeType === 'past') {
+    badgeLabel = 'Conclusa';
+    badgeClass = 'timeline-badge later';
+  } else if (diffDays <= 0) {
+    badgeLabel = 'Oggi';
+    badgeClass = 'timeline-badge urgent';
+  } else if (diffDays === 1) {
+    badgeLabel = 'Domani';
+    badgeClass = 'timeline-badge urgent';
+  } else if (diffDays <= 7) {
+    badgeLabel = `Tra ${diffDays} gg`;
+    badgeClass = 'timeline-badge urgent';
+  } else if (diffDays <= 30) {
+    badgeLabel = `Tra ${Math.round(diffDays / 7)} sett`;
+    badgeClass = 'timeline-badge soon';
+  } else {
+    badgeLabel = dt.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+    badgeClass = 'timeline-badge later';
+  }
+
+  const dateFormatted = dt.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+  const timeFormatted = dt.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  const checklist = a.checklist || [];
+  const cardDetailsId = `visitDetails_${a.id}`;
+
+  return `
+    <div class="glass-card" style="margin-bottom: 12px; padding: 14px 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+        <div style="flex: 1;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
+            <span class="${badgeClass}">${badgeLabel}</span>
+            <span style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">${dateFormatted} • Ore ${timeFormatted}</span>
+          </div>
+          <div style="font-size: 16px; font-weight: 800; color: var(--text-primary);">${escapeHTML(a.title)}</div>
+          ${a.location ? `
+            <a href="https://maps.google.com/?q=${encodeURIComponent(a.location)}" target="_blank" rel="noopener" style="font-size: 13px; color: var(--accent-blue); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;">
+              📍 ${escapeHTML(a.location)} ›
+            </a>
+          ` : ''}
+        </div>
+        <button class="btn-secondary-sm" style="flex: none; padding: 4px 8px; font-size: 12px;" onclick="toggleVisitCardDetails('${cardDetailsId}')">
+          <span id="arrow_${cardDetailsId}">▾</span> Dettagli
+        </button>
+      </div>
+
+      <!-- Sezione Espandibile: Note di preparazione & Domande checklist -->
+      <div id="${cardDetailsId}" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle);">
+        ${a.notes ? `
+          <div style="font-size: 12px; background: var(--bg-card-secondary); padding: 8px 12px; border-radius: var(--radius-sm); margin-bottom: 10px;">
+            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 2px;">Note di Preparazione</div>
+            ${escapeHTML(a.notes)}
+          </div>
+        ` : ''}
+
+        <div class="checklist-container" style="background: var(--bg-card-secondary); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 10px;">
+          <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--accent-blue); margin-bottom: 6px; display: flex; justify-content: space-between;">
+            <span>🩺 Domande per il Medico</span>
+            <span style="color: var(--text-secondary);">${checklist.filter(c => c.done).length}/${checklist.length}</span>
+          </div>
+          ${checklist.map((item, idx) => `
+            <div style="display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 13px; cursor: pointer; ${item.done ? 'text-decoration: line-through; opacity: 0.6;' : ''}" onclick="toggleChecklistItem('${a.id}', ${idx})">
+              <span style="width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--accent-blue); display: flex; align-items: center; justify-content: center; font-size: 11px; background: ${item.done ? 'var(--accent-blue)' : 'transparent'}; color: #fff;">${item.done ? '✓' : ''}</span>
+              <span>${escapeHTML(item.text)}</span>
+            </div>
+          `).join('')}
+          <div style="display: flex; gap: 6px; margin-top: 8px;">
+            <input type="text" id="checkInput_${a.id}" class="form-input" style="padding: 6px 10px; font-size: 12px;" placeholder="Aggiungi domanda per la visita..." onkeydown="if(event.key==='Enter') addChecklistItem('${a.id}')">
+            <button class="btn-secondary-sm" style="flex: none; padding: 6px 12px;" onclick="addChecklistItem('${a.id}')">+</button>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn-secondary-sm" onclick="exportSingleICS('${a.id}')">📅 Esporta .ics</button>
+          ${a.docId ? `<button class="btn-secondary-sm" onclick="openDocById('${a.docId}')">📄 Documento Dossier</button>` : ''}
+          <button class="btn-secondary-sm" style="color: var(--accent-coral); margin-left: auto;" onclick="deleteAppt('${a.id}')">Elimina</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// 16.2 Diario Appunti Salute (Stile Apple Notes)
+function renderHealthNotes() {
+  const container = document.getElementById('healthNotesList');
+  if (!container) return;
+
+  const activeProfile = getActiveProfileId();
+  const allNotes = JSON.parse(localStorage.getItem('pulse_notes') || '[]');
+  const profileNotes = allNotes.filter(n => !n.profileId || n.profileId === activeProfile);
+  profileNotes.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if (profileNotes.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state" style="padding: 24px 16px;">
+        <div class="empty-text">Nessun appunto nel diario</div>
+        <div class="empty-sub">Annota sintomi, reazioni a farmaci o promemoria prima della visita con il medico.</div>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = profileNotes.map(n => {
+    const dt = new Date(n.date);
+    const dateStr = dt.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    const tagClass = 'tag-' + (n.tag || 'nota').toLowerCase();
+
+    return `
+      <div class="glass-card" style="margin-bottom: 10px; padding: 12px 16px; border: 1px solid var(--border-subtle);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span class="health-note-tag-pill ${tagClass}">${escapeHTML(n.tag || 'Nota')}</span>
+          <span style="font-size: 11px; color: var(--text-secondary);">${dateStr}</span>
+        </div>
+        ${n.title ? `<div style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">${escapeHTML(n.title)}</div>` : ''}
+        <div style="font-size: 13px; color: var(--text-primary); line-height: 1.45; white-space: pre-wrap;">${escapeHTML(n.text)}</div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; border-top: 1px solid var(--border-subtle); padding-top: 6px;">
+          <button class="btn-secondary-sm" style="font-size: 11px; padding: 3px 8px;" onclick="editHealthNote('${n.id}')">Modifica</button>
+          <button class="btn-secondary-sm" style="font-size: 11px; padding: 3px 8px; color: var(--accent-coral);" onclick="deleteHealthNote('${n.id}')">Elimina</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function handleSaveHealthNote(e) {
+  e.preventDefault();
+  const idInput = document.getElementById('noteEditId');
+  const titleInput = document.getElementById('noteTitleInput');
+  const tagSelect = document.getElementById('noteTagSelect');
+  const textInput = document.getElementById('noteTextInput');
+
+  const text = textInput.value.trim();
+  if (!text) return;
+
+  const activeProfile = getActiveProfileId();
+  let notes = JSON.parse(localStorage.getItem('pulse_notes') || '[]');
+  const editId = idInput.value;
+
+  if (editId) {
+    const existing = notes.find(n => n.id === editId);
+    if (existing) {
+      existing.title = titleInput.value.trim();
+      existing.tag = tagSelect.value;
+      existing.text = text;
+      existing.updatedAt = new Date().toISOString();
+      showToast('Appunto aggiornato!', '📝');
+    }
+  } else {
+    const newNote = {
+      id: 'note_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+      profileId: activeProfile,
+      title: titleInput.value.trim(),
+      tag: tagSelect.value,
+      text: text,
+      date: new Date().toISOString()
+    };
+    notes.unshift(newNote);
+    showToast('Appunto salvato nel diario!', '📝');
+  }
+
+  localStorage.setItem('pulse_notes', JSON.stringify(notes));
+  cancelEditHealthNote();
+  renderHealthNotes();
+}
+
+function editHealthNote(id) {
+  const notes = JSON.parse(localStorage.getItem('pulse_notes') || '[]');
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+
+  document.getElementById('noteEditId').value = note.id;
+  document.getElementById('noteTitleInput').value = note.title || '';
+  document.getElementById('noteTagSelect').value = note.tag || 'Nota';
+  document.getElementById('noteTextInput').value = note.text || '';
+  document.getElementById('btnSaveHealthNote').innerText = 'Aggiorna';
+  document.getElementById('noteCancelBtnWrap').style.display = 'inline-block';
+  document.getElementById('noteTextInput').focus();
+}
+
+function cancelEditHealthNote() {
+  document.getElementById('noteEditId').value = '';
+  document.getElementById('noteTitleInput').value = '';
+  document.getElementById('noteTagSelect').value = 'Nota';
+  document.getElementById('noteTextInput').value = '';
+  document.getElementById('btnSaveHealthNote').innerText = 'Salva Appunto';
+  document.getElementById('noteCancelBtnWrap').style.display = 'none';
+}
+
+function deleteHealthNote(id) {
+  if (confirm('Eliminare questo appunto dal diario?')) {
+    let notes = JSON.parse(localStorage.getItem('pulse_notes') || '[]');
+    notes = notes.filter(n => n.id !== id);
+    localStorage.setItem('pulse_notes', JSON.stringify(notes));
+    showToast('Appunto eliminato', '🗑️');
+    renderHealthNotes();
+  }
+}
+
+function initPreventionRadar() {
+  // Gestito da switchAgendaSubTab
 }
 
 function renderPreventionRadar() {
@@ -2858,9 +3189,10 @@ function markRadarDoneToday(radarId) {
 
 function bookRadarAppointment(name) {
   switchTab('agenda');
-  document.getElementById('segAgendaCal').click();
+  switchAgendaSubTab('visits');
   openNewApptModal();
-  document.getElementById('apptTitleInput').value = `Controllo ${name}`;
+  const input = document.getElementById('apptTitleInput');
+  if (input) input.value = `Controllo ${name}`;
 }
 
 // 17. Riassunto Clinico "Nuovo Medico"
@@ -3008,18 +3340,71 @@ function renderProfile() {
   document.getElementById('profileAllergiesDisplay').innerText = profile.allergies || 'Nessuna';
   document.getElementById('profileDoctorDisplay').innerText = profile.doctor || 'Non indicato';
 
+  // 2 Pulsanti Rapidi a Sinistra del Medico (34x34) WhatsApp & Telefono
+  const docQuickBtns = document.getElementById('doctorQuickButtonsLeft');
+  if (docQuickBtns) {
+    docQuickBtns.innerHTML = `
+      <button class="quick-doc-btn whatsapp" onclick="openDoctorWhatsApp()" title="Invia WhatsApp al Medico">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.455 5.711 1.456h.005c6.554 0 11.89-5.336 11.893-11.893a11.821 11.821 0 00-3.48-8.414z"/>
+        </svg>
+      </button>
+      <button class="quick-doc-btn phone" onclick="openDoctorPhone()" title="Chiama il Medico">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+        </svg>
+      </button>
+    `;
+  }
+
   const docActions = document.getElementById('doctorActionsContainer');
-  let actionsHTML = '';
-  actionsHTML += `<button onclick="openDoctorModal()" class="btn-secondary-sm" style="padding: 6px 10px;">📋 Scheda Medico</button>`;
-  if (profile.doctorPhone) {
-    actionsHTML += `<a href="tel:${profile.doctorPhone}" class="btn-secondary-sm" style="text-decoration: none; padding: 6px 10px;">📞 Chiama</a>`;
+  if (docActions) {
+    let actionsHTML = '';
+    actionsHTML += `<button onclick="openDoctorModal()" class="btn-secondary-sm" style="padding: 6px 10px;">📋 Scheda Medico</button>`;
+    if (profile.doctorPhone) {
+      actionsHTML += `<a href="tel:${profile.doctorPhone}" class="btn-secondary-sm" style="text-decoration: none; padding: 6px 10px;">📞 Chiama</a>`;
+    }
+    if (profile.doctorEmail) {
+      actionsHTML += `<a href="mailto:${profile.doctorEmail}" class="btn-secondary-sm" style="text-decoration: none; padding: 6px 10px;">✉️ Email</a>`;
+    }
+    docActions.innerHTML = actionsHTML;
   }
-  if (profile.doctorEmail) {
-    actionsHTML += `<a href="mailto:${profile.doctorEmail}" class="btn-secondary-sm" style="text-decoration: none; padding: 6px 10px;">✉️ Email</a>`;
-  }
-  docActions.innerHTML = actionsHTML;
 
   estimateStorage();
+}
+
+function openDoctorWhatsApp() {
+  const activeId = getActiveProfileId();
+  const profile = getProfileData(activeId);
+  const rawNum = profile.doctorWa || profile.doctorPhone;
+  if (!rawNum) {
+    showToast('Numero medico non impostato', '⚠️');
+    openDoctorModal();
+    return;
+  }
+  const cleanNum = rawNum.replace(/[^0-9+]/g, '');
+  window.open(`https://wa.me/${cleanNum.startsWith('+') ? cleanNum.slice(1) : (cleanNum.startsWith('3') ? '39' + cleanNum : cleanNum)}`, '_blank');
+}
+
+function openDoctorPhone() {
+  const activeId = getActiveProfileId();
+  const profile = getProfileData(activeId);
+  const rawNum = profile.doctorPhone || profile.doctorWa;
+  if (!rawNum) {
+    showToast('Numero telefono non impostato', '⚠️');
+    openDoctorModal();
+    return;
+  }
+  window.location.href = `tel:${rawNum.replace(/[^0-9+]/g, '')}`;
+}
+
+function openNearestPharmacyMap() {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  if (isIOS) {
+    window.location.href = 'maps://?q=Farmacia';
+  } else {
+    window.open('https://www.google.com/maps/search/farmacia+piu+vicina/', '_blank');
+  }
 }
 
 function copyFiscalCode() {
@@ -3118,6 +3503,7 @@ async function exportFullBackup() {
     pin_code: localStorage.getItem('pulse_pin_code') || null,
     therapies: JSON.parse(localStorage.getItem('pulse_therapies') || '[]'),
     symptoms: JSON.parse(localStorage.getItem('pulse_symptoms') || '[]'),
+    notes: JSON.parse(localStorage.getItem('pulse_notes') || '[]'),
     cabinet: JSON.parse(localStorage.getItem('pulse_cabinet') || '[]'),
     radar: JSON.parse(localStorage.getItem('pulse_radar') || '[]'),
     documents: docs
@@ -3158,6 +3544,7 @@ function importFullBackup(e) {
       if (data.pin_code) localStorage.setItem('pulse_pin_code', data.pin_code);
       if (data.therapies) localStorage.setItem('pulse_therapies', JSON.stringify(data.therapies));
       if (data.symptoms) localStorage.setItem('pulse_symptoms', JSON.stringify(data.symptoms));
+      if (data.notes) localStorage.setItem('pulse_notes', JSON.stringify(data.notes));
       if (data.cabinet) localStorage.setItem('pulse_cabinet', JSON.stringify(data.cabinet));
       if (data.radar) localStorage.setItem('pulse_radar', JSON.stringify(data.radar));
 
