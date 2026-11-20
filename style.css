@@ -855,14 +855,57 @@ body::after {
 }
 
 .cal-dot {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
+  background: var(--accent-coral);
+}
+
+.cal-dot.promemoria {
+  background: var(--accent-amber);
+}
+
+.cal-dot.nota {
+  background: var(--accent-blue);
+}
+
+.cal-dot.visita {
   background: var(--accent-coral);
 }
 
 .cal-day-cell.is-selected .cal-dot {
   background: var(--accent-teal);
+}
+
+/* Quick Calendar Type Buttons */
+.cal-quick-type-btn {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-glass);
+  background: var(--bg-card-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s var(--spring-easing);
+  text-align: center;
+}
+
+.cal-quick-type-btn.active {
+  background: var(--text-primary);
+  color: var(--bg-app);
+  border-color: var(--text-primary);
+}
+
+/* Tax 730 Locked State */
+.tax-hero-card.tax-locked {
+  opacity: 0.72;
+  filter: grayscale(0.2);
+}
+
+.tax-hero-card.tax-locked:hover {
+  opacity: 0.85;
 }
 
 /* Floating Bottom Navigation Bar iOS */

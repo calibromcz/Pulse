@@ -1577,6 +1577,77 @@ function initCalendar() {
   });
 }
 
+let calQuickItemType = 'Promemoria';
+
+function setCalQuickType(type) {
+  calQuickItemType = type;
+  document.querySelectorAll('.cal-quick-type-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.type === type);
+  });
+}
+
+function addQuickCalendarItem() {
+  const titleInput = document.getElementById('calQuickItemTitle');
+  const timeInput = document.getElementById('calQuickItemTime');
+  const title = (titleInput && titleInput.value.trim()) || '';
+  if (!title) {
+    showToast('Inserisci un titolo o nota per il giorno', '⚠️');
+    return;
+  }
+
+  const timeVal = (timeInput && timeInput.value) || '';
+  const dateStr = calSelectedDate.toISOString().split('T')[0];
+  const activeProfile = getActiveProfileId();
+
+  if (calQuickItemType === 'Visita') {
+    // Salva come appuntamento
+    const dtStr = timeVal ? `${dateStr}T${timeVal}` : `${dateStr}T09:30`;
+    const allAppts = JSON.parse(localStorage.getItem('pulse_appointments') || '[]');
+    allAppts.push({
+      id: 'appt_' + Date.now(),
+      profileId: activeProfile,
+      title: title,
+      datetime: dtStr,
+      location: '',
+      notes: 'Creata da calendario rapido',
+      checklist: []
+    });
+    localStorage.setItem('pulse_appointments', JSON.stringify(allAppts));
+    renderAppointments();
+    renderAgendaVisits();
+  } else {
+    // Salva come nota / promemoria calendario
+    let notes = JSON.parse(localStorage.getItem('pulse_calendar_notes') || '[]');
+    notes.push({
+      id: 'calnote_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+      profileId: activeProfile,
+      date: dateStr,
+      time: timeVal,
+      type: calQuickItemType, // 'Promemoria' | 'Nota'
+      title: title,
+      createdAt: new Date().toISOString()
+    });
+    localStorage.setItem('pulse_calendar_notes', JSON.stringify(notes));
+  }
+
+  if (titleInput) titleInput.value = '';
+  if (timeInput) timeInput.value = '';
+
+  showToast(`${calQuickItemType} aggiunto al giorno!`, '🗓️');
+  renderCalendar();
+  renderSelectedDayAppointments();
+  renderHome();
+}
+
+function deleteCalendarNote(id) {
+  let notes = JSON.parse(localStorage.getItem('pulse_calendar_notes') || '[]');
+  notes = notes.filter(n => n.id !== id);
+  localStorage.setItem('pulse_calendar_notes', JSON.stringify(notes));
+  showToast('Elemento rimosso', '🗑️');
+  renderCalendar();
+  renderSelectedDayAppointments();
+}
+
 function renderCalendar() {
   const monthTitle = document.getElementById('calMonthTitle');
   const grid = document.getElementById('calDaysGrid');
@@ -1589,10 +1660,20 @@ function renderCalendar() {
   const allAppts = JSON.parse(localStorage.getItem('pulse_appointments') || '[]');
   const profileAppts = allAppts.filter(a => !a.profileId || a.profileId === activeProfile);
 
-  const apptsByDate = {};
+  const calNotes = JSON.parse(localStorage.getItem('pulse_calendar_notes') || '[]');
+  const profileCalNotes = calNotes.filter(n => !n.profileId || n.profileId === activeProfile);
+
+  const dotsByDate = {}; // { 'YYYY-MM-DD': ['visita', 'promemoria', 'nota'] }
   profileAppts.forEach(a => {
     const dStr = a.datetime.split('T')[0];
-    apptsByDate[dStr] = (apptsByDate[dStr] || 0) + 1;
+    if (!dotsByDate[dStr]) dotsByDate[dStr] = [];
+    dotsByDate[dStr].push('visita');
+  });
+
+  profileCalNotes.forEach(n => {
+    const dStr = n.date;
+    if (!dotsByDate[dStr]) dotsByDate[dStr] = [];
+    dotsByDate[dStr].push(n.type ? n.type.toLowerCase() : 'nota');
   });
 
   const firstDayOfMonth = new Date(calCurrentYear, calCurrentMonth, 1);
@@ -1622,12 +1703,12 @@ function renderCalendar() {
 
     const isToday = fullDateStr === todayStr;
     const isSelected = fullDateStr === selectedStr;
-    const hasAppts = apptsByDate[fullDateStr] || 0;
+    const dotTypes = dotsByDate[fullDateStr] || [];
 
     let dotsHtml = '';
-    if (hasAppts > 0) {
+    if (dotTypes.length > 0) {
       dotsHtml = `<div class="cal-dots-wrap">` +
-        `<span class="cal-dot"></span>`.repeat(Math.min(hasAppts, 3)) +
+        dotTypes.slice(0, 3).map(type => `<span class="cal-dot ${type}"></span>`).join('') +
         `</div>`;
     }
 
@@ -1662,31 +1743,60 @@ function quickAddApptDate(year, month, day) {
 function renderSelectedDayAppointments() {
   const container = document.getElementById('selectedDayApptsList');
   const bannerTitle = document.getElementById('selectedDayBannerTitle');
+  if (!container || !bannerTitle) return;
   const activeProfile = getActiveProfileId();
 
   const dateStr = calSelectedDate.toISOString().split('T')[0];
   const dateFormatted = calSelectedDate.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' });
-  bannerTitle.innerText = dateFormatted;
+  bannerTitle.innerText = dateFormatted.charAt(0).toUpperCase() + dateFormatted.slice(1);
 
   const allAppts = JSON.parse(localStorage.getItem('pulse_appointments') || '[]');
   const dayAppts = allAppts.filter(a => (!a.profileId || a.profileId === activeProfile) && a.datetime.startsWith(dateStr));
 
-  if (dayAppts.length === 0) {
+  const calNotes = JSON.parse(localStorage.getItem('pulse_calendar_notes') || '[]');
+  const dayNotes = calNotes.filter(n => (!n.profileId || n.profileId === activeProfile) && n.date === dateStr);
+
+  if (dayAppts.length === 0 && dayNotes.length === 0) {
     container.innerHTML = `
       <div class="empty-state" style="padding: 18px 12px;">
-        <div class="empty-text">Nessun impegno in questa data</div>
-        <div class="empty-sub">Tocca "+ Aggiungi Visita" per pianificare un promemoria.</div>
-        <button class="btn-secondary-sm" style="margin: 0 auto; max-width: 240px;" onclick="openNewApptModalWithDate(calSelectedDate)">
-          + Aggiungi Visita il ${calSelectedDate.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}
-        </button>
+        <div class="empty-text">Nessun impegno o appunto in questa data</div>
+        <div class="empty-sub">Usa il modulo sopra per aggiungere un promemoria, una nota o una visita.</div>
       </div>
     `;
   } else {
-    container.innerHTML = dayAppts.map(a => renderInteractiveApptCard(a)).join('') + `
-      <button class="btn-secondary-sm" style="width: 100%; margin-top: 6px;" onclick="openNewApptModalWithDate(calSelectedDate)">
-        + Aggiungi un'altra visita in questa data
-      </button>
-    `;
+    let itemsHTML = '';
+
+    // Render Note e Promemoria del Giorno
+    if (dayNotes.length > 0) {
+      itemsHTML += dayNotes.map(n => {
+        const isReminder = n.type === 'Promemoria';
+        const badgeColor = isReminder ? 'var(--accent-amber)' : 'var(--accent-blue)';
+        const badgeBg = isReminder ? 'rgba(229, 169, 92, 0.15)' : 'rgba(100, 168, 240, 0.15)';
+        return `
+          <div class="glass-card" style="margin-bottom: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border-glass);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 2px 7px; border-radius: 99px; background: ${badgeBg}; color: ${badgeColor};">
+                ${escapeHTML(n.type || 'Nota')}
+              </span>
+              <div>
+                <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">${escapeHTML(n.title)}</div>
+                ${n.time ? `<div style="font-size: 11px; color: var(--text-secondary);">⏰ Ore ${escapeHTML(n.time)}</div>` : ''}
+              </div>
+            </div>
+            <button class="btn-secondary-sm" style="padding: 3px 8px; font-size: 11px; color: var(--accent-coral);" onclick="deleteCalendarNote('${n.id}')">
+              ✕
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render Visite del Giorno
+    if (dayAppts.length > 0) {
+      itemsHTML += dayAppts.map(a => renderInteractiveApptCard(a)).join('');
+    }
+
+    container.innerHTML = itemsHTML;
   }
 }
 
@@ -1931,6 +2041,10 @@ async function markRecipeUsed(docId) {
     await pulseDB.saveDocument(doc);
     showToast('Ricetta segnata come ritirata!', '💊');
     openPharmacyMode();
+    await renderBentoWidgets();
+    if (document.getElementById('recipesModalOverlay').classList.contains('active')) {
+      await renderRecipesModalContent();
+    }
   }
 }
 
@@ -1942,7 +2056,7 @@ function initTax730() {
   if (banner) banner.addEventListener('click', openTax730Modal);
 
   const profileLink = document.getElementById('profileTax730Link');
-  if (profileLink) profileLink.addEventListener('click', openTax730Modal);
+  if (profileLink) profileLink.addEventListener('click', handleTax730CardClick);
 
   document.getElementById('taxYearPrevBtn').addEventListener('click', () => {
     taxSelectedYear--;
@@ -1971,7 +2085,53 @@ function initTax730() {
   });
 }
 
+function isTax730Active() {
+  return new Date() >= new Date('2027-01-01T00:00:00');
+}
+
+function handleTax730CardClick() {
+  if (!isTax730Active()) {
+    showToast('Cassetto 730 attivo dal 1° Gennaio 2027', '🔒');
+    return;
+  }
+  openTax730Modal();
+}
+
 async function renderTax730Dashboard() {
+  const isUnlocked = isTax730Active();
+  const card = document.getElementById('profileTax730Link');
+  const lockIcon = document.getElementById('tax730LockIcon');
+  const subtitle = document.getElementById('tax730Subtitle');
+  const badgeWrap = document.getElementById('tax730BadgeWrap');
+  const activeContent = document.getElementById('tax730ActiveContent');
+  const lockedContent = document.getElementById('tax730LockedContent');
+  const iconBadge = document.getElementById('tax730IconBadge');
+
+  if (card) {
+    if (!isUnlocked) {
+      card.classList.add('tax-locked');
+      if (lockIcon) lockIcon.style.display = 'inline';
+      if (subtitle) subtitle.innerText = 'Attivo dal 1° Gennaio 2027 con il nuovo anno fiscale';
+      if (badgeWrap) {
+        badgeWrap.style.background = 'rgba(142, 142, 147, 0.16)';
+        badgeWrap.style.color = 'var(--text-secondary)';
+        badgeWrap.innerText = 'Attivo dal 01/01/2027';
+      }
+      if (activeContent) activeContent.style.display = 'none';
+      if (lockedContent) lockedContent.style.display = 'block';
+      if (iconBadge) {
+        iconBadge.style.opacity = '0.6';
+      }
+      return;
+    } else {
+      card.classList.remove('tax-locked');
+      if (lockIcon) lockIcon.style.display = 'none';
+      if (subtitle) subtitle.innerText = 'Dossier spese, franchigia e rimborso 19%';
+      if (activeContent) activeContent.style.display = 'flex';
+      if (lockedContent) lockedContent.style.display = 'none';
+    }
+  }
+
   const profileAmt = document.getElementById('profileTax730Amount');
   const profileRef = document.getElementById('profileTax730Refund');
   const profileFran = document.getElementById('profileTax730Franchigia');
@@ -2006,6 +2166,10 @@ async function renderTax730Dashboard() {
 }
 
 async function openTax730Modal() {
+  if (!isTax730Active()) {
+    showToast('Cassetto 730 attivo dal 1° Gennaio 2027', '🔒');
+    return;
+  }
   await renderTax730ModalContent();
   openModal('tax730ModalOverlay');
 }
@@ -2533,7 +2697,165 @@ function switchPharmaTab(tab) {
 
 // Aliases and Direct Views
 function openPharmacyModal() {
-  openPharmacyMode();
+  openRecipesModal();
+}
+
+async function openRecipesModal() {
+  await renderRecipesModalContent();
+  openModal('recipesModalOverlay');
+}
+
+async function renderRecipesModalContent() {
+  const activeProfile = getActiveProfileId();
+  const allDocs = await pulseDB.getAllDocuments();
+  const profileDocs = allDocs.filter(d => (!d.profileId || d.profileId === activeProfile) && (d.category === 'Ricetta' || d.nre));
+
+  const activeRecipes = profileDocs.filter(d => !d.isUsedRx);
+  const usedRecipes = profileDocs.filter(d => d.isUsedRx);
+
+  const activeContainer = document.getElementById('activeRecipesList');
+  const usedContainer = document.getElementById('usedRecipesList');
+
+  if (activeContainer) {
+    if (activeRecipes.length === 0) {
+      activeContainer.innerHTML = `
+        <div class="empty-state" style="padding: 18px 12px;">
+          <div class="empty-text">Nessuna ricetta attiva da ritirare</div>
+          <div class="empty-sub">Compila il modulo in alto per aggiungere subito una ricetta o prescrizione.</div>
+        </div>
+      `;
+    } else {
+      activeContainer.innerHTML = activeRecipes.map(r => `
+        <div class="glass-card" style="margin-bottom: 10px; padding: 12px 14px; border: 1px solid var(--border-glass);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+            <div>
+              <div style="font-size: 15px; font-weight: 800; color: var(--text-primary);">${escapeHTML(r.title)}</div>
+              ${r.nre ? `<div style="font-family: monospace; font-size: 13px; font-weight: 800; color: var(--accent-green); margin-top: 3px;">NRE: ${escapeHTML(r.nre)}</div>` : ''}
+              ${r.notes ? `<div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">${escapeHTML(r.notes)}</div>` : ''}
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+              <button class="btn-secondary-sm" style="font-size: 11px; padding: 4px 10px; background: rgba(52, 199, 89, 0.15); color: var(--accent-green); border-color: rgba(52, 199, 89, 0.3);" onclick="markRecipeUsed('${r.id}')">
+                ✓ Segna ritirata
+              </button>
+              <button class="btn-secondary-sm" style="font-size: 10px; padding: 2px 6px; color: var(--accent-coral);" onclick="deleteRecipeDoc('${r.id}')">
+                Elimina
+              </button>
+            </div>
+          </div>
+          ${r.dataUrl ? `
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-subtle);">
+              <button class="btn-secondary-sm" style="font-size: 11px; padding: 3px 8px;" onclick="openDocById('${r.id}')">
+                📄 Visualizza Allegato
+              </button>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+  }
+
+  if (usedContainer) {
+    if (usedRecipes.length === 0) {
+      usedContainer.innerHTML = `<div style="font-size: 12px; color: var(--text-secondary); text-align: center; padding: 10px;">Nessuna ricetta archiviata.</div>`;
+    } else {
+      usedContainer.innerHTML = usedRecipes.map(r => `
+        <div class="glass-card" style="margin-bottom: 8px; padding: 10px 14px; opacity: 0.75; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 13px; font-weight: 700; text-decoration: line-through;">${escapeHTML(r.title)}</div>
+            ${r.nre ? `<div style="font-size: 11px; color: var(--text-secondary); font-family: monospace;">NRE: ${escapeHTML(r.nre)}</div>` : ''}
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn-secondary-sm" style="font-size: 10px; padding: 3px 8px;" onclick="restoreRecipeToActive('${r.id}')">
+              Ripristina
+            </button>
+            <button class="btn-secondary-sm" style="font-size: 10px; padding: 3px 8px; color: var(--accent-coral);" onclick="deleteRecipeDoc('${r.id}')">
+              Elimina
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+}
+
+async function handleSaveRecipe(e) {
+  e.preventDefault();
+  const titleInput = document.getElementById('recipeTitleInput');
+  const nreInput = document.getElementById('recipeNreInput');
+  const notesInput = document.getElementById('recipeNotesInput');
+  const fileInput = document.getElementById('recipeFileInput');
+
+  const title = (titleInput && titleInput.value.trim()) || '';
+  if (!title) return;
+
+  const nre = (nreInput && nreInput.value.trim().toUpperCase()) || '';
+  const notes = (notesInput && notesInput.value.trim()) || '';
+  const activeProfile = getActiveProfileId();
+
+  let dataUrl = null;
+  let fileType = null;
+  let fileName = null;
+
+  if (fileInput && fileInput.files && fileInput.files[0]) {
+    const file = fileInput.files[0];
+    fileName = file.name;
+    fileType = file.type;
+    dataUrl = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => resolve(ev.target.result);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const newDoc = {
+    id: 'rx_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+    profileId: activeProfile,
+    title: title,
+    category: 'Ricetta',
+    bodyZone: 'pharma',
+    date: new Date().toISOString().split('T')[0],
+    nre: nre,
+    notes: notes,
+    dataUrl: dataUrl,
+    fileType: fileType,
+    fileName: fileName,
+    isUsedRx: false,
+    createdAt: Date.now()
+  };
+
+  await pulseDB.saveDocument(newDoc);
+
+  // Reset form
+  if (titleInput) titleInput.value = '';
+  if (nreInput) nreInput.value = '';
+  if (notesInput) notesInput.value = '';
+  if (fileInput) fileInput.value = '';
+
+  showToast('Ricetta salvata con successo!', '📋');
+  await renderRecipesModalContent();
+  await renderBentoWidgets();
+  await renderArchiveGrid();
+}
+
+async function restoreRecipeToActive(docId) {
+  const doc = await pulseDB.getDocument(docId);
+  if (doc) {
+    doc.isUsedRx = false;
+    await pulseDB.saveDocument(doc);
+    showToast('Ricetta ripristinata tra le attive', '🔄');
+    await renderRecipesModalContent();
+    await renderBentoWidgets();
+  }
+}
+
+async function deleteRecipeDoc(docId) {
+  if (confirm('Eliminare definitivamente questa ricetta?')) {
+    await pulseDB.deleteDocument(docId);
+    showToast('Ricetta eliminata', '🗑️');
+    await renderRecipesModalContent();
+    await renderBentoWidgets();
+    await renderArchiveGrid();
+  }
 }
 
 async function openCabinetView() {
@@ -3504,6 +3826,7 @@ async function exportFullBackup() {
     therapies: JSON.parse(localStorage.getItem('pulse_therapies') || '[]'),
     symptoms: JSON.parse(localStorage.getItem('pulse_symptoms') || '[]'),
     notes: JSON.parse(localStorage.getItem('pulse_notes') || '[]'),
+    calendar_notes: JSON.parse(localStorage.getItem('pulse_calendar_notes') || '[]'),
     cabinet: JSON.parse(localStorage.getItem('pulse_cabinet') || '[]'),
     radar: JSON.parse(localStorage.getItem('pulse_radar') || '[]'),
     documents: docs
@@ -3545,6 +3868,7 @@ function importFullBackup(e) {
       if (data.therapies) localStorage.setItem('pulse_therapies', JSON.stringify(data.therapies));
       if (data.symptoms) localStorage.setItem('pulse_symptoms', JSON.stringify(data.symptoms));
       if (data.notes) localStorage.setItem('pulse_notes', JSON.stringify(data.notes));
+      if (data.calendar_notes) localStorage.setItem('pulse_calendar_notes', JSON.stringify(data.calendar_notes));
       if (data.cabinet) localStorage.setItem('pulse_cabinet', JSON.stringify(data.cabinet));
       if (data.radar) localStorage.setItem('pulse_radar', JSON.stringify(data.radar));
 

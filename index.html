@@ -205,8 +205,8 @@
 
         <!-- BLOCCO B: Griglia Bento 2x2 (4 Widget Fissi) -->
         <section class="bento-2x2-grid">
-          <!-- 1. In alto a sx: Ricette & Farmacia -->
-          <div id="widgetRxCard" class="bento-widget-card" onclick="openPharmacyModal()">
+          <!-- 1. In alto a sx: Ricette & Farmacia (Gestione & Inserimento Prescrizioni) -->
+          <div id="widgetRxCard" class="bento-widget-card" onclick="openRecipesModal()">
             <div class="bento-widget-top">
               <div class="squircle-icon-badge" style="width: 38px; height: 38px; min-width: 38px; border-radius: 12px; background: rgba(52, 199, 89, 0.14); border: 1px solid rgba(52, 199, 89, 0.25); color: #34C759;">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -438,83 +438,70 @@
         </div>
       </div>
 
-      <!-- Card "Trova la farmacia più vicina" Elegante Liquid Glass -->
-      <div id="findNearestPharmacyCard" class="glass-card" onclick="openNearestPharmacyMap()" style="padding: 14px 16px; margin-bottom: 12px; cursor: pointer; border: 1px solid rgba(52, 199, 89, 0.28); background: linear-gradient(135deg, rgba(52, 199, 89, 0.10) 0%, rgba(0, 199, 190, 0.08) 100%), var(--bg-card); display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <div class="squircle-icon-badge" style="width: 44px; height: 44px; min-width: 44px; border-radius: 14px; background: rgba(52, 199, 89, 0.16); color: var(--accent-green); border: 1px solid rgba(52, 199, 89, 0.3);">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 21s-6-5.33-6-10a6 6 0 0 1 12 0c0 4.67-6 10-6 10z" fill="currentColor" fill-opacity="0.16"/>
-              <circle cx="12" cy="11" r="2.5" fill="currentColor"/>
-              <path d="M12 7v8M8 11h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- 2. Blocco Emergenza & Primo Soccorso -->
+      <div class="glass-card" style="padding: 14px 16px; margin-bottom: 16px; border: 1px solid rgba(224, 108, 117, 0.28); background: linear-gradient(135deg, rgba(224, 108, 117, 0.08) 0%, rgba(229, 169, 92, 0.06) 100%), var(--bg-card);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent-coral); letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+            <span>🚨</span>
+            <span>EMERGENZA & PRIMO SOCCORSO</span>
+          </div>
+          <!-- Pulsante Rapido Chiama 112 -->
+          <a href="tel:112" class="emergency-call-pill" title="Chiama Subito il 112" style="padding: 5px 12px; font-size: 11px;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
             </svg>
-          </div>
-          <div>
-            <div style="font-size: 14px; font-weight: 800; color: var(--text-primary);">Trova la farmacia più vicina</div>
-            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Apri Mappe e imposta il percorso dalla tua posizione</div>
-          </div>
+            <span>Chiama 112</span>
+          </a>
         </div>
-        <span style="font-size: 18px; color: var(--accent-green); font-weight: 700; margin-left: 8px;">›</span>
-      </div>
 
-      <!-- Card "Manuale di Primo Soccorso" (100% Offline) -->
-      <div id="firstAidCard" class="glass-card" onclick="openFirstAidModal()" style="padding: 14px 16px; margin-bottom: 18px; cursor: pointer; border: 1px solid rgba(224, 108, 117, 0.3); background: linear-gradient(135deg, rgba(224, 108, 117, 0.10) 0%, rgba(229, 169, 92, 0.08) 100%), var(--bg-card); display: flex; align-items: center; justify-content: space-between;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <div class="squircle-icon-badge" style="width: 44px; height: 44px; min-width: 44px; border-radius: 14px; background: rgba(224, 108, 117, 0.16); color: var(--accent-coral); border: 1px solid rgba(224, 108, 117, 0.32);">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor" fill-opacity="0.16"/>
-              <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <div>
-            <div style="font-size: 14px; font-weight: 800; color: var(--text-primary);">Manuale Primo Soccorso</div>
-            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Guide rapide offline e chiamata 112</div>
-          </div>
-        </div>
-        <span style="font-size: 18px; color: var(--accent-coral); font-weight: 700; margin-left: 8px;">›</span>
-      </div>
-
-      <!-- Riassunto Clinico "Nuovo Medico" 1-Tap PDF -->
-      <button id="btnClinicalSummaryPdf" class="btn-primary" style="margin-bottom: 20px; background: linear-gradient(135deg, #007AFF 0%, #00C7BE 100%);">
-        📄 Genera Riassunto Clinico (PDF 1 Pagina)
-      </button>
-
-      <!-- Cassetto 730 Accesso Rapido Profilo -->
-      <div id="profileTax730Link" class="tax-hero-card" style="margin-bottom: 22px; cursor: pointer;">
-        <div class="tax-hero-top">
+        <!-- Card Manuale Primo Soccorso -->
+        <div id="firstAidCard" onclick="openFirstAidModal()" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: var(--radius-md); background: var(--bg-card); border: 1px solid var(--border-glass); cursor: pointer; margin-bottom: 10px;">
           <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="squircle-icon-badge" style="width: 38px; height: 38px; min-width: 38px; border-radius: 11px; background: rgba(255, 149, 0, 0.16); color: var(--accent-amber);">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="16" rx="4" fill="currentColor" fill-opacity="0.16"/>
-                <path d="M15 9.5C14.2 8.5 13 8 11.5 8C9 8 7 10 7 12.5C7 15 9 17 11.5 17C13 17 14.2 16.5 15 15.5"/><path d="M6 11.5H12"/><path d="M6 13.5H12"/>
+            <div class="squircle-icon-badge" style="width: 38px; height: 38px; min-width: 38px; border-radius: 12px; background: rgba(224, 108, 117, 0.16); color: var(--accent-coral); border: 1px solid rgba(224, 108, 117, 0.32);">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor" fill-opacity="0.16"/>
+                <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
               </svg>
             </div>
             <div>
-              <div style="font-size: 15px; font-weight: 700;">Cassetto Fiscale 730</div>
-              <div style="font-size: 11px; color: var(--text-secondary);">Dossier spese, franchigia e rimborso 19%</div>
+              <div style="font-size: 13px; font-weight: 800; color: var(--text-primary);">Manuale Primo Soccorso</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">9 guide rapide offline e manovre salvavita</div>
             </div>
           </div>
-          <div class="tax-refund-badge">
-            Rimborso 19%: <span id="profileTax730Refund" style="font-weight: 800;">€ 0,00</span>
-          </div>
+          <span style="font-size: 16px; color: var(--accent-coral); font-weight: 700;">›</span>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 8px;">
-          <div>
-            <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Spese Sanitarie Anno Attivo</div>
-            <div id="profileTax730Amount" style="font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-primary);">€ 0,00</div>
+
+        <!-- Card Trova la farmacia più vicina -->
+        <div id="findNearestPharmacyCard" onclick="openNearestPharmacyMap()" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: var(--radius-md); background: var(--bg-card); border: 1px solid var(--border-glass); cursor: pointer;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="squircle-icon-badge" style="width: 38px; height: 38px; min-width: 38px; border-radius: 12px; background: rgba(52, 199, 89, 0.16); color: var(--accent-green); border: 1px solid rgba(52, 199, 89, 0.3);">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 21s-6-5.33-6-10a6 6 0 0 1 12 0c0 4.67-6 10-6 10z" fill="currentColor" fill-opacity="0.16"/>
+                <circle cx="12" cy="11" r="2.5" fill="currentColor"/>
+                <path d="M12 7v8M8 11h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size: 13px; font-weight: 800; color: var(--text-primary);">Trova la farmacia più vicina</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">Apri Mappe e imposta il percorso dalla tua posizione</div>
+            </div>
           </div>
-          <div style="font-size: 12px; color: var(--text-secondary);" id="profileTax730Franchigia">
-            Calcolo franchigia...
-          </div>
+          <span style="font-size: 16px; color: var(--accent-green); font-weight: 700;">›</span>
         </div>
       </div>
 
-      <!-- Quick Health Hub -->
-      <div class="section-header">
+      <!-- 3. Riassunto Clinico "Nuovo Medico" 1-Tap PDF -->
+      <button id="btnClinicalSummaryPdf" class="btn-primary" style="margin-bottom: 20px; background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-teal) 100%);">
+        📄 Genera Riassunto Clinico (PDF 1 Pagina)
+      </button>
+
+      <!-- 4. Quick Health Hub: Portali & App Salute Collegate (Subito sotto Genera Riassunto) -->
+      <div class="section-header" style="margin-top: 8px;">
         <span class="section-title">Portali & App Salute</span>
       </div>
       <div id="healthHubGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px;"></div>
 
-      <!-- Privacy & Sicurezza PIN -->
+      <!-- 5. Privacy & Sicurezza PIN -->
       <div class="section-header">
         <span class="section-title">Sicurezza & Privacy PIN</span>
       </div>
@@ -531,7 +518,7 @@
         </button>
       </div>
 
-      <!-- Local Data Management -->
+      <!-- 5. Local Data Management (Backup JSON) -->
       <div class="section-header">
         <span class="section-title">Privacy & Dati Locali</span>
       </div>
@@ -557,6 +544,45 @@
         <button id="resetDataBtn" class="btn-secondary-sm" style="width: 100%; margin-top: 10px; color: var(--accent-coral);">
           Svuota Dati / Reset Demo
         </button>
+      </div>
+
+      <!-- 6. In fondo a tutto: Cassetto Fiscale 730 (Bloccato fino al 1° Gennaio 2027) -->
+      <div class="section-header">
+        <span class="section-title">Cassetto Fiscale 730</span>
+      </div>
+      <div id="profileTax730Link" class="tax-hero-card" onclick="handleTax730CardClick()" style="margin-bottom: 24px; cursor: pointer; transition: all 0.3s ease;">
+        <div class="tax-hero-top">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="squircle-icon-badge" id="tax730IconBadge" style="width: 38px; height: 38px; min-width: 38px; border-radius: 11px; background: rgba(229, 169, 92, 0.16); color: var(--accent-amber);">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="16" rx="4" fill="currentColor" fill-opacity="0.16"/>
+                <path d="M15 9.5C14.2 8.5 13 8 11.5 8C9 8 7 10 7 12.5C7 15 9 17 11.5 17C13 17 14.2 16.5 15 15.5"/><path d="M6 11.5H12"/><path d="M6 13.5H12"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+                <span>Cassetto Fiscale 730</span>
+                <span id="tax730LockIcon" style="display: none; font-size: 13px;">🔒</span>
+              </div>
+              <div style="font-size: 11px; color: var(--text-secondary);" id="tax730Subtitle">Dossier spese, franchigia e rimborso 19%</div>
+            </div>
+          </div>
+          <div class="tax-refund-badge" id="tax730BadgeWrap">
+            Rimborso 19%: <span id="profileTax730Refund" style="font-weight: 800;">€ 0,00</span>
+          </div>
+        </div>
+        <div id="tax730ActiveContent" style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 8px;">
+          <div>
+            <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Spese Sanitarie Anno Attivo</div>
+            <div id="profileTax730Amount" style="font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-primary);">€ 0,00</div>
+          </div>
+          <div style="font-size: 12px; color: var(--text-secondary);" id="profileTax730Franchigia">
+            Calcolo franchigia...
+          </div>
+        </div>
+        <div id="tax730LockedContent" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-subtle); font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+          Il monitoraggio delle spese detraibili e la franchigia fiscale si attiveranno automaticamente con il nuovo anno fiscale.
+        </div>
       </div>
     </main>
 
@@ -608,6 +634,65 @@
     </nav>
   </div>
 </div>
+
+  <!-- MODAL: GESTIONE RICETTE & FARMACIA (Widget Home Bento) -->
+  <div id="recipesModalOverlay" class="modal-overlay">
+    <div class="bottom-sheet" style="max-height: 90vh;">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 20px;">📋</span>
+          <h2 class="sheet-title">Ricette & Prescrizioni</h2>
+        </div>
+        <button class="sheet-close-btn" onclick="closeAllModals()">✕</button>
+      </div>
+
+      <!-- Form Immediato Inserimento Ricetta -->
+      <div class="glass-card" style="padding: 16px; margin-bottom: 16px; border: 1px solid var(--border-glass);">
+        <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent-green); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+          <span>+</span>
+          <span>Nuova Ricetta o Prescrizione</span>
+        </div>
+        <form id="newRecipeForm" onsubmit="handleSaveRecipe(event)">
+          <div style="margin-bottom: 10px;">
+            <label class="form-label">Nome farmaco / prestazione *</label>
+            <input type="text" id="recipeTitleInput" class="form-input" placeholder="Es. Augmentin, Analisi del sangue..." required>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <label class="form-label">Codice Ricetta Elettronica (NRE)</label>
+            <input type="text" id="recipeNreInput" class="form-input" placeholder="Es. 080A12345678901 (max 15 cifre)" maxlength="15" style="font-family: monospace; letter-spacing: 1px;">
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 3px;">Se inserito, genererà automaticamente il codice a barre per la farmacia.</div>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <label class="form-label">Note / Posologia</label>
+            <input type="text" id="recipeNotesInput" class="form-input" placeholder="Es. 1 compressa ogni 12h a stomaco pieno">
+          </div>
+          <div style="margin-bottom: 14px;">
+            <label class="form-label">Allegato PDF o Foto (Opzionale)</label>
+            <input type="file" id="recipeFileInput" class="form-input" accept=".pdf,image/*" style="font-size: 12px; padding: 6px 10px;">
+          </div>
+          <button type="submit" class="btn-primary" style="width: 100%; padding: 10px; font-weight: 700;">
+            Salva Ricetta
+          </button>
+        </form>
+      </div>
+
+      <!-- Elenco Ricette Attive (da ritirare) -->
+      <div class="section-header" style="margin: 16px 0 10px 0;">
+        <span class="section-title" style="font-size: 15px;">Ricette Attive (Da Ritirare)</span>
+        <button class="btn-secondary-sm" onclick="closeAllModals(); openPharmacyMode();" style="font-size: 11px; padding: 4px 8px; color: var(--accent-green);">
+          Mostra Barcode ›
+        </button>
+      </div>
+      <div id="activeRecipesList" style="margin-bottom: 18px;"></div>
+
+      <!-- Elenco Ricette Già Ritirate -->
+      <div class="section-header" style="margin: 16px 0 10px 0;">
+        <span class="section-title" style="font-size: 15px; color: var(--text-secondary);">Già Ritirate / Archiviate</span>
+      </div>
+      <div id="usedRecipesList" style="margin-bottom: 16px;"></div>
+    </div>
+  </div>
 
   <!-- MODAL: PHARMACY MODE (FULLSCREEN HIGH CONTRAST) -->
   <div id="pharmacyModalOverlay" class="modal-overlay">
@@ -1083,13 +1168,32 @@
           <div id="calDaysGrid" class="cal-days-grid"></div>
         </div>
 
+        <!-- Pannello Dettaglio del Giorno Selezionato & Aggiunta Rapida -->
         <div class="selected-day-banner" style="display: flex; justify-content: space-between; align-items: center; margin: 12px 0 8px 0;">
           <div class="selected-day-title" id="selectedDayBannerTitle" style="font-size: 15px; font-weight: 700;">Appuntamenti del Giorno</div>
-          <button class="btn-secondary-sm" style="flex: none; padding: 6px 12px;" onclick="closeAllModals(); openNewApptModalWithDate(calSelectedDate)">
-            + Aggiungi
+        </div>
+
+        <!-- Form Rapido Integrato per Aggiungere Voce al Giorno -->
+        <div class="glass-card" style="padding: 12px 14px; margin-bottom: 14px; border: 1px solid var(--border-glass);">
+          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent-blue); margin-bottom: 8px; letter-spacing: 0.5px;">
+            + Aggiungi a questo giorno
+          </div>
+          <!-- Tipo pillole -->
+          <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+            <button type="button" class="cal-quick-type-btn active" data-type="Promemoria" onclick="setCalQuickType('Promemoria')">Promemoria</button>
+            <button type="button" class="cal-quick-type-btn" data-type="Nota" onclick="setCalQuickType('Nota')">Nota</button>
+            <button type="button" class="cal-quick-type-btn" data-type="Visita" onclick="setCalQuickType('Visita')">Visita</button>
+          </div>
+          <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+            <input type="text" id="calQuickItemTitle" class="form-input" placeholder="Es. Ritirare esami, impegnativa..." style="flex: 2; padding: 7px 10px; font-size: 13px;">
+            <input type="time" id="calQuickItemTime" class="form-input" style="flex: 1; padding: 7px 8px; font-size: 13px;" title="Orario (opzionale)">
+          </div>
+          <button type="button" class="btn-primary" style="width: 100%; padding: 8px; font-size: 12px;" onclick="addQuickCalendarItem()">
+            Aggiungi al giorno
           </button>
         </div>
 
+        <!-- Elenco Voci della Data Selezionata -->
         <section id="selectedDayApptsList" style="margin-bottom: 16px;"></section>
       </div>
     </div>
