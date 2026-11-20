@@ -28,6 +28,13 @@
 
 // Pulse Application Logic - Master Upgrade v2.5 (Bug Free & Event Delegation)
 document.addEventListener('DOMContentLoaded', async () => {
+  // Richiesta persistenza storage locale (iOS/Safari/Chrome Local Storage Protection)
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().then(persisted => {
+      // Storage is secured locally
+    }).catch(() => {});
+  }
+
   initTheme();
   initProfilesState();
   initPinSecurity();
@@ -818,13 +825,14 @@ async function renderArchiveGrid() {
 
   gridContainer.innerHTML = BODY_ZONES.map(zone => {
     const count = counts[zone.id] || 0;
+    const countLabel = count === 0 ? 'Vuota' : (count === 1 ? '1 file' : `${count} file`);
     return `
       <div class="zone-card" onclick="openZoneFolder('${zone.id}')">
         <div class="squircle-icon-badge" style="background: ${zone.bg}; border: 1px solid ${zone.border}; color: ${zone.color};">
           ${zone.svg}
         </div>
         <div class="zone-name">${zone.name}</div>
-        <div class="zone-count">${count} ${count === 1 ? 'documento' : 'documenti'}</div>
+        <div class="zone-count">${countLabel}</div>
       </div>
     `;
   }).join('');
@@ -902,12 +910,17 @@ async function openZoneFolder(zoneId) {
   const body = document.getElementById('folderViewContent');
 
   title.innerHTML = `
-    <span style="display: inline-flex; align-items: center; gap: 10px;">
-      <span class="squircle-icon-badge" style="width: 32px; height: 32px; min-width: 32px; border-radius: 9px; background: ${zone.bg}; border: 1px solid ${zone.border}; color: ${zone.color};">
-        ${zone.svg}
+    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+      <span style="display: inline-flex; align-items: center; gap: 10px;">
+        <span class="squircle-icon-badge" style="width: 34px; height: 34px; min-width: 34px; border-radius: 10px; background: ${zone.bg}; border: 1px solid ${zone.border}; color: ${zone.color};">
+          ${zone.svg}
+        </span>
+        ${zone.name}
       </span>
-      ${zone.name}
-    </span>
+      <button class="btn-secondary-sm" onclick="closeAllModals()" style="padding: 4px 10px; font-size: 12px; margin-right: 28px;">
+        ← Dossier
+      </button>
+    </div>
   `;
 
   let extraHeaderHTML = '';
@@ -930,6 +943,12 @@ async function openZoneFolder(zoneId) {
 
   body.innerHTML = extraHeaderHTML + `
     <div id="folderDocsListWrap">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <span style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">${zoneDocs.length} ${zoneDocs.length === 1 ? 'documento' : 'documenti archiviati'}</span>
+        <button class="btn-secondary-sm" style="color: var(--accent-coral); font-weight: 700; padding: 6px 12px;" onclick="closeAllModals(); openAddDocModal('${zoneId}')">
+          + Aggiungi qui
+        </button>
+      </div>
       ${zoneDocs.length === 0 ? `
         <div class="empty-state">
           <div class="empty-text">Nessun documento in questa cartella</div>
@@ -940,8 +959,8 @@ async function openZoneFolder(zoneId) {
           ${zoneDocs.map(d => renderDocCardHTML(d)).join('')}
         </div>
       `}
-      <button class="btn-secondary-sm" style="width: 100%; margin-top: 10px;" onclick="openAddDocModal('${zoneId}')">
-        + Aggiungi documento in ${zone.name}
+      <button class="btn-secondary-sm" style="width: 100%; margin-top: 10px;" onclick="closeAllModals(); openAddDocModal('${zoneId}')">
+        + Aggiungi qui in ${zone.name}
       </button>
     </div>
   `;

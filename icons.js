@@ -40,7 +40,7 @@ const BODY_ZONES = [
   },
   {
     id: 'dental',
-    name: 'Denti & Cavo Orale',
+    name: 'Denti',
     color: '#32ADE6',
     bg: 'rgba(50, 173, 230, 0.12)',
     border: 'rgba(50, 173, 230, 0.24)',
@@ -51,7 +51,7 @@ const BODY_ZONES = [
   },
   {
     id: 'heart',
-    name: 'Cuore & Cardio',
+    name: 'Cuore',
     color: '#FF375F',
     bg: 'rgba(255, 55, 95, 0.12)',
     border: 'rgba(255, 55, 95, 0.24)',
@@ -62,7 +62,7 @@ const BODY_ZONES = [
   },
   {
     id: 'respiratory',
-    name: 'Respiro & Polmoni',
+    name: 'Respiro',
     color: '#00C7BE',
     bg: 'rgba(0, 199, 190, 0.12)',
     border: 'rgba(0, 199, 190, 0.24)',
@@ -100,7 +100,7 @@ const BODY_ZONES = [
   },
   {
     id: 'derma',
-    name: 'Pelle & Derma',
+    name: 'Pelle',
     color: '#FF6482',
     bg: 'rgba(255, 100, 130, 0.12)',
     border: 'rgba(255, 100, 130, 0.24)',

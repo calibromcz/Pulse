@@ -682,6 +682,20 @@ body::after {
   gap: 12px;
 }
 
+@media (min-width: 768px) {
+  .body-zones-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+}
+
+@media (min-width: 900px) {
+  .body-zones-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+  }
+}
+
 .zone-card {
   background: var(--bg-card);
   backdrop-filter: var(--blur-glass);
