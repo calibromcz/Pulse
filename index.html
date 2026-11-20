@@ -184,7 +184,7 @@
         </button>
 
         <!-- 3. Manuale Primo Soccorso -->
-        <button id="headerFirstAidBtn" class="icon-btn" title="Manuale Primo Soccorso" style="color: var(--accent-coral);">
+        <button id="headerFirstAidBtn" class="icon-btn" onclick="openFirstAidModal()" title="Manuale Primo Soccorso" style="color: var(--accent-coral);">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor" fill-opacity="0.16"/>
             <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
@@ -264,6 +264,47 @@
             </div>
             <div id="widgetDoctorName" class="bento-widget-title">Medico di Base</div>
             <div id="widgetDoctorStatus" class="bento-widget-status">Orario...</div>
+          </div>
+        </section>
+
+        <!-- CARD "Come ti senti oggi?" (Pillola Sintomi, Rimedi Naturali, Armadietto e Diario) -->
+        <section class="how-feeling-card glass-card" style="padding: 14px 16px; margin: 0; border: 1px solid var(--border-glass);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="squircle-icon-badge" style="width: 30px; height: 30px; min-width: 30px; border-radius: 9px; background: rgba(0, 199, 190, 0.14); color: var(--accent-teal);">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2a10 10 0 0 1 10 10c0 5.5-4.5 10-10 10S2 17.5 2 12A10 10 0 0 1 12 2z" fill="currentColor" fill-opacity="0.12"/>
+                  <path d="M8 12s1.5 2 4 2 4-2 4-2"/>
+                  <line x1="9" y1="9" x2="9.01" y2="9"/>
+                  <line x1="15" y1="9" x2="15.01" y2="9"/>
+                </svg>
+              </div>
+              <div>
+                <div style="font-size: 14px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.01em;">Come ti senti oggi?</div>
+                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">Rimedi naturali, armadietto e diario</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Barra di Ricerca Sintomo -->
+          <div style="position: relative; margin-bottom: 10px;">
+            <input type="text" id="feelingSearchInput" class="form-input" placeholder="Scrivi un sintomo (es. mal di testa, gola...)" style="padding-left: 36px; padding-right: 36px; font-size: 13px; height: 38px; border-radius: var(--radius-md);" onkeydown="if(event.key === 'Enter') handleFeelingSearch(this.value)">
+            <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5;" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <button onclick="handleFeelingSearch(document.getElementById('feelingSearchInput').value)" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--accent-teal); font-weight: 700; font-size: 12px; padding: 4px 6px;">Cerca</button>
+          </div>
+
+          <!-- Chip Rapidi Scorrevoli Orizzontalmente -->
+          <div class="feeling-chips-scroll" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; -webkit-overflow-scrolling: touch; scrollbar-width: none;">
+            <button class="feeling-chip-btn" onclick="openSymptomRemedyDetail('headache')">Mal di testa</button>
+            <button class="feeling-chip-btn" onclick="openSymptomRemedyDetail('stomach')">Stomaco</button>
+            <button class="feeling-chip-btn" onclick="openSymptomRemedyDetail('sore_throat')">Mal di gola</button>
+            <button class="feeling-chip-btn" onclick="openSymptomRemedyDetail('fever')">Febbre</button>
+            <button class="feeling-chip-btn" onclick="openSymptomRemedyDetail('fatigue')">Stanchezza</button>
+            <button class="feeling-chip-btn" onclick="openSymptomRemedyDetail('insomnia')">Insonnia</button>
+            <button class="feeling-chip-btn" onclick="openSymptomRemedyDetail('cold')">Raffreddore</button>
+            <button class="feeling-chip-btn" onclick="openSymptomRemedyDetail('neck_pain')">Cervicale</button>
           </div>
         </section>
 
@@ -464,7 +505,7 @@
             </div>
             <div>
               <div style="font-size: 13px; font-weight: 800; color: var(--text-primary);">Manuale Primo Soccorso</div>
-              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">9 guide rapide offline e manovre salvavita</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">13 guide rapide offline e manovre salvavita</div>
             </div>
           </div>
           <span style="font-size: 16px; color: var(--accent-coral); font-weight: 700;">›</span>
@@ -498,6 +539,62 @@
       <div class="section-header" style="margin-top: 8px;">
         <span class="section-title">Portali & App Salute</span>
       </div>
+
+      <!-- Prime 3 Opzioni Rapide Emergenze & Continuità Assistenziale -->
+      <div class="priority-emergency-grid" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+        <!-- 1. Chiama 112 -->
+        <a href="tel:112" class="glass-card" style="padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; border: 1px solid rgba(224, 108, 117, 0.35); background: linear-gradient(135deg, rgba(224, 108, 117, 0.10) 0%, rgba(224, 108, 117, 0.03) 100%), var(--bg-card);">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="squircle-icon-badge" style="width: 40px; height: 40px; min-width: 40px; border-radius: 12px; background: rgba(224, 108, 117, 0.18); color: var(--accent-coral); border: 1px solid rgba(224, 108, 117, 0.35);">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size: 14px; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+                <span>Chiama 112</span>
+                <span style="font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; background: rgba(224, 108, 117, 0.2); color: var(--accent-coral); text-transform: uppercase;">Sos</span>
+              </div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">Emergenza unica 24/7</div>
+            </div>
+          </div>
+          <span style="font-size: 16px; color: var(--accent-coral); font-weight: 700;">›</span>
+        </a>
+
+        <!-- 2. Guardia Medica Bologna -->
+        <a href="tel:0513131" class="glass-card" style="padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; border: 1px solid rgba(100, 168, 240, 0.35); background: linear-gradient(135deg, rgba(100, 168, 240, 0.08) 0%, rgba(100, 168, 240, 0.02) 100%), var(--bg-card);">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="squircle-icon-badge" style="width: 40px; height: 40px; min-width: 40px; border-radius: 12px; background: rgba(100, 168, 240, 0.16); color: var(--accent-blue); border: 1px solid rgba(100, 168, 240, 0.32);">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size: 14px; font-weight: 800; color: var(--text-primary);">Guardia Medica Bologna</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">Continuità Assistenziale · 051 3131 (smistamento per quartiere)</div>
+            </div>
+          </div>
+          <span style="font-size: 16px; color: var(--accent-blue); font-weight: 700;">›</span>
+        </a>
+
+        <!-- 3. Chiama Centro Antiveleni -->
+        <a href="tel:0266101029" class="glass-card" style="padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; border: 1px solid rgba(229, 169, 92, 0.35); background: linear-gradient(135deg, rgba(229, 169, 92, 0.08) 0%, rgba(229, 169, 92, 0.02) 100%), var(--bg-card);">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="squircle-icon-badge" style="width: 40px; height: 40px; min-width: 40px; border-radius: 12px; background: rgba(229, 169, 92, 0.16); color: var(--accent-amber); border: 1px solid rgba(229, 169, 92, 0.32);">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2l7 4v6c0 5.55-3.84 10.74-7 12-3.16-1.26-7-6.45-7-12V6l7-4z" fill="currentColor" fill-opacity="0.16"/>
+                <path d="M12 8v5M12 16h.01"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size: 14px; font-weight: 800; color: var(--text-primary);">Chiama Centro Antiveleni</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">Niguarda · Attivo 24/7 (02 66101029)</div>
+            </div>
+          </div>
+          <span style="font-size: 16px; color: var(--accent-amber); font-weight: 700;">›</span>
+        </a>
+      </div>
+
       <div id="healthHubGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px;"></div>
 
       <!-- 5. Cassetto Fiscale 730 (Bloccato fino al 1° Gennaio 2027) -->
@@ -1380,6 +1477,62 @@
         </div>
         <button type="submit" class="btn-primary">Salva Scheda Identità</button>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DETTAGLIO RIMEDI "COME TI SENTI OGGI?" (Bottom Sheet) -->
+  <div id="feelingRemedyModalOverlay" class="modal-overlay">
+    <div class="bottom-sheet" style="max-height: 88vh;">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header" style="margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span id="feelingModalEmoji" style="font-size: 22px;">🌿</span>
+          <h2 class="sheet-title" id="feelingModalTitle" style="font-size: 18px; margin: 0;">Rimedi & Consigli</h2>
+        </div>
+        <button class="sheet-close-btn" onclick="closeAllModals()">✕</button>
+      </div>
+
+      <div id="feelingModalContent" style="display: flex; flex-direction: column; gap: 14px;">
+        <!-- Sezione A: Rimedi Naturali & Azioni Pratiche -->
+        <div class="glass-card" style="padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent-teal); letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+            <span>🍃</span>
+            <span>RIMEDI NATURALI & AZIONI PRATICHE</span>
+          </div>
+          <ul id="feelingRemediesList" style="margin: 0; padding-left: 18px; font-size: 13px; color: var(--text-primary); line-height: 1.5; display: flex; flex-direction: column; gap: 6px;"></ul>
+          <div id="feelingPharmacyNote" style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-subtle); font-size: 12px; color: var(--text-secondary); font-style: italic;"></div>
+        </div>
+
+        <!-- Sezione B: Nel tuo Armadietto -->
+        <div class="glass-card" style="padding: 14px 16px;">
+          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent-amber); letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span>💊</span>
+              <span>NEL TUO ARMADIETTO</span>
+            </div>
+            <button onclick="closeAllModals(); openCabinetView();" class="btn-secondary-sm" style="font-size: 10px; padding: 2px 6px;">Vedi tutto ›</button>
+          </div>
+          <div id="feelingCabinetMatchList"></div>
+        </div>
+
+        <!-- Sezione C: Azione Rapida Annota nel Diario -->
+        <div class="glass-card" style="padding: 14px 16px; background: linear-gradient(135deg, rgba(0, 199, 190, 0.08) 0%, rgba(100, 168, 240, 0.08) 100%), var(--bg-card);">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+            <div>
+              <div style="font-size: 13px; font-weight: 800; color: var(--text-primary);">Annota nel Diario della Salute</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">Salva questo sintomo nella tua cronologia con data e ora</div>
+            </div>
+            <button id="btnSaveFeelingToDiary" class="btn-primary" style="padding: 8px 14px; font-size: 12px; white-space: nowrap; flex: none;">
+              📝 Annota
+            </button>
+          </div>
+        </div>
+
+        <!-- Sezione D: Disclaimer Discreto -->
+        <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.4; text-align: center; padding: 4px 10px 10px 10px;">
+          ℹ️ Suggerimenti generali a scopo informativo. Non sostituiscono il parere del medico o del farmacista.
+        </div>
+      </div>
     </div>
   </div>
 

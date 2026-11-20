@@ -584,6 +584,20 @@ function initNavigation() {
     });
   }
 
+  const headerFirstAid = document.getElementById('headerFirstAidBtn');
+  if (headerFirstAid) {
+    headerFirstAid.addEventListener('click', () => {
+      openFirstAidModal();
+    });
+  }
+
+  const desktopFirstAid = document.getElementById('desktopFirstAidBtn');
+  if (desktopFirstAid) {
+    desktopFirstAid.addEventListener('click', () => {
+      openFirstAidModal();
+    });
+  }
+
   const fabAdd = document.getElementById('fabAddDoc');
   if (fabAdd) {
     fabAdd.addEventListener('click', () => {
@@ -4354,6 +4368,97 @@ const FIRST_AID_DATA = [
       'NON avere paura di fare male: l\'arresto cardiaco senza massaggio è fatale.'
     ],
     emergencyCall: 'Chiama SUBITO il 112 e mantieni il vivavoce attivo: l\'operatore ti guiderà passo dopo passo al secondo durante tutta la manovra.'
+  },
+  {
+    id: 'nosebleed',
+    title: 'Sangue dal Naso (Epistassi)',
+    subtitle: 'Compressione e postura',
+    iconColor: '#E06C75',
+    iconBg: 'rgba(224, 108, 117, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2C8 7 8 11 8 14a4 4 0 0 0 8 0c0-3 0-7-4-12z" fill="currentColor" fill-opacity="0.16"/>
+      <path d="M12 18v3M9 21h6"/>
+    </svg>`,
+    dos: [
+      'Siediti comodo con il busto e la testa leggermente inclinati in avanti.',
+      'Stringi con decisione le due narici con pollice e indice per almeno 10 minuti continui senza rilasciare.',
+      'Respira con la bocca ed espelli eventuale sangue che scende in gola (non deglutire).',
+      'Applica una borsa del ghiaccio o un panno freddo sulla radice del naso o sulla fronte per favorire la vasocostrizione.'
+    ],
+    donts: [
+      'NON reclinare la testa all\'indietro (il sangue scenderebbe nell\'esofago o nelle vie aeree, causando nausea o soffocamento).',
+      'NON inserire cotone idrofilo o fazzoletti asciutti nelle narici che strappano il coagulo alla rimozione.',
+      'NON soffiarti il naso o fare sforzi intensi per alcune ore dopo l\'arresto dell\'emorragia.'
+    ],
+    emergencyCall: 'Chiama il 112 o recati al Pronto Soccorso se l\'emorragia non si ferma dopo 20 minuti di compressione continua, in caso di trauma facciale violento o se la persona assume anticoagulanti.'
+  },
+  {
+    id: 'fractures',
+    title: 'Distorsioni & Fratture',
+    subtitle: 'Immobilizzazione e ghiaccio',
+    iconColor: '#64A8F0',
+    iconBg: 'rgba(100, 168, 240, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M17 10c.7-.7 1.6-1 2.5-1a3.5 3.5 0 0 1 0 7c-.9 0-1.8-.3-2.5-1l-10-10C6.3 4.3 5.4 4 4.5 4a3.5 3.5 0 0 0 0 7c.9 0 1.8.3 2.5 1l10 10z" fill="currentColor" fill-opacity="0.16"/>
+    </svg>`,
+    dos: [
+      'Immobilizza immediatamente l\'arto nella posizione in cui si trova, evitando qualsiasi movimento.',
+      'Applica ghiaccio avvolto in un panno asciutto per 15-20 minuti alla volta per contenere gonfiore ed ematoma.',
+      'Mantieni l\'arto in scarico e, se possibile, leggermente sollevato rispetto al cuore.',
+      'In caso di frattura esposta, copri la ferita con una garza sterile senza toccare l\'osso sporgente.'
+    ],
+    donts: [
+      'NON forzare il movimento dell\'arto o provare ad appoggiarvi peso sopra.',
+      'NON tentare in nessun caso di riallineare o raddrizzare l\'osso o l\'articolazione deformata.',
+      'NON applicare il ghiaccio a contatto diretto con la pelle nuda per evitare ustioni da freddo.'
+    ],
+    emergencyCall: 'Chiama subito il 112 in caso di frattura esposta, se l\'arto diventa freddo/pallido/insensibile o in caso di traumi a femore, bacino o colonna vertebrale.'
+  },
+  {
+    id: 'seizure',
+    title: 'Crisi Epilettica / Convulsioni',
+    subtitle: 'Protezione e sicurezza',
+    iconColor: '#AF52DE',
+    iconBg: 'rgba(175, 82, 222, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor" fill-opacity="0.16"/>
+    </svg>`,
+    dos: [
+      'Mantieni la calma e allontana subito qualsiasi oggetto spigoloso o pericoloso nelle vicinanze.',
+      'Proteggi la testa posizionando sotto di essa qualcosa di morbido (es. giacca, cuscino, maglione ripiegato).',
+      'Allenta colletti, cravatte o cinture strette e togli gli occhiali se presenti.',
+      'Cronometra con precisione la durata della crisi dall\'inizio alla fine.',
+      'Al termine delle convulsioni, poni delicatamente la persona in Posizione Laterale di Sicurezza (PLS) per mantenere libere le vie aeree.'
+    ],
+    donts: [
+      'NON bloccare o trattenere la persona con la forza durante le convulsioni.',
+      'NON mettere NULLA in bocca (né dita, né fazzoletti, né oggetti rigidi): la lingua non può essere ingoiata e rischi di provocare soffocamento o lesioni.',
+      'NON somministrare liquidi, farmaci o cibo finché non è completamente vigile e orientata.'
+    ],
+    emergencyCall: 'Chiama subito il 112 se la crisi dura più di 5 minuti, se si ripete a breve distanza, se la persona non riprende conoscenza o se è la prima crisi della sua vita.'
+  },
+  {
+    id: 'poisoning',
+    title: 'Avvelenamento / Ingestione Sostanze',
+    subtitle: 'Detersivi, farmaci, tossici',
+    iconColor: '#E5A95C',
+    iconBg: 'rgba(229, 169, 92, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2l7 4v6c0 5.55-3.84 10.74-7 12-3.16-1.26-7-6.45-7-12V6l7-4z" fill="currentColor" fill-opacity="0.16"/>
+      <path d="M12 8v5M12 16h.01"/>
+    </svg>`,
+    dos: [
+      'Chiama SUBITO il Centro Antiveleni (02 66101029) o il 112 prima di compiere qualsiasi manovra.',
+      'Recupera e tieni a portata di mano la confezione o l\'etichetta del prodotto/farmaco ingerito per riferire composizione esatta e quantità.',
+      'Se la sostanza è sulla pelle o negli occhi, sciacqua immediatamente con abbondante acqua corrente tiepida per almeno 15 minuti.',
+      'Se il soggetto ha inalato vapori tossici, arieggia la stanza e portalo subito all\'aria aperta.'
+    ],
+    donts: [
+      'NON indurre in nessun caso il vomito (le sostanze caustiche come candeggina o acidi brucerebbero l\'esofago una seconda volta).',
+      'NON somministrare latte, acqua, aceto o rimedi fai-da-te: il latte non è un antidoto e può accelerare l\'assorbimento di tossici liposolubili.',
+      'NON attendere la comparsa dei sintomi per allertare il Centro Antiveleni o il 112.'
+    ],
+    emergencyCall: 'Chiama subito il 112 o il Centro Antiveleni di Niguarda (02 66101029) e segui tassativamente le istruzioni fornite dal tossicologo medico.'
   }
 ];
 
@@ -4497,4 +4602,327 @@ function openFirstAidDetail(id) {
       </div>
     </div>
   `;
+}
+
+// ----------------------------------------------------
+// 19. "COME TI SENTI OGGI?" (DATABASE RIMEDI LOCALE & MATCHING)
+// ----------------------------------------------------
+const FEELING_REMEDIES_DB = [
+  {
+    id: 'headache',
+    title: 'Mal di testa',
+    emoji: '🤕',
+    keywords: ['testa', 'cefalea', 'emicrania', 'pulsante', 'frontale', 'tempie'],
+    cabinetKeywords: ['tachipirina', 'paracetamolo', 'ibuprofene', 'moment', 'oki', 'brufen', 'aspirina', 'ketoprofene', 'novalgina', 'voltaren'],
+    remedies: [
+      'Bevi subito un abbondante bicchiere d\'acqua fresca: la disidratazione è la causa scatenante più comune.',
+      'Applica una compressa fresca o ghiaccio avvolto in un panno sulla fronte o alla base del collo.',
+      'Fai una pausa di almeno 15-20 minuti lontano da smartphone, monitor e schermi luminosi, preferibilmente al buio o con luce soffusa.',
+      'Bevi una tisana tiepida a base di zenzero fresco, melissa o menta piperita per allentare la tensione vascolare.'
+    ],
+    pharmacyNote: 'Eventuale analgesico o antinfiammatorio da banco (FANS o paracetamolo): chiedi sempre consiglio al farmacista o al medico.'
+  },
+  {
+    id: 'stomach',
+    title: 'Stomaco & Acidità',
+    emoji: '🍵',
+    keywords: ['stomaco', 'nausea', 'acidita', 'acidità', 'reflusso', 'bruciore stomaco', 'digestione', 'pesantezza'],
+    cabinetKeywords: ['gaviscon', 'maalox', 'biochetasi', 'fermenti', 'pantoprazolo', 'omeprazolo', 'riopan', 'buscopan', 'citrosodina', 'geffer'],
+    remedies: [
+      'Bevi a piccoli sorsi una tisana tiepida di camomilla, alloro, finocchio o zenzero per calmare gli spasmi gastrici.',
+      'Rimani in posizione eretta o semiseduta; evita di sdraiarti subito dopo aver mangiato per contrastare la risalita acida.',
+      'Consuma una piccola porzione di cibo asciutto e leggero (es. fette biscottate integrali o cracker senza sale) che assorbe l\'eccesso di succhi gastrici.',
+      'Applica una borsa dell\'acqua calda sull\'addome se avverti crampi o tensione da freddo.'
+    ],
+    pharmacyNote: 'Eventuale antiacido o procinetico da banco (es. barriera protettiva o citrati): chiedi sempre consiglio al farmacista.'
+  },
+  {
+    id: 'sore_throat',
+    title: 'Mal di gola',
+    emoji: '🧣',
+    keywords: ['gola', 'bruciore', 'faringe', 'deglutire', 'abbassamento voce', 'laringe'],
+    cabinetKeywords: ['benagol', 'tantum', 'froben', 'sciroppo', 'borocillina', 'neoborocillina', 'flurbiprofene', 'golamir', 'paracetamolo', 'oki'],
+    remedies: [
+      'Fai gargarismi con un bicchiere di acqua tiepida e mezzo cucchiaino di sale o bicarbonato 3 volte al giorno.',
+      'Consuma un cucchiaino di miele (preferibilmente eucalipto o timo) sciolto in acqua tiepida o tisana, noto per le sue proprietà lenitive naturali.',
+      'Mantieni idratata la mucosa bevendo liquidi a temperatura ambiente ed evitando bevande troppo calde o gassate.',
+      'Usa un umidificatore o posiziona vaschette d\'acqua sui termosifoni per evitare che l\'aria secca irriti ulteriormente la faringe.'
+    ],
+    pharmacyNote: 'Eventuale spray o pastiglie lenitive/antinfiammatorie da banco a base di flurbiprofene o propoli: chiedi consiglio al farmacista.'
+  },
+  {
+    id: 'fever',
+    title: 'Febbre & Brividi',
+    emoji: '🌡️',
+    keywords: ['febbre', 'temperatura', 'brividi', 'caldo', 'alterazione', 'linee'],
+    cabinetKeywords: ['tachipirina', 'paracetamolo', 'efferalgan', 'aspirina', 'ibuprofene', 'termo', 'termometro'],
+    remedies: [
+      'Riposa completamente a letto in un ambiente ben aerato con temperatura intorno ai 20 °C.',
+      'Bevi abbondanti liquidi (acqua, spremute d\'arancia, brodo vegetale leggero o tisane) per prevenire la disidratazione da sudorazione.',
+      'Indossa abiti leggeri in cotone traspirante: coprirsi eccessivamente intrappola il calore corporeo.',
+      'Applica spugnature di acqua tiepida (non ghiacciata) su fronte, tempie e polsi se la temperatura causa fastidio elevato.'
+    ],
+    pharmacyNote: 'Eventuale antipiretico da banco (preferibilmente paracetamolo a dosaggio adeguato): chiedi sempre al medico o farmacista in base al peso e ai sintomi.'
+  },
+  {
+    id: 'fatigue',
+    title: 'Stanchezza & Astenia',
+    emoji: '⚡',
+    keywords: ['stanchezza', 'astenia', 'spossatezza', 'sonnolenza', 'energie', 'affaticamento'],
+    cabinetKeywords: ['magnesio', 'potassio', 'supradyn', 'polase', 'vitamina', 'carnitina', 'multivitaminico', 'b12', 'ferro'],
+    remedies: [
+      'Reidrata l\'organismo con un bicchiere d\'acqua con spremuta di mezzo limone per un apporto immediato di minerali ed elettroliti.',
+      'Fai una camminata all\'aria aperta di 15 minuti alla luce del sole per stimolare la produzione naturale di serotonina e vitamina D.',
+      'Consuma un piccolo snack nutriente a base di frutta fresca e una manciata di mandorle o noci ricche di magnesio.',
+      'Pianifica una sessione di riposo rigenerante (power nap) di non più di 20 minuti nel primo pomeriggio.'
+    ],
+    pharmacyNote: 'Eventuale integratore di magnesio, potassio o vitamine del gruppo B: chiedi consiglio al farmacista per valutare carenze nutrizionali o stagionali.'
+  },
+  {
+    id: 'insomnia',
+    title: 'Insonnia & Sonno agitato',
+    emoji: '🌙',
+    keywords: ['insonnia', 'sonno', 'dormire', 'risvegli', 'notte', 'agitazione', 'agitato'],
+    cabinetKeywords: ['melatonina', 'valeriana', 'sedivitax', 'passiflora', 'biancospino', 'magnesio', 'armonia', 'novanight'],
+    remedies: [
+      'Spegni smartphone, tablet e schermi TV almeno 45 minuti prima di andare a dormire per non inibire la melatonina naturale.',
+      'Bevi una tisana rilassante a base di camomilla, tiglio, passiflora, melissa o valeriana a temperatura tiepida.',
+      'Mantieni la camera da letto buia, silenziosa e fresca (temperatura ideale 18-19 °C).',
+      'Pratica 5 minuti di respirazione guidata (es. tecnica 4-7-8: inspira per 4 sec, trattieni per 7 sec, espira per 8 sec).'
+    ],
+    pharmacyNote: 'Eventuale integratore di melatonina o estratti fitoterapici da banco: chiedi consiglio al farmacista sull\'orario corretto di assunzione.'
+  },
+  {
+    id: 'cold',
+    title: 'Raffreddore & Naso Chiuso',
+    emoji: '🤧',
+    keywords: ['raffreddore', 'naso', 'mucose', 'starnuti', 'catarro', 'congestione', 'chiuso'],
+    cabinetKeywords: ['rinazina', 'actifed', 'fluimucil', 'fisiologica', 'aerosol', 'paracetamolo', 'zerinol', 'vichy', 'narhinel'],
+    remedies: [
+      'Esegui lavaggi nasali frequenti con soluzione fisiologica o ipertonica sterile per liberare le cavità nasali e rimuovere il muco in eccesso.',
+      'Fai suffumigi (fumenti) con vapore caldo e poche gocce di olio essenziale di eucalipto, menta o tea tree oil.',
+      'Dormi con un cuscino extra sotto la testa per mantenere sollevate le vie respiratorie e facilitare il drenaggio durante la notte.',
+      'Bevi tisane calde con limone e miele per fluidificare le secrezioni.'
+    ],
+    pharmacyNote: 'Eventuale spray nasale salino o decongestionante da banco (da non usare per più di 4-5 giorni): chiedi consiglio al farmacista.'
+  },
+  {
+    id: 'neck_pain',
+    title: 'Cervicale & Rigidità Collo',
+    emoji: '💆',
+    keywords: ['cervicale', 'collo', 'spalle', 'trapezio', 'rigidita', 'rigidità', 'torcicollo'],
+    cabinetKeywords: ['voltaren', 'flector', 'arnica', 'fasce', 'termoriscaldanti', 'thermacare', 'oki', 'ibuprofene', 'muscoril', 'artrosilene'],
+    remedies: [
+      'Applica calore secco sulla zona cervicale (cuscino con noccioli di ciliegio, borsa dell\'acqua calda o fascia termica) per decontrarre la muscolatura.',
+      'Esegui movimenti lenti e controllati di flessione ed estensione del capo, senza scatti e fermandoti alla soglia del dolore.',
+      'Regola l\'altezza dello schermo del computer in modo che il terzo superiore sia esattamente all\'altezza dei tuoi occhi.',
+      'Fai un automassaggio delicato con olio d\'arnica o di iperico lungo la fascia dei trapezi e alla base della nuca.'
+    ],
+    pharmacyNote: 'Eventuale cerotto autoriscaldante o gel antinfiammatorio locale da banco: chiedi consiglio al farmacista.'
+  },
+  {
+    id: 'anxiety',
+    title: 'Ansia & Tensione Nervosa',
+    emoji: '🧘',
+    keywords: ['ansia', 'stress', 'panico', 'tachicardia', 'agitazione', 'tensione', 'nervosismo'],
+    cabinetKeywords: ['valeriana', 'passiflora', 'biancospino', 'magnesio', 'rescue', 'sedivitax', 'ansiolitico'],
+    remedies: [
+      'Siediti comodo e appoggia una mano sulla pancia: esegui respirazioni diaframmatiche lente e profonde (inspira gonfiando l\'addome, espira sgonfiandolo lentamente).',
+      'Bevi un bicchiere d\'acqua fresca a piccoli sorsi e bagna i polsi con acqua corrente per attivare il sistema nervoso parasimpatico.',
+      'Fai una pausa da ambienti rumorosi o compiti complessi per 10 minuti camminando con passo calmo.',
+      'Bevi una tisana di melissa, biancospino o lavanda, piante note per il supporto al rilassamento e al benessere mentale.'
+    ],
+    pharmacyNote: 'Eventuali preparati fitoterapici o magnesio biodisponibile: chiedi consiglio al farmacista per la gestione di picchi di stress passeggeri.'
+  },
+  {
+    id: 'muscle_pain',
+    title: 'Dolori Muscolari & Contratture',
+    emoji: '🏃',
+    keywords: ['muscolo', 'muscoli', 'contrattura', 'strappo', 'indolenzimento', 'gambe', 'schiena', 'lombare'],
+    cabinetKeywords: ['arnica', 'voltaren', 'flector', 'dicloreum', 'oki', 'ibuprofene', 'magnesio', 'fastum', 'artrosilene'],
+    remedies: [
+      'Riposa il gruppo muscolare dolente evitando sforzi, sollevamento pesi o movimenti bruschi.',
+      'Se il dolore è acuto da trauma recente (prime 24h), applica ghiaccio protetto; se è una contrattura o indolenzimento muscolare cronico, applica impacchi caldi.',
+      'Bevi abbondante acqua e assumi cibi ricchi di potassio e magnesio (come banane, mandorle e spinaci).',
+      'Esegui stretching leggerissimo e progressivo senza mai forzare la contrazione del muscolo infiammato.'
+    ],
+    pharmacyNote: 'Eventuale gel o cerotto antinfiammatorio a base di ibuprofene/diclofenac o estratto d\'arnica pura: chiedi consiglio al farmacista.'
+  },
+  {
+    id: 'allergy_seasonal',
+    title: 'Allergia Stagionale & Rinite',
+    emoji: '🌸',
+    keywords: ['allergia', 'pollini', 'occhi rossi', 'starnuto', 'prurito', 'graminacee', 'rinite'],
+    cabinetKeywords: ['antistaminico', 'cetirizina', 'loratadina', 'ebastina', 'collirio', 'flixonase', 'fexofenadina'],
+    remedies: [
+      'Sciacqua viso e occhi con acqua fredda dopo essere rientrato dall\'esterno per eliminare i pollini depositati sulla cute e sulle ciglia.',
+      'Usa gocce oculari rinfrescanti a base di eufrasia o camomilla o soluzione salina sterile monodose per detergere la congiuntiva.',
+      'Cambia gli abiti usati all\'aperto e lavati i capelli prima di coricarti per non impollinare il cuscino.',
+      'Tieni chiuse le finestre nelle ore più calde e ventose della giornata, quando la concentrazione di pollini nell\'aria è massima.'
+    ],
+    pharmacyNote: 'Eventuale antistaminico orale o spray nasale prescritto: chiedi sempre indicazione al medico curante o al farmacista.'
+  }
+];
+
+let _currentActiveFeelingSymptom = null;
+
+function handleFeelingSearch(query) {
+  if (!query || !query.trim()) return;
+  const q = query.trim().toLowerCase();
+
+  // Cerca per keyword nei disturbi
+  const match = FEELING_REMEDIES_DB.find(item => {
+    if (item.title.toLowerCase().includes(q)) return true;
+    return item.keywords.some(k => q.includes(k) || k.includes(q));
+  });
+
+  if (match) {
+    openSymptomRemedyDetail(match.id);
+  } else {
+    // Apri il più simile o il mal di testa come default informativo, impostando il titolo cercato
+    openCustomSymptomDetail(query.trim());
+  }
+}
+
+function openSymptomRemedyDetail(symptomId) {
+  const item = FEELING_REMEDIES_DB.find(s => s.id === symptomId);
+  if (!item) return;
+
+  _currentActiveFeelingSymptom = {
+    title: item.title,
+    emoji: item.emoji,
+    remedies: item.remedies,
+    pharmacyNote: item.pharmacyNote,
+    cabinetKeywords: item.cabinetKeywords
+  };
+
+  renderFeelingRemedyModal();
+}
+
+function openCustomSymptomDetail(customTitle) {
+  _currentActiveFeelingSymptom = {
+    title: customTitle,
+    emoji: '🌿',
+    remedies: [
+      'Bevi abbondante acqua a piccoli sorsi per favorire la corretta idratazione cellulare.',
+      'Fai una pausa in un ambiente tranquillo, allentando indumenti stretti e riposando per almeno 15 minuti.',
+      'Consuma alimenti leggeri e facilmente digeribili a temperatura ambiente.',
+      'Se il disturbo è accompagnato da dolore localizzato, mantieni a riposo la parte interessata.'
+    ],
+    pharmacyNote: 'Per una valutazione specifica e un rimedio mirato, consulta sempre il tuo Medico di Base o chiedi consiglio al farmacista.',
+    cabinetKeywords: ['tachipirina', 'paracetamolo', 'ibuprofene', 'arnica', 'moment']
+  };
+
+  renderFeelingRemedyModal();
+}
+
+function renderFeelingRemedyModal() {
+  if (!_currentActiveFeelingSymptom) return;
+  const data = _currentActiveFeelingSymptom;
+
+  const emojiEl = document.getElementById('feelingModalEmoji');
+  const titleEl = document.getElementById('feelingModalTitle');
+  const remediesList = document.getElementById('feelingRemediesList');
+  const pharmacyNote = document.getElementById('feelingPharmacyNote');
+  const cabinetList = document.getElementById('feelingCabinetMatchList');
+  const saveDiaryBtn = document.getElementById('btnSaveFeelingToDiary');
+
+  if (emojiEl) emojiEl.innerText = data.emoji || '🌿';
+  if (titleEl) titleEl.innerText = data.title;
+
+  if (remediesList) {
+    remediesList.innerHTML = data.remedies.map(r => `<li>${escapeHTML(r)}</li>`).join('');
+  }
+
+  if (pharmacyNote) {
+    pharmacyNote.innerText = data.pharmacyNote;
+  }
+
+  // Matching con l'Armadietto del profileId attivo
+  if (cabinetList) {
+    const activeProfile = getActiveProfileId();
+    const allCabinet = JSON.parse(localStorage.getItem('pulse_cabinet') || '[]');
+    const profileCabinet = allCabinet.filter(c => !c.profileId || c.profileId === activeProfile);
+    const keywords = data.cabinetKeywords || [];
+    const todayIso = new Date().toISOString().split('T')[0];
+
+    const matched = profileCabinet.filter(item => {
+      const name = (item.name || '').toLowerCase();
+      const notes = (item.notes || '').toLowerCase();
+      return keywords.some(k => name.includes(k) || notes.includes(k));
+    });
+
+    if (matched.length > 0) {
+      cabinetList.innerHTML = `
+        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">
+          Trovati <strong>${matched.length}</strong> farmaci o dispositivi compatibili in casa:
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          ${matched.map(med => {
+            const isExpired = med.expiryDate && med.expiryDate < todayIso;
+            return `
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--bg-card); border: 1px solid ${isExpired ? 'rgba(224, 108, 117, 0.4)' : 'var(--border-glass)'};">
+                <div>
+                  <div style="font-size: 13px; font-weight: 700; color: ${isExpired ? 'var(--accent-coral)' : 'var(--text-primary)'}; display: flex; align-items: center; gap: 6px;">
+                    <span>${escapeHTML(med.name)}</span>
+                    ${isExpired ? '<span style="font-size: 10px; font-weight: 800; padding: 1px 5px; border-radius: 4px; background: rgba(224, 108, 117, 0.2); color: var(--accent-coral);">SCADUTO</span>' : ''}
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">
+                    Q.tà: ${escapeHTML(med.quantity || 'Disponibile')} · Scadenza: ${med.expiryDate || 'Non indicata'}
+                  </div>
+                </div>
+                <button onclick="closeAllModals(); openCabinetView();" class="btn-secondary-sm" style="padding: 4px 8px; font-size: 11px; flex: none;">
+                  Dettagli ›
+                </button>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    } else {
+      cabinetList.innerHTML = `
+        <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <span>Nessun farmaco corrispondente per questo disturbo salvato nel tuo armadietto.</span>
+          <button onclick="closeAllModals(); openCabinetView();" class="btn-secondary-sm" style="padding: 4px 8px; font-size: 11px; flex: none;">
+            Apri Armadietto ›
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  // Bottone Salva nel Diario
+  if (saveDiaryBtn) {
+    saveDiaryBtn.onclick = () => {
+      saveFeelingSymptomToDiary(data.title);
+    };
+  }
+
+  openModal('feelingRemedyModalOverlay');
+}
+
+function saveFeelingSymptomToDiary(symptomTitle) {
+  const activeProfile = getActiveProfileId();
+  let notes = JSON.parse(localStorage.getItem('pulse_notes') || '[]');
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+
+  const newNote = {
+    id: 'note_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+    profileId: activeProfile,
+    title: `Sintomo: ${symptomTitle}`,
+    tag: 'Sintomo',
+    text: `Avvertito alle ore ${timeStr}. Consultati rimedi naturali e controllo armadietto.`,
+    date: now.toISOString()
+  };
+
+  notes.unshift(newNote);
+  localStorage.setItem('pulse_notes', JSON.stringify(notes));
+
+  showToast(`Sintomo "${symptomTitle}" salvato nel Diario!`, '📝');
+  closeAllModals();
+
+  if (typeof renderHealthNotes === 'function') {
+    renderHealthNotes();
+  }
 }
