@@ -1,0 +1,19 @@
+{
+  "name": "Pulse — Salute & Documenti",
+  "short_name": "Pulse",
+  "description": "Gestione salute personale, archivio cartelle anatomiche e visite mediche.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F5F5F7",
+  "theme_color": "#FF2D55",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='128' fill='%23FF2D55'/><circle cx='256' cy='256' r='200' fill='none' stroke='white' stroke-width='16' stroke-opacity='0.25'/><path d='M100 256h80l24-56 36 120 36-88 28 44 24-20h84' fill='none' stroke='white' stroke-width='28' stroke-linecap='round' stroke-linejoin='round'/><circle cx='412' cy='256' r='18' fill='%2300C7BE'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
