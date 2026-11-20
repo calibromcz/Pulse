@@ -197,14 +197,14 @@
       <section id="homeRecentDocs" class="doc-list"></section>
     </main>
 
-    <!-- TAB 2: ARCHIVIO (Cartelle Anatomiche) -->
+    <!-- TAB 2: DOSSIER (Cartelle Anatomiche) -->
     <main id="tab-archive" class="tab-content">
       <div class="search-bar-wrap">
         <svg class="search-icon-left" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8"/>
           <line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
-        <input type="text" id="docSearchInput" class="search-input" placeholder="Cerca titolo, note, codice NRE...">
+        <input type="text" id="docSearchInput" class="search-input" placeholder="Cerca nel Dossier (titolo, note, NRE)...">
       </div>
 
       <div class="chips-row">
@@ -401,7 +401,7 @@
             <path d="M2 3H22V7H2V3Z"/>
             <path d="M10 11H14"/>
           </svg>
-          <span>Archivio</span>
+          <span>Dossier</span>
         </button>
 
         <!-- Raised central action button -->
@@ -629,26 +629,41 @@
         <button type="button" onclick="document.getElementById('pdfExtractedPill').style.display='none'" style="background: none; border: none; color: var(--accent-teal); cursor: pointer; font-size: 14px; font-weight: 700;">✕</button>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
         <label class="btn-secondary-sm" style="padding: 12px; cursor: pointer; text-align: center; flex-direction: column;">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          <span style="margin-top: 4px;">Scatta Foto</span>
+          <span style="margin-top: 4px; font-weight: 600;">Scatta Foto</span>
           <input type="file" id="scanCameraInput" accept="image/*" capture="environment" style="display: none;">
         </label>
         <label class="btn-secondary-sm" style="padding: 12px; cursor: pointer; text-align: center; flex-direction: column;">
           <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          <span style="margin-top: 4px;">PDF o Galleria</span>
+          <span style="margin-top: 4px; font-weight: 600;">Carica PDF / Galleria</span>
           <input type="file" id="scanFileInput" accept="image/*,application/pdf" style="display: none;">
         </label>
       </div>
 
-      <div id="bwFilterToggleWrap" style="display: none; align-items: center; justify-content: space-between; background: var(--bg-card-secondary); padding: 10px 14px; border-radius: var(--radius-md); margin-bottom: 14px;">
-        <span style="font-size: 13px; font-weight: 600;">Ottimizza Documento (B/N contrasto)</span>
-        <input type="checkbox" id="bwFilterToggle" checked>
-      </div>
+      <!-- Preview e Strumenti Ottimizzazione Immagine -->
+      <div id="scanPreviewWrap" style="display: none; margin-bottom: 14px; background: var(--bg-card-secondary); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Anteprima Documento</span>
+          <button type="button" id="rotateScanBtn" class="btn-secondary-sm" style="padding: 4px 10px; font-size: 12px;" title="Ruota 90° orario">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            Ruota 90°
+          </button>
+        </div>
 
-      <div id="scanPreviewWrap" style="display: none; margin-bottom: 14px; text-align: center; background: #000; border-radius: var(--radius-md); padding: 8px;">
-        <img id="scanPreviewImg" src="" alt="Anteprima Scansione" style="max-height: 180px; max-width: 100%; border-radius: 4px; object-fit: contain;">
+        <div style="background: #000; border-radius: var(--radius-sm); overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 160px; max-height: 220px; margin-bottom: 10px;">
+          <img id="scanPreviewImg" src="" alt="Anteprima Scansione" style="max-height: 210px; max-width: 100%; object-fit: contain;">
+        </div>
+
+        <!-- Segmented Control Filtri (Originale, Documento B/N, Nitido) -->
+        <div id="imageFiltersControlWrap" style="margin-top: 4px;">
+          <div class="segmented-control" id="scanFilterSegments" style="margin-bottom: 0;">
+            <button type="button" class="seg-btn" data-filter="original">Originale</button>
+            <button type="button" class="seg-btn active" data-filter="bw">Documento B/N</button>
+            <button type="button" class="seg-btn" data-filter="sharp">Nitido</button>
+          </div>
+        </div>
       </div>
 
       <form id="addDocForm">
@@ -780,7 +795,7 @@
           <input type="text" id="apptLocationInput" class="form-input" placeholder="Es. Policlinico Sant'Orsola Pad. 2">
         </div>
         <div class="form-group">
-          <label class="form-label">Collega Documento o Impegnativa</label>
+          <label class="form-label">Collega Documento dal Dossier</label>
           <select id="apptDocSelect" class="form-select">
             <option value="">Nessun documento collegato</option>
           </select>

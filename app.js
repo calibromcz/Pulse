@@ -858,11 +858,41 @@ async function openZoneFolder(zoneId) {
 }
 
 // 7. Viewer Modale
+let currentViewerObjectUrl = null;
+
+function cleanupViewerObjectUrl() {
+  if (currentViewerObjectUrl) {
+    URL.revokeObjectURL(currentViewerObjectUrl);
+    currentViewerObjectUrl = null;
+  }
+}
+
 async function openDocById(id) {
   const doc = await pulseDB.getDocument(id);
   if (!doc) {
     showToast('Documento non trovato', '⚠️');
     return;
+  }
+
+  cleanupViewerObjectUrl();
+
+  let fileUrl = doc.imageData;
+  if (doc.imageData && doc.imageData.startsWith('data:')) {
+    try {
+      const parts = doc.imageData.split(',');
+      const mime = (parts[0].match(/:(.*?);/) || [])[1] || 'image/jpeg';
+      const bstr = atob(parts[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      const blob = new Blob([u8arr], { type: mime });
+      currentViewerObjectUrl = URL.createObjectURL(blob);
+      fileUrl = currentViewerObjectUrl;
+    } catch (e) {
+      fileUrl = doc.imageData;
+    }
   }
 
   const zone = getBodyZone(doc.bodyZone);
@@ -917,12 +947,12 @@ async function openDocById(id) {
           <div style="font-size: 12px; opacity: 0.8;">Clicca 'Scarica' per visualizzare</div>
         </div>
       ` : `
-        <img src="${doc.imageData}" alt="${escapeHTML(doc.title)}" style="max-width: 100%; max-height: 340px; object-fit: contain;" />
+        <img src="${fileUrl}" alt="${escapeHTML(doc.title)}" style="max-width: 100%; max-height: 340px; object-fit: contain;" />
       `}
     </div>
 
     <div style="display: flex; gap: 10px;">
-      <a href="${doc.imageData}" download="${doc.title.replace(/[^a-zA-Z0-9]/g, '_')}${doc.isPdf ? '.pdf' : '.jpg'}" class="btn-secondary-sm" style="flex: 1; text-decoration: none; padding: 12px;" onclick="showToast('Download avviato', '⬇️')">
+      <a href="${fileUrl}" download="${doc.title.replace(/[^a-zA-Z0-9]/g, '_')}${doc.isPdf ? '.pdf' : '.jpg'}" class="btn-secondary-sm" style="flex: 1; text-decoration: none; padding: 12px;" onclick="showToast('Download avviato', '⬇️')">
         Scarica File
       </a>
       <button class="btn-secondary-sm" style="color: var(--accent-coral); padding: 12px;" onclick="deleteDocItem('${doc.id}')">
@@ -945,17 +975,20 @@ async function deleteDocItem(id) {
 
 // 8. Add / Scan Document Modal
 let rawUploadedImage = null;
+let currentRotation = 0;
+let currentFilterMode = 'bw';
 let selectedZoneId = 'blood';
 
 function initAddDocumentModal() {
   const form = document.getElementById('addDocForm');
   const cameraInput = document.getElementById('scanCameraInput');
   const fileInput = document.getElementById('scanFileInput');
-  const filterToggle = document.getElementById('bwFilterToggle');
   const previewImg = document.getElementById('scanPreviewImg');
   const previewWrap = document.getElementById('scanPreviewWrap');
+  const rotateBtn = document.getElementById('rotateScanBtn');
   const catSelect = document.getElementById('docCategorySelect');
   const taxFieldsWrap = document.getElementById('tax730ExtraFields');
+  const filterSegmentBtns = document.querySelectorAll('#scanFilterSegments .seg-btn');
 
   catSelect.addEventListener('change', () => {
     const val = catSelect.value;
@@ -990,13 +1023,36 @@ function initAddDocumentModal() {
     </div>
   `).join('');
 
+  if (rotateBtn) {
+    rotateBtn.addEventListener('click', () => {
+      if (!rawUploadedImage || rawUploadedImage.isPdf) return;
+      currentRotation = (currentRotation + 90) % 360;
+      processImageOptimization();
+    });
+  }
+
+  filterSegmentBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterSegmentBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilterMode = btn.dataset.filter || 'original';
+      if (rawUploadedImage && !rawUploadedImage.isPdf) {
+        processImageOptimization();
+      }
+    });
+  });
+
   const handleFile = async (file) => {
     if (!file) return;
     const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
     const indicator = document.getElementById('pdfAnalyzingIndicator');
     const extractedPill = document.getElementById('pdfExtractedPill');
+    const filtersWrap = document.getElementById('imageFiltersControlWrap');
+    if (rotateBtn) rotateBtn.style.display = isPdf ? 'none' : 'inline-flex';
+    if (filtersWrap) filtersWrap.style.display = isPdf ? 'none' : 'block';
 
     if (extractedPill) extractedPill.style.display = 'none';
+    currentRotation = 0;
 
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -1007,7 +1063,6 @@ function initAddDocumentModal() {
       if (isPdf) {
         previewWrap.style.display = 'block';
         previewImg.src = 'data:image/svg+xml;base64,' + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="%23007AFF" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>');
-        document.getElementById('bwFilterToggleWrap').style.display = 'none';
 
         if (indicator) indicator.style.display = 'flex';
         try {
@@ -1028,11 +1083,7 @@ function initAddDocumentModal() {
         }
       } else {
         previewWrap.style.display = 'block';
-        previewImg.src = rawUploadedImage.dataUrl;
-        document.getElementById('bwFilterToggleWrap').style.display = 'flex';
-        if (filterToggle && filterToggle.checked) {
-          applyBWCanvasFilter();
-        }
+        processImageOptimization();
       }
     };
     reader.readAsDataURL(file);
@@ -1040,17 +1091,6 @@ function initAddDocumentModal() {
 
   cameraInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
   fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
-
-  if (filterToggle) {
-    filterToggle.addEventListener('change', () => {
-      if (!rawUploadedImage || rawUploadedImage.isPdf) return;
-      if (filterToggle.checked) {
-        applyBWCanvasFilter();
-      } else {
-        previewImg.src = rawUploadedImage.dataUrl;
-      }
-    });
-  }
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -1092,10 +1132,69 @@ function initAddDocumentModal() {
     form.reset();
     previewWrap.style.display = 'none';
     rawUploadedImage = null;
+    currentRotation = 0;
 
     showToast('Documento salvato con successo', '✅');
     await renderAllViews();
   });
+}
+
+function processImageOptimization() {
+  if (!rawUploadedImage || rawUploadedImage.isPdf) return;
+  const img = new Image();
+  img.onload = () => {
+    const maxSide = 1600;
+    let w = img.width;
+    let h = img.height;
+    if (w > maxSide || h > maxSide) {
+      if (w > h) {
+        h = Math.round((h * maxSide) / w);
+        w = maxSide;
+      } else {
+        w = Math.round((w * maxSide) / h);
+        h = maxSide;
+      }
+    }
+
+    const canvas = document.createElement('canvas');
+    const isSideways = currentRotation === 90 || currentRotation === 270;
+    canvas.width = isSideways ? h : w;
+    canvas.height = isSideways ? w : h;
+
+    const ctx = canvas.getContext('2d');
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate((currentRotation * Math.PI) / 180);
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+
+    if (currentFilterMode === 'bw') {
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = imgData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+        const val = gray > 135 ? 255 : (gray < 75 ? 0 : Math.min(255, gray * 0.9));
+        d[i] = val;
+        d[i + 1] = val;
+        d[i + 2] = val;
+      }
+      ctx.putImageData(imgData, 0, 0);
+    } else if (currentFilterMode === 'sharp') {
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = imgData.data;
+      for (let i = 0; i < d.length; i += 4) {
+        // High contrast while preserving colors
+        d[i] = Math.min(255, Math.max(0, (d[i] - 128) * 1.35 + 128));
+        d[i + 1] = Math.min(255, Math.max(0, (d[i + 1] - 128) * 1.35 + 128));
+        d[i + 2] = Math.min(255, Math.max(0, (d[i + 2] - 128) * 1.35 + 128));
+      }
+      ctx.putImageData(imgData, 0, 0);
+    }
+
+    const preview = document.getElementById('scanPreviewImg');
+    if (preview) {
+      preview.src = canvas.toDataURL('image/jpeg', 0.82);
+    }
+  };
+  img.src = rawUploadedImage.dataUrl;
 }
 
 function selectPickerZone(zoneId) {
@@ -1108,29 +1207,7 @@ function selectPickerZone(zoneId) {
 }
 
 function applyBWCanvasFilter() {
-  if (!rawUploadedImage || rawUploadedImage.isPdf) return;
-  const img = new Image();
-  img.onload = () => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = img.width;
-    canvas.height = img.height;
-    ctx.drawImage(img, 0, 0);
-
-    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const d = imgData.data;
-
-    for (let i = 0; i < d.length; i += 4) {
-      const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-      const contrastGray = gray > 140 ? 255 : (gray < 70 ? 0 : gray * 0.9);
-      d[i] = contrastGray;
-      d[i + 1] = contrastGray;
-      d[i + 2] = contrastGray;
-    }
-    ctx.putImageData(imgData, 0, 0);
-    document.getElementById('scanPreviewImg').src = canvas.toDataURL('image/jpeg', 0.85);
-  };
-  img.src = rawUploadedImage.dataUrl;
+  processImageOptimization();
 }
 
 async function extractTextFromPDFDataUri(dataUri) {
@@ -2713,6 +2790,7 @@ function openModal(modalId) {
 }
 
 function closeAllModals() {
+  cleanupViewerObjectUrl();
   document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
   document.body.classList.remove('modal-open');
 }

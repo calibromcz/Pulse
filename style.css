@@ -1150,3 +1150,35 @@ body::after {
 .pin-dots-row.shake {
   animation: shake 0.4s ease;
 }
+
+/* Desktop & iPad Adaptability (macOS Floating Center Container) */
+@media (min-width: 768px) {
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 24px 0;
+  }
+
+  .app-viewport {
+    max-width: 520px;
+    min-height: calc(100vh - 48px);
+    border-radius: 32px;
+    border: 1px solid var(--border-glass);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+  }
+
+  .bottom-nav {
+    max-width: 520px;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    border-bottom-left-radius: 32px;
+    border-bottom-right-radius: 32px;
+  }
+
+  .app-header {
+    border-top-left-radius: 32px;
+    border-top-right-radius: 32px;
+  }
+}
