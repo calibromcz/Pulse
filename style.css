@@ -1,34 +1,34 @@
-/* Apple Cupertino iOS 18 / visionOS Liquid Glass Design System */
+/* Apple Cupertino iOS 26 / Liquid Glass Design System (Soft Pastels & Matte Glass) */
 :root {
-  --bg-app: #F5F5F7;
-  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-app: #F4F5F7;
+  --bg-card: rgba(255, 255, 255, 0.72);
   --bg-card-solid: #FFFFFF;
-  --bg-card-secondary: rgba(242, 242, 247, 0.85);
+  --bg-card-secondary: rgba(240, 242, 245, 0.75);
   --bg-glass: rgba(255, 255, 255, 0.75);
-  --bg-glass-strong: rgba(255, 255, 255, 0.92);
+  --bg-glass-strong: rgba(255, 255, 255, 0.90);
   
-  --border-glass: rgba(255, 255, 255, 0.70);
-  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-glass: rgba(255, 255, 255, 0.55);
+  --border-subtle: rgba(0, 0, 0, 0.05);
 
-  --text-primary: #1D1D1F;
-  --text-secondary: #86868B;
-  --text-tertiary: #A1A1A6;
+  --text-primary: #1C1C1E;
+  --text-secondary: #6E6E73;
+  --text-tertiary: #98989D;
 
-  --accent-coral: #FF2D55;
-  --accent-coral-grad: linear-gradient(135deg, #FF375F 0%, #FF2D55 100%);
-  --accent-teal: #00C7BE;
-  --accent-blue: #007AFF;
-  --accent-purple: #AF52DE;
-  --accent-amber: #FF9500;
-  --accent-green: #34C759;
+  --accent-coral: #E05666;
+  --accent-coral-grad: linear-gradient(135deg, #EB6B78 0%, #D94858 100%);
+  --accent-teal: #00A8A0;
+  --accent-blue: #0A84FF;
+  --accent-purple: #9D4EDD;
+  --accent-amber: #E68A00;
+  --accent-green: #30B050;
 
-  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.03);
-  --shadow-md: 0 8px 28px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 16px 44px rgba(0, 0, 0, 0.08);
-  --shadow-float: 0 14px 38px rgba(0, 0, 0, 0.09);
-  --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.07);
+  --shadow-float: 0 14px 36px rgba(0, 0, 0, 0.07);
+  --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.65);
 
-  --blur-glass: blur(28px) saturate(200%);
+  --blur-glass: blur(24px) saturate(160%);
   --radius-sm: 12px;
   --radius-md: 18px;
   --radius-lg: 24px;
@@ -40,24 +40,32 @@
 }
 
 [data-theme="dark"] {
-  --bg-app: #000000;
-  --bg-card: rgba(28, 28, 30, 0.82);
-  --bg-card-solid: #1C1C1E;
-  --bg-card-secondary: rgba(44, 44, 46, 0.82);
-  --bg-glass: rgba(28, 28, 30, 0.75);
-  --bg-glass-strong: rgba(28, 28, 30, 0.92);
+  --bg-app: #0D0E11;
+  --bg-card: rgba(28, 30, 36, 0.68);
+  --bg-card-solid: #16181E;
+  --bg-card-secondary: rgba(36, 39, 48, 0.68);
+  --bg-glass: rgba(22, 24, 30, 0.72);
+  --bg-glass-strong: rgba(26, 28, 35, 0.88);
   
-  --border-glass: rgba(255, 255, 255, 0.12);
-  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.05);
 
-  --text-primary: #F5F5F7;
-  --text-secondary: #8E8E93;
-  --text-tertiary: #636366;
+  --text-primary: #EAECEF;
+  --text-secondary: #989DA8;
+  --text-tertiary: #686D7A;
 
-  --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.65);
-  --shadow-float: 0 16px 44px rgba(0, 0, 0, 0.75);
+  --accent-coral: #E06C75;
+  --accent-coral-grad: linear-gradient(135deg, #E57373 0%, #E06C75 100%);
+  --accent-teal: #56C2BC;
+  --accent-blue: #64A8F0;
+  --accent-purple: #A98AE0;
+  --accent-amber: #E5A95C;
+  --accent-green: #5EC282;
+
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55);
+  --shadow-float: 0 14px 38px rgba(0, 0, 0, 0.6);
   --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
@@ -109,7 +117,7 @@ body::before {
   left: -80px;
   width: 320px;
   height: 320px;
-  background: radial-gradient(circle, rgba(255, 45, 85, 0.14) 0%, rgba(255, 45, 85, 0) 70%);
+  background: radial-gradient(circle, rgba(224, 108, 117, 0.08) 0%, rgba(224, 108, 117, 0) 70%);
 }
 
 body::after {
@@ -117,15 +125,15 @@ body::after {
   right: -60px;
   width: 340px;
   height: 340px;
-  background: radial-gradient(circle, rgba(0, 199, 190, 0.13) 0%, rgba(0, 199, 190, 0) 70%);
+  background: radial-gradient(circle, rgba(86, 194, 188, 0.07) 0%, rgba(86, 194, 188, 0) 70%);
 }
 
 [data-theme="dark"] body::before {
-  background: radial-gradient(circle, rgba(255, 45, 85, 0.12) 0%, rgba(255, 45, 85, 0) 70%);
+  background: radial-gradient(circle, rgba(224, 108, 117, 0.06) 0%, rgba(224, 108, 117, 0) 70%);
 }
 
 [data-theme="dark"] body::after {
-  background: radial-gradient(circle, rgba(0, 199, 190, 0.10) 0%, rgba(0, 199, 190, 0) 70%);
+  background: radial-gradient(circle, rgba(86, 194, 188, 0.05) 0%, rgba(86, 194, 188, 0) 70%);
 }
 
 .app-viewport {
@@ -1615,10 +1623,15 @@ body::after {
     padding: 0 0 calc(115px + var(--safe-bottom)) 0;
   }
   .tab-content {
-    padding: 10px 16px 20px 16px;
+    padding: 12px 16px 20px 16px;
   }
   #tab-home {
-    padding-top: 6px !important;
+    padding-top: 4px !important;
+  }
+  #tab-archive,
+  #tab-agenda,
+  #tab-profile {
+    padding-top: 8px !important;
   }
 }
 
@@ -1755,6 +1768,170 @@ body::after {
 .time-slot-pill.urgent {
   border-color: var(--accent-coral);
   box-shadow: 0 0 0 2px rgba(255, 45, 85, 0.18);
+}
+
+/* Emergency 112 Pill */
+.emergency-call-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-coral);
+  color: #FFFFFF !important;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 4px 14px rgba(224, 108, 117, 0.35);
+  transition: transform 0.2s var(--spring-easing), opacity 0.2s ease;
+}
+
+.emergency-call-pill:active {
+  transform: scale(0.94);
+}
+
+/* First Aid Modal & Cards */
+.first-aid-sheet {
+  max-width: 580px;
+}
+
+.first-aid-sticky-header {
+  position: sticky;
+  top: 0;
+  background: var(--bg-card-solid);
+  padding-bottom: 8px;
+  z-index: 10;
+}
+
+.first-aid-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+@media (min-width: 900px) {
+  .first-aid-sheet {
+    max-width: 720px;
+  }
+  .first-aid-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+}
+
+.first-aid-card {
+  background: var(--bg-card);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  cursor: pointer;
+  box-shadow: var(--glass-inset), var(--shadow-sm);
+  transition: transform 0.2s var(--spring-easing), border-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.first-aid-card:hover {
+  border-color: rgba(224, 108, 117, 0.4);
+}
+
+.first-aid-card:active {
+  transform: scale(0.96);
+}
+
+.first-aid-card-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 10px 0 4px 0;
+  line-height: 1.3;
+}
+
+.first-aid-card-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+.first-aid-disclaimer {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  text-align: center;
+  margin-top: 20px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.fa-action-box {
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border: 1px solid transparent;
+}
+
+.fa-action-box.do {
+  background: rgba(94, 194, 130, 0.12);
+  border-color: rgba(94, 194, 130, 0.28);
+}
+
+.fa-action-box.dont {
+  background: rgba(224, 108, 117, 0.12);
+  border-color: rgba(224, 108, 117, 0.28);
+}
+
+.fa-action-box.emergency {
+  background: rgba(229, 169, 92, 0.12);
+  border-color: rgba(229, 169, 92, 0.28);
+}
+
+.fa-box-title {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fa-action-box.do .fa-box-title {
+  color: var(--accent-green);
+}
+
+.fa-action-box.dont .fa-box-title {
+  color: var(--accent-coral);
+}
+
+.fa-action-box.emergency .fa-box-title {
+  color: var(--accent-amber);
+}
+
+.fa-step-item {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.fa-step-item:last-child {
+  margin-bottom: 0;
+}
+
+.fa-step-num {
+  font-weight: 800;
+  min-width: 18px;
+  color: var(--text-secondary);
 }
 
 /* Desktop & iPad Adaptability (macOS Floating Center Container) */

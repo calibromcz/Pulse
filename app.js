@@ -3817,3 +3817,358 @@ function escapeHTML(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
+
+// ----------------------------------------------------
+// 18. MANUALE DI PRIMO SOCCORSO (100% OFFLINE)
+// ----------------------------------------------------
+const FIRST_AID_DATA = [
+  {
+    id: 'heimlich',
+    title: 'Soffocamento (Heimlich)',
+    subtitle: 'Ostruzione vie aeree',
+    iconColor: '#E06C75',
+    iconBg: 'rgba(224, 108, 117, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2a5 5 0 0 0-5 5v3a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5z" fill="currentColor" fill-opacity="0.16"/>
+      <path d="M12 15v7M8 22h8"/>
+    </svg>`,
+    dos: [
+      'Incoraggia la persona a tossire energicamente se respira ancora.',
+      'Se non riesce a parlare o tossire, posizionati dietro e dai 5 colpi interscapolari (tra le scapole) con il palmo.',
+      'Se l\'ostruzione persiste, esegui la manovra di Heimlich: cingi la vita, poni il pugno sopra l\'ombelico e comprimi con forza verso l\'interno e verso l\'alto.',
+      'Alterna 5 colpi dorsali a 5 compressioni addominali finché l\'oggetto non viene espulso.'
+    ],
+    donts: [
+      'NON tentare di estrarre l\'oggetto alla cieca con le dita se non è chiaramente visibile (rischi di spingerlo più a fondo).',
+      'NON dare acqua o cibo durante l\'ostruzione.'
+    ],
+    emergencyCall: 'Se la persona perde conoscenza, adagiala a terra, chiama subito il 112 e inizia le manovre di RCP (massaggio cardiaco).'
+  },
+  {
+    id: 'burns',
+    title: 'Ustioni & Scottature',
+    subtitle: 'Calore o liquidi bollenti',
+    iconColor: '#E5A95C',
+    iconBg: 'rgba(229, 169, 92, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2c1 3 4 5 4 9a6 6 0 1 1-12 0c0-4 3-6 4-9 1 3 3 5 4 0z" fill="currentColor" fill-opacity="0.16"/>
+    </svg>`,
+    dos: [
+      'Raffredda subito l\'area con acqua corrente fresca (non gelata) per almeno 10-15 minuti continui.',
+      'Rimuovi anelli, bracciali o indumenti non attaccati alla pelle prima che la parte si gonfi.',
+      'Copri la scottatura con garze sterili o con una pellicola trasparente pulita senza stringere.',
+      'Mantieni l\'area pulita e al riparo da sfregamenti.'
+    ],
+    donts: [
+      'NON applicare mai ghiaccio diretto (può causare necrosi tissutale da congelamento).',
+      'NON rompere le bolle o vesciche (proteggono dalle infezioni).',
+      'NON applicare olio, burro, dentifricio o pomate su ustioni fresche.'
+    ],
+    emergencyCall: 'Chiama il 112 se l\'ustione è estesa (più del palmo della mano), colpisce viso, mani o articolazioni, o se la pelle appare bianca/nera (3° grado).'
+  },
+  {
+    id: 'cuts',
+    title: 'Tagli & Emorragie',
+    subtitle: 'Ferite e sanguinamenti',
+    iconColor: '#E06C75',
+    iconBg: 'rgba(224, 108, 117, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+      <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" fill="currentColor" fill-opacity="0.16"/>
+      <line x1="8" y1="13" x2="16" y2="13"/>
+    </svg>`,
+    dos: [
+      'Lava le mani e applica una pressione diretta e costante sulla ferita con una garza o un panno pulito per almeno 5-10 minuti.',
+      'Se il sanguinamento è su un arto, sollevalo al di sopra del livello del cuore se non ci sono fratture.',
+      'Pulisci la ferita con acqua corrente o fisiologica e disinfetta delicatamente i bordi.',
+      'Applica una medicazione compressiva pulita.'
+    ],
+    donts: [
+      'NON rimuovere la prima garza anche se si impregna di sangue: aggiungine altre sopra continuando a premere.',
+      'NON estrarre oggetti conficcati in profondità (tampona attorno all\'oggetto).',
+      'NON usare lacci emostatici artigianali a meno che tu non abbia un addestramento specifico.'
+    ],
+    emergencyCall: 'Chiama il 112 se il sangue zampilla o non si arresta dopo 10 minuti di pressione continua, o se la persona avverte debolezza estrema o sviene.'
+  },
+  {
+    id: 'fainting',
+    title: 'Svenimento',
+    subtitle: 'Perdita di coscienza breve',
+    iconColor: '#64A8F0',
+    iconBg: 'rgba(100, 168, 240, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10" fill="currentColor" fill-opacity="0.16"/>
+      <line x1="8" y1="15" x2="16" y2="15"/>
+      <line x1="9" y1="9" x2="9.01" y2="9"/>
+      <line x1="15" y1="9" x2="15.01" y2="9"/>
+    </svg>`,
+    dos: [
+      'Stendi la persona sulla schiena e solleva le gambe di circa 30 cm (posizione antishock) per favorire l\'afflusso di sangue al cervello.',
+      'Allenta colletti, cinture e indumenti stretti per facilitare la respirazione.',
+      'Assicurati che ci sia ricircolo d\'aria fresca e allontana la folla.',
+      'Rassicurala al risveglio e lasciala sdraiata ancora per qualche minuto prima di farla alzare gradualmente.'
+    ],
+    donts: [
+      'NON farla alzare subito in piedi, anche se dice di sentirsi meglio.',
+      'NON somministrare bevande o cibo finché non è perfettamente cosciente e orientata.',
+      'NON schiaffeggiare o bagnare violentemente il viso con acqua fredda.'
+    ],
+    emergencyCall: 'Chiama il 112 se la persona non riprende conoscenza entro 1-2 minuti, se ha battuto violentemente la testa cadendo o ha convulsioni.'
+  },
+  {
+    id: 'allergy',
+    title: 'Reazione Allergica',
+    subtitle: 'Orticaria o anafilassi',
+    iconColor: '#A98AE0',
+    iconBg: 'rgba(169, 138, 224, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 21a9 9 0 0 0 9-9H3a9 9 0 0 0 9 9z" fill="currentColor" fill-opacity="0.16"/>
+      <path d="M12 3v10"/>
+    </svg>`,
+    dos: [
+      'Identifica e allontana immediatamente il presunto allergene (alimento, pianta, farmaco o puntura).',
+      'Se il soggetto ha un autoiniettore di adrenalina prescritto (es. Fastjekt), aiutalo a usarlo immediatamente sulla coscia.',
+      'Mantieni la persona calma, seduta se fatica a respirare o distesa con gambe alzate se avverte vertigini.',
+      'Monitora costantemente respiro e livello di coscienza.'
+    ],
+    donts: [
+      'NON sottovalutare sintomi anche lievi se compaiono formicolio in bocca o tosse improvvisa.',
+      'NON dare da bere o mangiare se ci sono difficoltà a deglutire o gonfiore a labbra/gola.'
+    ],
+    emergencyCall: 'Chiama immediatamente il 112 al primo segno di difficoltà respiratoria, gonfiore di lingua o gola, voce roca o collasso (anafilassi grave).'
+  },
+  {
+    id: 'bites',
+    title: 'Punture & Morsi',
+    subtitle: 'Insetti, api, zecche',
+    iconColor: '#5EC282',
+    iconBg: 'rgba(94, 194, 130, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="6" fill="currentColor" fill-opacity="0.16"/>
+      <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
+    </svg>`,
+    dos: [
+      'Per punture d\'ape: rimuovi subito il pungiglione raschiando con una tessera rigida (senza schiacciarlo).',
+      'Applica impacchi freddi o ghiaccio avvolto in un panno per ridurre gonfiore e dolore.',
+      'Per morsi di zecca: afferrala con una pinzetta sottile alla base della cute e tira verso l\'alto delicatamente senza ruotarla.',
+      'Disinfetta accuratamente la zona e monitora l\'eventuale comparsa di aloni rossi nei giorni successivi.'
+    ],
+    donts: [
+      'NON schiacciare il pungiglione con le dita (espelleresti altro veleno nel tessuto).',
+      'NON soffocare la zecca con alcol, olio, acetone o fiammiferi prima di estrarla.',
+      'NON grattare vigorosamente la puntura per non provocare sovrainfezioni.'
+    ],
+    emergencyCall: 'Chiama il 112 se la puntura è in bocca o gola, se compaiono difficoltà a respirare o se la persona è allergica nota al veleno d\'api.'
+  },
+  {
+    id: 'heatstroke',
+    title: 'Colpo di Calore',
+    subtitle: 'Disidratazione e ipertermia',
+    iconColor: '#E5A95C',
+    iconBg: 'rgba(229, 169, 92, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="5" fill="currentColor" fill-opacity="0.16"/>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+    </svg>`,
+    dos: [
+      'Sposta subito la persona in un ambiente fresco, ombreggiato e ben ventilato.',
+      'Falla sdraiare con le gambe leggermente sollevate e rimuovi gli indumenti pesanti o in eccesso.',
+      'Raffredda il corpo con panni bagnati con acqua fresca su fronte, collo, ascelle e inguine.',
+      'Se è cosciente e non vomita, offri piccoli sorsi di acqua fresca (non ghiacciata) o soluzioni reidratanti.'
+    ],
+    donts: [
+      'NON immergere la persona in acqua ghiacciata (può provocare shock termico o arresto).',
+      'NON somministrare farmaci antipiretici (tachipirina o aspirina non sono efficaci per il colpo di calore).',
+      'NON dare alcol o bevande zuccherate/caffeinate.'
+    ],
+    emergencyCall: 'Chiama il 112 se la temperatura corporea è superiore a 39-40 °C, se la persona è confusa, delira o perde conoscenza.'
+  },
+  {
+    id: 'headtrauma',
+    title: 'Trauma Cranico',
+    subtitle: 'Botte alla testa e allarmi',
+    iconColor: '#A98AE0',
+    iconBg: 'rgba(169, 138, 224, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2a8 8 0 0 0-8 8c0 3 1.5 5.5 3.5 7V20a2 2 0 0 0 2 2h5a2 2 0 0 0 2-2v-3c2-1.5 3.5-4 3.5-7a8 8 0 0 0-8-8z" fill="currentColor" fill-opacity="0.16"/>
+    </svg>`,
+    dos: [
+      'Fai riposare la persona immobile tenendo testa e collo allineati.',
+      'Applica una borsa del ghiaccio avvolta in un panno sul bernoccolo o contusione per ridurre il rigonfiamento.',
+      'Se c\'è una ferita che sanguina superficialmente, applica una leggera pressione con una garza pulita.',
+      'Tienila sotto osservazione costante nelle 24-48 ore successive per verificare la presenza di segnali di allarme.'
+    ],
+    donts: [
+      'NON muovere il collo o la colonna vertebrale se il trauma è stato violento (es. caduta da alto o incidente).',
+      'NON somministrare sedativi o antidolorifici forti prima della visita medica.',
+      'NON premere con forza se sospetti una frattura cranica.'
+    ],
+    emergencyCall: 'Chiama subito il 112 in presenza di: perdita di coscienza anche brevissima, vomito ripetuto, sonnolenza anomala, pupille asimmetriche o fuoriuscita di liquido da naso/orecchie.'
+  },
+  {
+    id: 'cpr',
+    title: 'RCP Base',
+    subtitle: 'Arresto cardiaco e massaggio',
+    iconColor: '#E06C75',
+    iconBg: 'rgba(224, 108, 117, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19.5 12.5L12 20.5L4.5 12.5C2.5 10.2 2.8 6.8 5.2 4.8C7.5 2.8 11 3.5 12 6C13 3.5 16.5 2.8 18.8 4.8C21.2 6.8 21.5 10.2 19.5 12.5Z" fill="currentColor" fill-opacity="0.16"/>
+      <path d="M12 9v6M9 12h6"/>
+    </svg>`,
+    dos: [
+      'Verifica la sicurezza ambientale e scuoti delicatamente le spalle chiamando la persona ad alta voce.',
+      'Se non risponde e non respira normalmente (o ha respiro agonico/gasping), chiama subito il 112 mettendo il vivavoce.',
+      'Posiziona le mani intrecciate al centro del torace, braccia tese e perpendicolari.',
+      'Esegui compressioni toraciche continue a ritmo di 100-120 al minuto (profondità 5-6 cm).',
+      'Chiedi a un passante di recuperare il Defibrillatore (DAE) più vicino e accendilo appena disponibile.'
+    ],
+    donts: [
+      'NON interrompere il massaggio cardiaco se non quando il DAE lo richiede o all\'arrivo del personale del 112.',
+      'NON piegare le braccia durante la compressione (usa il peso del busto).',
+      'NON avere paura di fare male: l\'arresto cardiaco senza massaggio è fatale.'
+    ],
+    emergencyCall: 'Chiama SUBITO il 112 e mantieni il vivavoce attivo: l\'operatore ti guiderà passo dopo passo al secondo durante tutta la manovra.'
+  }
+];
+
+function openFirstAidModal() {
+  openModal('firstAidModalOverlay');
+  showFirstAidIndex();
+}
+
+function showFirstAidIndex() {
+  const indexView = document.getElementById('firstAidIndexView');
+  const detailView = document.getElementById('firstAidDetailView');
+  const searchWrap = document.getElementById('firstAidSearchWrap');
+  const headerTitle = document.getElementById('firstAidHeaderTitle');
+  const searchInput = document.getElementById('firstAidSearchInput');
+
+  if (indexView) indexView.style.display = 'block';
+  if (detailView) detailView.style.display = 'none';
+  if (searchWrap) searchWrap.style.display = 'block';
+  if (headerTitle) headerTitle.innerText = 'Primo Soccorso';
+  if (searchInput) searchInput.value = '';
+
+  renderFirstAidCards(FIRST_AID_DATA);
+}
+
+function renderFirstAidCards(items) {
+  const grid = document.getElementById('firstAidCardsGrid');
+  if (!grid) return;
+
+  if (items.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 24px; color: var(--text-secondary); font-size: 13px;">
+        Nessuna guida trovata con questa parola chiave.
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = items.map(item => `
+    <div class="first-aid-card" onclick="openFirstAidDetail('${item.id}')">
+      <div>
+        <div class="squircle-icon-badge" style="width: 40px; height: 40px; min-width: 40px; border-radius: 12px; background: ${item.iconBg}; color: ${item.iconColor}; border: 1px solid ${item.iconColor}33;">
+          ${item.iconSvg}
+        </div>
+        <div class="first-aid-card-title">${escapeHTML(item.title)}</div>
+        <div class="first-aid-card-sub">${escapeHTML(item.subtitle)}</div>
+      </div>
+      <div style="margin-top: 10px; font-size: 12px; font-weight: 700; color: ${item.iconColor}; display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
+        <span>Leggi guida</span>
+        <span>›</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterFirstAidTopics(query) {
+  const q = (query || '').toLowerCase().trim();
+  if (!q) {
+    renderFirstAidCards(FIRST_AID_DATA);
+    return;
+  }
+  const filtered = FIRST_AID_DATA.filter(item =>
+    item.title.toLowerCase().includes(q) ||
+    item.subtitle.toLowerCase().includes(q) ||
+    item.dos.some(d => d.toLowerCase().includes(q)) ||
+    item.donts.some(d => d.toLowerCase().includes(q))
+  );
+  renderFirstAidCards(filtered);
+}
+
+function openFirstAidDetail(id) {
+  const item = FIRST_AID_DATA.find(i => i.id === id);
+  if (!item) return;
+
+  const indexView = document.getElementById('firstAidIndexView');
+  const detailView = document.getElementById('firstAidDetailView');
+  const searchWrap = document.getElementById('firstAidSearchWrap');
+  const headerTitle = document.getElementById('firstAidHeaderTitle');
+  const detailContent = document.getElementById('firstAidDetailContent');
+
+  if (indexView) indexView.style.display = 'none';
+  if (detailView) detailView.style.display = 'block';
+  if (searchWrap) searchWrap.style.display = 'none';
+  if (headerTitle) headerTitle.innerText = item.title;
+
+  detailContent.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+      <div class="squircle-icon-badge" style="width: 46px; height: 46px; min-width: 46px; border-radius: 14px; background: ${item.iconBg}; color: ${item.iconColor}; border: 1px solid ${item.iconColor}33;">
+        ${item.iconSvg}
+      </div>
+      <div>
+        <div style="font-size: 18px; font-weight: 800; color: var(--text-primary);">${escapeHTML(item.title)}</div>
+        <div style="font-size: 13px; color: var(--text-secondary);">${escapeHTML(item.subtitle)}</div>
+      </div>
+    </div>
+
+    <!-- Blocco 1: Cosa fare subito (Verde soft) -->
+    <div class="fa-action-box do">
+      <div class="fa-box-title">
+        <span>✓</span>
+        <span>Cosa fare subito</span>
+      </div>
+      <div>
+        ${item.dos.map((step, idx) => `
+          <div class="fa-step-item">
+            <span class="fa-step-num">${idx + 1}.</span>
+            <span>${escapeHTML(step)}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- Blocco 2: Cosa NON fare (Corallo soft) -->
+    <div class="fa-action-box dont">
+      <div class="fa-box-title">
+        <span>✕</span>
+        <span>Cosa NON fare (Errori comuni)</span>
+      </div>
+      <div>
+        ${item.donts.map(dont => `
+          <div class="fa-step-item">
+            <span class="fa-step-num" style="color: var(--accent-coral); font-weight: 900;">•</span>
+            <span>${escapeHTML(dont)}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- Blocco 3: Quando chiamare subito il 112 -->
+    <div class="fa-action-box emergency">
+      <div class="fa-box-title">
+        <span>🚨</span>
+        <span>Quando chiamare subito il 112</span>
+      </div>
+      <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); line-height: 1.5;">
+        ${escapeHTML(item.emergencyCall)}
+      </div>
+      <div style="margin-top: 10px;">
+        <a href="tel:112" class="emergency-call-pill" style="font-size: 13px; padding: 7px 16px;">
+          <span>📞 Chiama 112 Ora</span>
+        </a>
+      </div>
+    </div>
+  `;
+}
