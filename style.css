@@ -1151,8 +1151,161 @@ body::after {
   animation: shake 0.4s ease;
 }
 
+/* Bento Grid Home & Smart Alerts */
+.home-bento-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 32px 0;
+  }
+
+  .app-viewport {
+    max-width: 860px;
+    min-height: calc(100vh - 64px);
+    border-radius: 32px;
+    border: 1px solid var(--border-glass);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+  }
+
+  .bottom-nav {
+    max-width: 860px;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    border-bottom-left-radius: 32px;
+    border-bottom-right-radius: 32px;
+  }
+
+  .app-header {
+    border-top-left-radius: 32px;
+    border-top-right-radius: 32px;
+  }
+
+  .home-bento-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    align-items: start;
+  }
+
+  .home-bento-item.bento-hero {
+    grid-column: 1 / 2;
+  }
+
+  .home-bento-item.bento-alerts {
+    grid-column: 2 / 3;
+  }
+
+  .home-bento-item.bento-therapies {
+    grid-column: 1 / 2;
+  }
+
+  .home-bento-item.bento-docs {
+    grid-column: 2 / 3;
+  }
+}
+
+/* Smart Alerts Card */
+.smart-alerts-card {
+  background: var(--bg-card);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  box-shadow: var(--glass-inset), var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.smart-alert-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: transform 0.15s var(--spring-easing), opacity 0.15s ease;
+}
+
+.smart-alert-item:active {
+  transform: scale(0.97);
+}
+
+.smart-alert-item.alert-rx {
+  background: rgba(255, 45, 85, 0.10);
+  border: 1px solid rgba(255, 45, 85, 0.22);
+  color: var(--accent-coral);
+}
+
+.smart-alert-item.alert-cab {
+  background: rgba(255, 149, 0, 0.10);
+  border: 1px solid rgba(255, 149, 0, 0.22);
+  color: var(--accent-amber);
+}
+
+.smart-alert-item.alert-radar {
+  background: rgba(0, 122, 255, 0.10);
+  border: 1px solid rgba(0, 122, 255, 0.22);
+  color: var(--accent-blue);
+}
+
+.smart-alert-item.alert-calm {
+  background: rgba(0, 199, 190, 0.10);
+  border: 1px solid rgba(0, 199, 190, 0.22);
+  color: var(--accent-teal);
+  cursor: default;
+}
+
+/* Time Slot Pills for Therapies */
+.therapy-slots-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.time-slot-pill {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-glass);
+  background: var(--bg-card-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s var(--spring-easing);
+}
+
+.time-slot-pill:active {
+  transform: scale(0.92);
+}
+
+.time-slot-pill.taken {
+  background: rgba(0, 199, 190, 0.18);
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+}
+
+.time-slot-pill.urgent {
+  border-color: var(--accent-coral);
+  box-shadow: 0 0 0 2px rgba(255, 45, 85, 0.18);
+}
+
 /* Desktop & iPad Adaptability (macOS Floating Center Container) */
-@media (min-width: 768px) {
+@media (min-width: 768px) and (max-width: 899px) {
   body {
     display: flex;
     justify-content: center;

@@ -81,14 +81,23 @@
       </div>
 
       <div class="header-actions">
-        <!-- 1. Modalità Farmacia (Barcode / Tessera Sanitaria) -->
+        <!-- 1. Vista Rapida Calendario -->
+        <button id="headerCalendarBtn" class="icon-btn" title="Calendario Visite & Agenda">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4.5" width="18" height="17" rx="3" fill="currentColor" fill-opacity="0.16"/>
+            <path d="M16 2.5V5.5"/><path d="M8 2.5V5.5"/><path d="M3 9.5H21"/>
+            <circle cx="8" cy="14" r="1.2" fill="currentColor"/><circle cx="12" cy="14" r="1.2" fill="currentColor"/><circle cx="16" cy="14" r="1.2" fill="currentColor"/>
+          </svg>
+        </button>
+
+        <!-- 2. Modalità Farmacia (Barcode / Tessera Sanitaria) -->
         <button id="headerPharmacyBtn" class="icon-btn" title="Modalità Farmacia & Ricette">
           <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 5V19"/><path d="M6.5 5V19"/><path d="M10 5V19" stroke-width="2.5"/><path d="M14 5V19"/><path d="M17.5 5V19" stroke-width="2.5"/><path d="M21 5V19"/>
           </svg>
         </button>
 
-        <!-- 2. Privacy Lock (Lucchetto) -->
+        <!-- 3. Privacy Lock (Lucchetto) -->
         <button id="headerLockBtn" class="icon-btn" title="Blocco Privacy PIN">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="4" y="10" width="16" height="12" rx="3" fill="currentColor" fill-opacity="0.16"/>
@@ -97,104 +106,42 @@
           </svg>
         </button>
 
-        <!-- 3. Toggle Light / Dark Mode -->
+        <!-- 4. Toggle Light / Dark Mode -->
         <button id="themeToggleBtn" class="icon-btn" title="Cambia Tema"></button>
       </div>
     </header>
 
     <!-- TAB 1: HOME (Panoramica) -->
     <main id="tab-home" class="tab-content active">
-      <!-- Hero Next Appointment -->
-      <section id="homeNextAppointment"></section>
-
-      <!-- Quick Action Pills con Icone Squircle Duotone -->
-      <section class="quick-pills-row">
-        <div class="pill-card-btn" onclick="openAddDocModal()">
-          <div class="squircle-icon-badge" style="background: rgba(255, 45, 85, 0.12); border: 1px solid rgba(255, 45, 85, 0.22); color: var(--accent-coral);">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 8H7L9 5H15L17 8H20C21.1 8 22 8.9 22 10V19C22 20.1 21.1 21 20 21H4C2.9 21 2 20.1 2 19V10C2 8.9 2.9 8 4 8Z" fill="currentColor" fill-opacity="0.16"/>
-              <circle cx="12" cy="14.5" r="3.5"/>
-            </svg>
-          </div>
-          <div>
-            <div class="pill-title">Scansiona</div>
-            <div class="pill-desc">Aggiungi referto</div>
-          </div>
+      <div class="home-bento-grid">
+        <!-- BLOCCO A: Hero Card Prossimo Appuntamento -->
+        <div class="home-bento-item bento-hero">
+          <section id="homeNextAppointment"></section>
         </div>
 
-        <div class="pill-card-btn" onclick="openNewApptModal()">
-          <div class="squircle-icon-badge" style="background: rgba(0, 122, 255, 0.12); border: 1px solid rgba(0, 122, 255, 0.22); color: var(--accent-blue);">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4.5" width="18" height="17" rx="3" fill="currentColor" fill-opacity="0.16"/>
-              <path d="M16 2.5V5.5"/><path d="M8 2.5V5.5"/><path d="M3 9.5H21"/>
-              <path d="M12 12V17"/><path d="M9.5 14.5H14.5"/>
-            </svg>
-          </div>
-          <div>
-            <div class="pill-title">Promemoria</div>
-            <div class="pill-desc">Nuova visita</div>
-          </div>
+        <!-- BLOCCO B: Card Stato & Avvisi Smart -->
+        <div class="home-bento-item bento-alerts">
+          <section id="homeSmartAlertsWrap" class="smart-alerts-card"></section>
         </div>
-      </section>
 
-      <!-- Tracker Terapie Temporanee (Anelli Apple) -->
-      <div class="section-header" style="margin-top: 14px;">
-        <span class="section-title">Terapie in corso</span>
-        <button id="btnNewTherapy" class="section-action" style="background: none; border: none;">+ Nuova Terapia</button>
-      </div>
-      <section id="homeTherapiesList"></section>
-
-      <!-- Pill Card Rapida Diario Sintomi & Parametri -->
-      <div id="btnOpenSymptomsModal" class="glass-card" style="margin-bottom: 18px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-        <div style="display: flex; align-items: center; gap: 14px;">
-          <div class="squircle-icon-badge" style="background: rgba(0, 199, 190, 0.14); border: 1px solid rgba(0, 199, 190, 0.24); color: var(--accent-teal);">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M6 3V9C6 12.3 8.7 15 12 15C15.3 15 18 12.3 18 9V3"/>
-              <circle cx="18" cy="3" r="1.5" fill="currentColor"/><circle cx="6" cy="3" r="1.5" fill="currentColor"/>
-              <path d="M12 15V18C12 19.7 13.3 21 15 21H16"/><circle cx="18" cy="21" r="2.5" fill="currentColor" fill-opacity="0.16"/>
-            </svg>
+        <!-- BLOCCO C: Terapie in Corso con Slot Orari -->
+        <div class="home-bento-item bento-therapies">
+          <div class="section-header" style="margin-top: 4px;">
+            <span class="section-title">Terapie in corso</span>
+            <button id="btnNewTherapy" class="section-action" style="background: none; border: none;">+ Nuova Terapia</button>
           </div>
-          <div>
-            <div style="font-weight: 700; font-size: 14px;">Diario Sintomi & Parametri</div>
-            <div style="font-size: 12px; color: var(--text-secondary);">Pressione, febbre, peso ed export per il medico</div>
-          </div>
+          <section id="homeTherapiesList"></section>
         </div>
-        <span style="font-size: 16px; color: var(--text-tertiary); font-weight: 700;">›</span>
-      </div>
 
-      <!-- Banner Cassetto 730 Potenziato Apple Card -->
-      <div id="homeTax730Banner" class="tax-hero-card">
-        <div class="tax-hero-top">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="squircle-icon-badge" style="width: 36px; height: 36px; min-width: 36px; border-radius: 10px; background: rgba(255, 149, 0, 0.16); color: var(--accent-amber);">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="16" rx="4" fill="currentColor" fill-opacity="0.16"/>
-                <path d="M15 9.5C14.2 8.5 13 8 11.5 8C9 8 7 10 7 12.5C7 15 9 17 11.5 17C13 17 14.2 16.5 15 15.5"/><path d="M6 11.5H12"/><path d="M6 13.5H12"/>
-              </svg>
-            </div>
-            <span style="font-size: 15px; font-weight: 700;">Cassetto Fiscale 730</span>
+        <!-- BLOCCO D: Ultimi Documenti nel Dossier -->
+        <div class="home-bento-item bento-docs">
+          <div class="section-header" style="margin-top: 4px;">
+            <span class="section-title">Ultimi nel Dossier</span>
+            <span class="section-action" onclick="switchTab('archive')">Vedi tutti</span>
           </div>
-          <div class="tax-refund-badge">
-            Rimborso 19%: <span id="homeTax730Refund" style="font-weight: 800;">€ 0,00</span>
-          </div>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px;">
-          <div>
-            <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Spese Sanitarie Nette</div>
-            <div id="homeTax730Amount" style="font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-primary);">€ 0,00</div>
-          </div>
-          <div style="font-size: 12px; color: var(--text-secondary);" id="homeTax730Franchigia">
-            Calcolo franchigia...
-          </div>
+          <section id="homeRecentDocs" class="doc-list"></section>
         </div>
       </div>
-
-      <!-- Ultimi Documenti -->
-      <div class="section-header">
-        <span class="section-title">Ultimi Documenti</span>
-        <span class="section-action" onclick="switchTab('archive')">Vedi tutti</span>
-      </div>
-      <section id="homeRecentDocs" class="doc-list"></section>
     </main>
 
     <!-- TAB 2: DOSSIER (Cartelle Anatomiche) -->
@@ -316,20 +263,33 @@
       </button>
 
       <!-- Cassetto 730 Accesso Rapido Profilo -->
-      <div id="profileTax730Link" class="glass-card" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <div class="squircle-icon-badge" style="width: 40px; height: 40px; min-width: 40px; border-radius: 12px; background: rgba(255, 149, 0, 0.16); color: var(--accent-amber);">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="16" rx="4" fill="currentColor" fill-opacity="0.16"/>
-              <path d="M15 9.5C14.2 8.5 13 8 11.5 8C9 8 7 10 7 12.5C7 15 9 17 11.5 17C13 17 14.2 16.5 15 15.5"/><path d="M6 11.5H12"/><path d="M6 13.5H12"/>
-            </svg>
+      <div id="profileTax730Link" class="tax-hero-card" style="margin-bottom: 22px; cursor: pointer;">
+        <div class="tax-hero-top">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="squircle-icon-badge" style="width: 38px; height: 38px; min-width: 38px; border-radius: 11px; background: rgba(255, 149, 0, 0.16); color: var(--accent-amber);">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="16" rx="4" fill="currentColor" fill-opacity="0.16"/>
+                <path d="M15 9.5C14.2 8.5 13 8 11.5 8C9 8 7 10 7 12.5C7 15 9 17 11.5 17C13 17 14.2 16.5 15 15.5"/><path d="M6 11.5H12"/><path d="M6 13.5H12"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size: 15px; font-weight: 700;">Cassetto Fiscale 730</div>
+              <div style="font-size: 11px; color: var(--text-secondary);">Dossier spese, franchigia e rimborso 19%</div>
+            </div>
           </div>
-          <div>
-            <div style="font-weight: 700;">Dashboard Fiscale Cassetto 730</div>
-            <div style="font-size: 12px; color: var(--text-secondary);">Dossier spese, franchigia e rimborso 19%</div>
+          <div class="tax-refund-badge">
+            Rimborso 19%: <span id="profileTax730Refund" style="font-weight: 800;">€ 0,00</span>
           </div>
         </div>
-        <span style="color: var(--text-tertiary); font-weight: 700;">›</span>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 8px;">
+          <div>
+            <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Spese Sanitarie Anno Attivo</div>
+            <div id="profileTax730Amount" style="font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-primary);">€ 0,00</div>
+          </div>
+          <div style="font-size: 12px; color: var(--text-secondary);" id="profileTax730Franchigia">
+            Calcolo franchigia...
+          </div>
+        </div>
       </div>
 
       <!-- Quick Health Hub -->
@@ -562,9 +522,16 @@
             <input type="number" id="therapyDaysInput" class="form-input" value="6" min="1" max="60" required>
           </div>
         </div>
+
+        <!-- Slot Orari Generati Automaticamente -->
+        <div class="form-group">
+          <label class="form-label">Slot Orari Assunzione</label>
+          <div id="therapyTimesSlotsContainer" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;"></div>
+        </div>
+
         <div class="form-group">
           <label class="form-label">Note / Istruzioni Assunzione</label>
-          <input type="text" id="therapyNotesInput" class="form-input" placeholder="Es. A stomaco pieno alle 8:00 e 20:00">
+          <input type="text" id="therapyNotesInput" class="form-input" placeholder="Es. A stomaco pieno, dopo i pasti...">
         </div>
         <button type="submit" class="btn-primary">Attiva Terapia con Anelli</button>
       </form>

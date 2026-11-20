@@ -451,7 +451,8 @@ async function initSeedData() {
         dosesPerDay: 2,
         durationDays: 6,
         startDate: todayStr,
-        notes: 'Dopo i pasti (ore 8:00 e 20:00)',
+        notes: 'Dopo i pasti (ore 8:30 e 20:30)',
+        times: ['08:30', '20:30'],
         logs: { [todayStr]: [true, false] }
       }
     ];
@@ -554,6 +555,15 @@ function initNavigation() {
     });
   });
 
+  const headerCalBtn = document.getElementById('headerCalendarBtn');
+  if (headerCalBtn) {
+    headerCalBtn.addEventListener('click', () => {
+      switchTab('agenda');
+      const calSegBtn = document.getElementById('segAgendaCal');
+      if (calSegBtn) calSegBtn.click();
+    });
+  }
+
   const fabAdd = document.getElementById('fabAddDoc');
   if (fabAdd) {
     fabAdd.addEventListener('click', () => {
@@ -595,6 +605,7 @@ async function renderAllViews() {
 // 5. Home View
 async function renderHome() {
   const heroContainer = document.getElementById('homeNextAppointment');
+  const alertsContainer = document.getElementById('homeSmartAlertsWrap');
   const recentContainer = document.getElementById('homeRecentDocs');
   const activeProfile = getActiveProfileId();
 
@@ -632,6 +643,11 @@ async function renderHome() {
           </div>
         </div>
         <div class="hero-actions">
+          ${next.docId ? `
+            <button class="btn-secondary-sm" onclick="openDocById('${next.docId}')">
+              📄 Doc allegato
+            </button>
+          ` : ''}
           <button class="btn-secondary-sm" onclick="exportSingleICS('${next.id}')">
             Salva .ics
           </button>
@@ -643,9 +659,9 @@ async function renderHome() {
     `;
   } else {
     heroContainer.innerHTML = `
-      <div class="glass-card" style="text-align: center; padding: 20px 16px; margin-bottom: 16px;">
+      <div class="glass-card" style="text-align: center; padding: 22px 18px;">
         <div style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">Nessuna visita in programma</div>
-        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">Pianifica un appuntamento per questo profilo.</div>
+        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">Pianifica un appuntamento per questo profilo.</div>
         <button class="btn-secondary-sm" style="margin: 0 auto; max-width: 200px;" onclick="openNewApptModal()">
           + Aggiungi Visita
         </button>
@@ -653,18 +669,101 @@ async function renderHome() {
     `;
   }
 
-  // Recent Documents (4 latest)
+  // BLOCCO B: Card Stato & Avvisi Smart
+  if (alertsContainer) {
+    const allDocs = await pulseDB.getAllDocuments();
+    const profileDocs = allDocs.filter(d => !d.profileId || d.profileId === activeProfile);
+
+    // 1. Ricette attive non ritirate
+    const pendingRx = profileDocs.filter(d => (d.category === 'Ricetta' || d.nre) && !d.isUsedRx);
+
+    // 2. Armadietto farmaci scaduti o in scadenza entro 60 giorni
+    const cabinetItems = JSON.parse(localStorage.getItem('pulse_cabinet') || '[]').filter(c => !c.profileId || c.profileId === activeProfile);
+    let expiringMeds = 0;
+    const nowTime = Date.now();
+    const thresholdTime = nowTime + 60 * 86400000;
+    cabinetItems.forEach(item => {
+      if (item.expiryDate) {
+        const exp = new Date(item.expiryDate).getTime();
+        if (exp <= thresholdTime) expiringMeds++;
+      }
+    });
+
+    // 3. Radar prevenzione controlli scaduti
+    const radarItems = JSON.parse(localStorage.getItem('pulse_radar') || '[]').filter(r => !r.profileId || r.profileId === activeProfile);
+    let dueRadar = [];
+    radarItems.forEach(r => {
+      if (r.lastDate && r.intervalMonths) {
+        const last = new Date(r.lastDate);
+        const nextDate = new Date(last.setMonth(last.getMonth() + r.intervalMonths));
+        if (nextDate <= now) dueRadar.push(r.name);
+      }
+    });
+
+    const alerts = [];
+    if (pendingRx.length > 0) {
+      alerts.push(`
+        <div class="smart-alert-item alert-rx" onclick="openPharmacyModal()">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span>💊</span>
+            <span style="font-size: 13px; font-weight: 600;">${pendingRx.length} ${pendingRx.length === 1 ? 'ricetta pronta' : 'ricette pronte'} da ritirare in farmacia</span>
+          </div>
+          <span style="font-size: 12px; font-weight: 700;">Mostra NRE ›</span>
+        </div>
+      `);
+    }
+
+    if (expiringMeds > 0) {
+      alerts.push(`
+        <div class="smart-alert-item alert-cab" onclick="openZoneFolder('pharma'); switchPharmaTab('cabinet');">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span>⚠️</span>
+            <span style="font-size: 13px; font-weight: 600;">${expiringMeds} ${expiringMeds === 1 ? 'farmaco' : 'farmaci'} in scadenza nell'armadietto</span>
+          </div>
+          <span style="font-size: 12px; font-weight: 700;">Verifica ›</span>
+        </div>
+      `);
+    }
+
+    if (dueRadar.length > 0) {
+      alerts.push(`
+        <div class="smart-alert-item alert-radar" onclick="switchTab('agenda'); document.getElementById('segAgendaRadar').click();">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span>🛡️</span>
+            <span style="font-size: 13px; font-weight: 600;">${dueRadar[0]} consigliato da prenotare</span>
+          </div>
+          <span style="font-size: 12px; font-weight: 700;">Radar ›</span>
+        </div>
+      `);
+    }
+
+    if (alerts.length === 0) {
+      alertsContainer.innerHTML = `
+        <div class="smart-alert-item alert-calm">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 15px;">✓</span>
+            <span style="font-size: 13px; font-weight: 600;">Tutto in ordine — nessuna scadenza imminente</span>
+          </div>
+          <span style="font-size: 11px; opacity: 0.8; font-weight: 600;">Profilo aggiornato</span>
+        </div>
+      `;
+    } else {
+      alertsContainer.innerHTML = alerts.join('');
+    }
+  }
+
+  // BLOCCO D: Ultimi Documenti nel Dossier (3 latest)
   const allDocs = await pulseDB.getAllDocuments();
   const profileDocs = allDocs.filter(d => !d.profileId || d.profileId === activeProfile);
   profileDocs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  const recent = profileDocs.slice(0, 4);
+  const recent = profileDocs.slice(0, 3);
 
   if (recent.length === 0) {
     recentContainer.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-text">Nessun documento per questo profilo</div>
+      <div class="empty-state" style="padding: 16px;">
+        <div class="empty-text">Nessun documento nel Dossier</div>
         <div class="empty-sub">Scansiona o carica i tuoi referti per averli sempre con te.</div>
-        <button class="btn-secondary-sm" style="margin: 0 auto; max-width: 200px;" onclick="openAddDocModal()">
+        <button class="btn-secondary-sm" style="margin: 8px auto 0; max-width: 200px;" onclick="openAddDocModal()">
           + Scansiona Referto
         </button>
       </div>
@@ -1714,10 +1813,9 @@ function initTax730() {
 }
 
 async function renderTax730Dashboard() {
-  const amountDisplay = document.getElementById('homeTax730Amount');
-  const refundDisplay = document.getElementById('homeTax730Refund');
-  const franchigiaStatus = document.getElementById('homeTax730Franchigia');
-  if (!amountDisplay) return;
+  const profileAmt = document.getElementById('profileTax730Amount');
+  const profileRef = document.getElementById('profileTax730Refund');
+  const profileFran = document.getElementById('profileTax730Franchigia');
 
   const activeProfile = getActiveProfileId();
   const currentYearStr = new Date().getFullYear().toString();
@@ -1735,15 +1833,15 @@ async function renderTax730Dashboard() {
   const franchigia = 129.11;
   const refund = Math.max(0, netDeductible - franchigia) * 0.19;
 
-  amountDisplay.innerText = `€ ${netDeductible.toFixed(2)}`;
-  if (refundDisplay) refundDisplay.innerText = `€ ${refund.toFixed(2)}`;
+  if (profileAmt) profileAmt.innerText = `€ ${netDeductible.toFixed(2)}`;
+  if (profileRef) profileRef.innerText = `€ ${refund.toFixed(2)}`;
 
-  if (franchigiaStatus) {
+  if (profileFran) {
     if (netDeductible >= franchigia) {
-      franchigiaStatus.innerHTML = `<span style="color: var(--accent-teal); font-weight: 700;">✓ Franchigia superata</span> • Rimborso attivo`;
+      profileFran.innerHTML = `<span style="color: var(--accent-teal); font-weight: 700;">✓ Franchigia superata</span> • Rimborso attivo`;
     } else {
       const missing = franchigia - netDeductible;
-      franchigiaStatus.innerHTML = `Mancano <strong>€ ${missing.toFixed(2)}</strong> alla franchigia`;
+      profileFran.innerHTML = `Mancano <strong>€ ${missing.toFixed(2)}</strong> alla franchigia`;
     }
   }
 }
@@ -1978,7 +2076,34 @@ async function printDossierCAF() {
 // 12. Tracker Terapie Temporanee
 function initTherapyTracker() {
   const btn = document.getElementById('btnNewTherapy');
-  if (btn) btn.addEventListener('click', () => openModal('newTherapyModalOverlay'));
+  if (btn) btn.addEventListener('click', () => {
+    updateTherapyTimeInputs();
+    openModal('newTherapyModalOverlay');
+  });
+
+  const dosesSelect = document.getElementById('therapyDosesSelect');
+  if (dosesSelect) {
+    dosesSelect.addEventListener('change', updateTherapyTimeInputs);
+  }
+
+  function updateTherapyTimeInputs() {
+    const container = document.getElementById('therapyTimesSlotsContainer');
+    if (!container) return;
+    const doses = parseInt(document.getElementById('therapyDosesSelect').value) || 2;
+    const defaults = {
+      1: ['08:30'],
+      2: ['08:30', '20:30'],
+      3: ['08:00', '14:00', '20:30'],
+      4: ['08:00', '12:30', '17:00', '21:30']
+    };
+    const defTimes = defaults[doses] || defaults[2];
+    container.innerHTML = defTimes.map((time, idx) => `
+      <div style="display: flex; align-items: center; gap: 6px; background: var(--bg-card-secondary); padding: 6px 10px; border-radius: var(--radius-sm);">
+        <span style="font-size: 11px; font-weight: 700; color: var(--text-secondary);">Dose ${idx + 1}:</span>
+        <input type="time" class="form-input therapy-slot-input" value="${time}" style="padding: 4px 8px; font-size: 13px;">
+      </div>
+    `).join('');
+  }
 
   const form = document.getElementById('newTherapyForm');
   if (form) {
@@ -1989,6 +2114,9 @@ function initTherapyTracker() {
       const days = parseInt(document.getElementById('therapyDaysInput').value) || 7;
       const notes = document.getElementById('therapyNotesInput').value.trim();
 
+      const timeInputs = document.querySelectorAll('.therapy-slot-input');
+      const times = Array.from(timeInputs).map(inp => inp.value || '08:00');
+
       const todayStr = new Date().toISOString().split('T')[0];
       const newTher = {
         id: 'ther_' + Date.now(),
@@ -1998,6 +2126,7 @@ function initTherapyTracker() {
         durationDays: days,
         startDate: todayStr,
         notes: notes,
+        times: times,
         logs: { [todayStr]: new Array(doses).fill(false) }
       };
 
@@ -2031,6 +2160,8 @@ function renderTherapies() {
   }
 
   const todayStr = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
   container.innerHTML = profileThers.map(t => {
     if (!t.logs[todayStr]) {
@@ -2048,35 +2179,65 @@ function renderTherapies() {
     const circ = 2 * Math.PI * radius;
     const strokeDash = (progressPct / 100) * circ;
 
+    // Default times if missing in legacy records
+    const defTimes = ['08:30', '14:00', '20:30', '22:00'];
+    const times = t.times || defTimes.slice(0, t.dosesPerDay);
+
     return `
-      <div class="therapy-ring-card">
-        <div style="display: flex; align-items: center; gap: 14px;">
-          <div class="therapy-ring-wrap">
-            <svg width="50" height="50" viewBox="0 0 50 50">
-              <circle cx="25" cy="25" r="${radius}" fill="none" stroke="var(--bg-card-secondary)" stroke-width="4.5" />
-              <circle cx="25" cy="25" r="${radius}" fill="none" stroke="var(--accent-coral)" stroke-width="4.5"
-                stroke-dasharray="${circ}" stroke-dashoffset="${circ - strokeDash}"
-                stroke-linecap="round" transform="rotate(-90 25 25)" style="transition: stroke-dashoffset 0.3s ease;" />
-            </svg>
-            <div style="position: absolute; font-size: 11px; font-weight: 800; color: var(--accent-coral);">${progressPct}%</div>
-          </div>
-          <div>
-            <div style="font-size: 15px; font-weight: 700;">${escapeHTML(t.name)}</div>
-            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
-              Giorno ${dayIndex} di ${t.durationDays} • ${escapeHTML(t.notes || 'Dosi giornaliere')}
+      <div class="therapy-ring-card" style="padding: 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div class="therapy-ring-wrap">
+              <svg width="48" height="48" viewBox="0 0 50 50">
+                <circle cx="25" cy="25" r="${radius}" fill="none" stroke="var(--bg-card-secondary)" stroke-width="4.5" />
+                <circle cx="25" cy="25" r="${radius}" fill="none" stroke="var(--accent-coral)" stroke-width="4.5"
+                  stroke-dasharray="${circ}" stroke-dashoffset="${circ - strokeDash}"
+                  stroke-linecap="round" transform="rotate(-90 25 25)" style="transition: stroke-dashoffset 0.3s ease;" />
+              </svg>
+              <div style="position: absolute; font-size: 11px; font-weight: 800; color: var(--accent-coral);">${takenCount}/${t.dosesPerDay}</div>
+            </div>
+            <div>
+              <div style="font-size: 15px; font-weight: 700;">${escapeHTML(t.name)}</div>
+              <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
+                Giorno ${dayIndex} di ${t.durationDays} ${t.notes ? `&bull; ${escapeHTML(t.notes)}` : ''}
+              </div>
             </div>
           </div>
+          <button style="background: none; border: none; font-size: 12px; color: var(--accent-coral); cursor: pointer;" onclick="deleteTherapy('${t.id}')">Elimina</button>
         </div>
-        <div style="display: flex; gap: 6px;">
-          ${todayLogs.map((done, idx) => `
-            <button class="dose-pill-btn ${done ? 'done' : ''}" onclick="toggleTherapyDose('${t.id}', ${idx})">
-              ${done ? '✓' : `Dose ${idx + 1}`}
-            </button>
-          `).join('')}
+
+        <!-- Pillole Slot Orari Interattive -->
+        <div class="therapy-slots-row">
+          ${todayLogs.map((done, idx) => {
+            const timeSlot = times[idx] || `Dose ${idx + 1}`;
+            let isUrgent = false;
+            if (!done && timeSlot.includes(':')) {
+              const [h, m] = timeSlot.split(':').map(Number);
+              const slotMin = h * 60 + m;
+              if (currentMinutes >= slotMin - 30) isUrgent = true;
+            }
+
+            return `
+              <button class="time-slot-pill ${done ? 'taken' : ''} ${isUrgent ? 'urgent' : ''}" onclick="toggleTherapyDose('${t.id}', ${idx})">
+                <span>${timeSlot}</span>
+                <span>${done ? '✓' : (isUrgent ? '• Ora' : '')}</span>
+              </button>
+            `;
+          }).join('')}
         </div>
       </div>
     `;
   }).join('');
+}
+
+function deleteTherapy(id) {
+  if (confirm('Vuoi rimuovere questa terapia attiva?')) {
+    const thers = JSON.parse(localStorage.getItem('pulse_therapies') || '[]');
+    const filtered = thers.filter(t => t.id !== id);
+    localStorage.setItem('pulse_therapies', JSON.stringify(filtered));
+    renderTherapies();
+    showToast('Terapia rimossa', '🗑️');
+  }
 }
 
 function toggleTherapyDose(therId, doseIndex) {
