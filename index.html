@@ -198,6 +198,15 @@
 
     <!-- TAB 1: HOME (Panoramica Apple Cupertino) -->
     <main id="tab-home" class="tab-content active">
+      <!-- Banner Notifica / Avviso Scadenze & Visite Imminenti (Discreto e Chiudibile) -->
+      <div id="localReminderAlertPill" style="display: none; margin-bottom: 12px; padding: 10px 14px; border-radius: var(--radius-md); background: linear-gradient(135deg, rgba(255, 149, 0, 0.12) 0%, rgba(224, 108, 117, 0.08) 100%), var(--bg-card); border: 1px solid rgba(255, 149, 0, 0.3); align-items: center; justify-content: space-between; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+          <span id="localReminderAlertIcon" style="font-size: 16px; flex: none;">⚠️</span>
+          <span id="localReminderAlertText" style="font-size: 12px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
+        </div>
+        <button onclick="dismissLocalReminderAlert()" style="background: none; border: none; font-size: 13px; font-weight: 700; color: var(--text-secondary); cursor: pointer; padding: 2px 6px;">✕</button>
+      </div>
+
       <div class="home-layout-stack" style="gap: 12px;">
         <!-- BLOCCO A: Hero Card "Oggi" -->
         <section id="homeHeroOggi" class="hero-oggi-card"></section>
@@ -308,30 +317,18 @@
           </div>
         </section>
 
-        <!-- Sezione 2 Colonne su Desktop / 1 Colonna Mobile: Terapie & Ultimi Documenti -->
-        <div class="home-bottom-columns">
-          <!-- BLOCCO C: Card "Terapie di Oggi" -->
-          <div class="home-col-item">
-            <div class="section-header" style="margin-top: 4px;">
-              <span class="section-title">Terapie di Oggi</span>
-              <button id="btnNewTherapy" class="section-action" style="background: none; border: none;">+ Aggiungi</button>
-            </div>
-            <section id="homeTherapiesList"></section>
+        <!-- BLOCCO C: Card "Terapie di Oggi" -->
+        <div style="margin-top: 4px;">
+          <div class="section-header" style="margin-top: 4px;">
+            <span class="section-title">Terapie di Oggi</span>
+            <button id="btnNewTherapy" class="section-action" style="background: none; border: none;">+ Aggiungi</button>
           </div>
-
-          <!-- BLOCCO D: Ultimi nel Dossier -->
-          <div class="home-col-item">
-            <div class="section-header" style="margin-top: 4px;">
-              <span class="section-title">Ultimi nel Dossier</span>
-              <span class="section-action" onclick="switchTab('archive')">Vedi tutti</span>
-            </div>
-            <section id="homeRecentDocs" class="doc-list"></section>
-          </div>
+          <section id="homeTherapiesList"></section>
         </div>
       </div>
     </main>
 
-    <!-- TAB 2: DOSSIER (Cartelle Anatomiche) -->
+    <!-- TAB 2: DOSSIER (Cartelle Anatomiche & Ultimi Documenti) -->
     <main id="tab-archive" class="tab-content">
       <div class="search-bar-wrap">
         <svg class="search-icon-left" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
@@ -354,6 +351,18 @@
 
       <!-- Anatomical Body Zones 2-column Grid (Sempre 10 cartelle fisse) -->
       <section id="bodyZonesGrid" class="body-zones-grid"></section>
+
+      <!-- Sezione Ultimi nel Dossier (Sotto le 10 Cartelle Anatomiche) -->
+      <div id="archiveRecentDocsSection" style="margin-top: 24px;">
+        <div class="section-header" style="margin-bottom: 10px;">
+          <span class="section-title" style="display: flex; align-items: center; gap: 6px;">
+            <span>📄</span>
+            <span>Ultimi Documenti nel Dossier</span>
+          </span>
+          <button class="section-action" onclick="openAddDocModal()" style="background: none; border: none;">+ Aggiungi</button>
+        </div>
+        <section id="archiveRecentDocs" class="doc-list"></section>
+      </div>
     </main>
 
     <!-- TAB 3: AGENDA (Timeline Visite + Diario + Prevenzione) -->
@@ -478,55 +487,24 @@
         </div>
       </div>
 
-      <!-- 2. Blocco Emergenza & Primo Soccorso -->
-      <div class="glass-card" style="padding: 14px 16px; margin-bottom: 16px; border: 1px solid rgba(224, 108, 117, 0.28); background: linear-gradient(135deg, rgba(224, 108, 117, 0.08) 0%, rgba(229, 169, 92, 0.06) 100%), var(--bg-card);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent-coral); letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
-            <span>🚨</span>
-            <span>EMERGENZA & PRIMO SOCCORSO</span>
-          </div>
-          <!-- Pulsante Rapido Chiama 112 -->
-          <a href="tel:112" class="emergency-call-pill" title="Chiama Subito il 112" style="padding: 5px 12px; font-size: 11px;">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-            </svg>
-            <span>Chiama 112</span>
-          </a>
-        </div>
-
-        <!-- Card Manuale Primo Soccorso -->
-        <div id="firstAidCard" onclick="openFirstAidModal()" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: var(--radius-md); background: var(--bg-card); border: 1px solid var(--border-glass); cursor: pointer; margin-bottom: 10px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="squircle-icon-badge" style="width: 38px; height: 38px; min-width: 38px; border-radius: 12px; background: rgba(224, 108, 117, 0.16); color: var(--accent-coral); border: 1px solid rgba(224, 108, 117, 0.32);">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor" fill-opacity="0.16"/>
-                <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-              </svg>
-            </div>
-            <div>
-              <div style="font-size: 13px; font-weight: 800; color: var(--text-primary);">Manuale Primo Soccorso</div>
-              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">13 guide rapide offline e manovre salvavita</div>
-            </div>
-          </div>
-          <span style="font-size: 16px; color: var(--accent-coral); font-weight: 700;">›</span>
-        </div>
-
-        <!-- Card Trova la farmacia più vicina -->
-        <div id="findNearestPharmacyCard" onclick="openNearestPharmacyMap()" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: var(--radius-md); background: var(--bg-card); border: 1px solid var(--border-glass); cursor: pointer;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="squircle-icon-badge" style="width: 38px; height: 38px; min-width: 38px; border-radius: 12px; background: rgba(52, 199, 89, 0.16); color: var(--accent-green); border: 1px solid rgba(52, 199, 89, 0.3);">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <!-- 2. Blocco Emergenza & Farmacia Vicina -->
+      <div class="glass-card" style="padding: 12px 14px; margin-bottom: 16px; border: 1px solid var(--border-glass);">
+        <!-- Card Trova la farmacia più vicina (compatta orizzontale su una riga) -->
+        <div id="findNearestPharmacyCard" onclick="openNearestPharmacyMap()" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+            <div class="squircle-icon-badge" style="width: 32px; height: 32px; min-width: 32px; border-radius: 10px; background: rgba(52, 199, 89, 0.16); color: var(--accent-green); border: 1px solid rgba(52, 199, 89, 0.3);">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 21s-6-5.33-6-10a6 6 0 0 1 12 0c0 4.67-6 10-6 10z" fill="currentColor" fill-opacity="0.16"/>
                 <circle cx="12" cy="11" r="2.5" fill="currentColor"/>
                 <path d="M12 7v8M8 11h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
               </svg>
             </div>
-            <div>
-              <div style="font-size: 13px; font-weight: 800; color: var(--text-primary);">Trova la farmacia più vicina</div>
-              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">Apri Mappe e imposta il percorso dalla tua posizione</div>
+            <div style="min-width: 0;">
+              <div style="font-size: 13px; font-weight: 800; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Trova la farmacia più vicina</div>
+              <div style="font-size: 11px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Apri percorso in Mappe dalla tua posizione</div>
             </div>
           </div>
-          <span style="font-size: 16px; color: var(--accent-green); font-weight: 700;">›</span>
+          <span style="font-size: 16px; color: var(--accent-green); font-weight: 700; flex: none;">›</span>
         </div>
       </div>
 
@@ -667,6 +645,19 @@
             100% Sul Dispositivo
           </div>
         </div>
+
+        <!-- Toggle Notifiche Locali Browser -->
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); margin-bottom: 12px;">
+          <div>
+            <div style="font-size: 13px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+              <span>🔔</span>
+              <span>Notifiche & Promemoria Locali</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;" id="localNotifStatusText">Avvisi visite imminenti e scadenze farmaci</div>
+          </div>
+          <input type="checkbox" id="localNotificationsToggle" style="width: 20px; height: 20px; accent-color: var(--accent-blue);" onchange="handleNotificationToggle(this.checked)">
+        </div>
+
         <div style="display: flex; gap: 8px; margin-top: 14px;">
           <button id="exportBackupBtn" class="btn-secondary-sm">
             Esporta Backup (.json)
@@ -1533,6 +1524,54 @@
           ℹ️ Suggerimenti generali a scopo informativo. Non sostituiscono il parere del medico o del farmacista.
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL: VISTA DEDICATA ARMADIETTO DEI FARMACI -->
+  <div id="dedicatedCabinetModalOverlay" class="modal-overlay">
+    <div class="bottom-sheet dedicated-cabinet-sheet" style="max-height: 92vh;">
+      <div class="sheet-handle"></div>
+      
+      <!-- Header Dedicato Armadietto -->
+      <div class="sheet-header" style="margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 22px;">💊</span>
+          <div>
+            <h2 class="sheet-title" style="font-size: 18px; margin: 0;">Armadietto</h2>
+            <div id="dedicatedCabinetSubtitle" style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">0 farmaci · 0 in scadenza</div>
+          </div>
+        </div>
+        <button class="sheet-close-btn" onclick="closeAllModals()">✕</button>
+      </div>
+
+      <!-- Form Rapido Inserimento Farmaco in Alto -->
+      <div class="glass-card" style="padding: 12px 14px; margin-bottom: 14px; border: 1px solid var(--border-glass);">
+        <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent-amber); letter-spacing: 0.5px; margin-bottom: 8px;">
+          + Aggiungi Nuovo Farmaco
+        </div>
+        <form id="dedicatedAddCabinetForm" onsubmit="handleDedicatedCabinetAdd(event)">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <input type="text" id="dedicatedCabName" class="form-input" placeholder="Nome farmaco o principio attivo *" required style="padding: 8px 10px; font-size: 13px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <input type="date" id="dedicatedCabExpiry" class="form-input" required style="padding: 7px 8px; font-size: 12px;" title="Data di scadenza">
+              <input type="text" id="dedicatedCabQty" class="form-input" placeholder="Quantità (es. 12 cpr)" value="1 confezione" style="padding: 7px 8px; font-size: 12px;">
+            </div>
+            <button type="submit" class="btn-primary" style="padding: 9px; font-size: 13px; font-weight: 700; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--accent-amber) 0%, #FF9500 100%);">
+              Aggiungi all'Armadietto
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Filtri Rapidi (Tutti | In scadenza | Scaduti) -->
+      <div class="segmented-control" style="margin-bottom: 12px;">
+        <button id="cabFilterAll" class="seg-btn active" onclick="switchCabinetFilter('all')">Tutti</button>
+        <button id="cabFilterExpiring" class="seg-btn" onclick="switchCabinetFilter('expiring')">In scadenza</button>
+        <button id="cabFilterExpired" class="seg-btn" onclick="switchCabinetFilter('expired')">Scaduti</button>
+      </div>
+
+      <!-- Lista Farmaci -->
+      <div id="dedicatedCabinetList" style="display: flex; flex-direction: column; gap: 10px;"></div>
     </div>
   </div>
 

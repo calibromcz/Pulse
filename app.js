@@ -53,8 +53,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   initProfile();
   initDoctorModal();
   initQuickHub();
+  initLocalRemindersSystem();
   initGlobalModalsHandler();
   await renderAllViews();
+  checkLocalRemindersAndAlerts();
 });
 
 // Toast Dynamic Island notification
@@ -757,28 +759,6 @@ async function renderHome() {
 
   // Render BLOCCO B: Bento 2x2 Widgets
   renderBentoWidgets();
-
-  // Render BLOCCO D: Ultimi nel Dossier (3 latest)
-  const allDocs = await pulseDB.getAllDocuments();
-  const profileDocs = allDocs.filter(d => !d.profileId || d.profileId === activeProfile);
-  profileDocs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  const recent = profileDocs.slice(0, 3);
-
-  if (recentContainer) {
-    if (recent.length === 0) {
-      recentContainer.innerHTML = `
-        <div class="empty-state" style="padding: 16px;">
-          <div class="empty-text">Nessun documento nel Dossier</div>
-          <div class="empty-sub">Scansiona o carica i tuoi referti per averli sempre con te.</div>
-          <button class="btn-secondary-sm" style="margin: 8px auto 0; max-width: 200px;" onclick="openAddDocModal()">
-            + Scansiona Referto
-          </button>
-        </div>
-      `;
-    } else {
-      recentContainer.innerHTML = recent.map(doc => renderDocCardHTML(doc)).join('');
-    }
-  }
 }
 
 // 5.1 Bento 2x2 Widgets Update
@@ -974,19 +954,37 @@ async function renderArchiveGrid() {
     counts[d.bodyZone] = (counts[d.bodyZone] || 0) + 1;
   });
 
-  gridContainer.innerHTML = BODY_ZONES.map(zone => {
-    const count = counts[zone.id] || 0;
-    const countLabel = count === 0 ? 'Vuota' : (count === 1 ? '1 file' : `${count} file`);
-    return `
-      <div class="zone-card" onclick="openZoneFolder('${zone.id}')">
-        <div class="squircle-icon-badge" style="background: ${zone.bg}; border: 1px solid ${zone.border}; color: ${zone.color};">
-          ${zone.svg}
+  if (gridContainer) {
+    gridContainer.innerHTML = BODY_ZONES.map(zone => {
+      const count = counts[zone.id] || 0;
+      const countLabel = count === 0 ? 'Vuota' : (count === 1 ? '1 file' : `${count} file`);
+      return `
+        <div class="zone-card" onclick="openZoneFolder('${zone.id}')">
+          <div class="squircle-icon-badge" style="background: ${zone.bg}; border: 1px solid ${zone.border}; color: ${zone.color};">
+            ${zone.svg}
+          </div>
+          <div class="zone-name">${zone.name}</div>
+          <div class="zone-count">${countLabel}</div>
         </div>
-        <div class="zone-name">${zone.name}</div>
-        <div class="zone-count">${countLabel}</div>
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
+  }
+
+  // Render Sezione "Ultimi Documenti nel Dossier" (sotto le 10 cartelle)
+  const archiveRecentEl = document.getElementById('archiveRecentDocs');
+  if (archiveRecentEl) {
+    const recent = [...profileDocs].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0, 5);
+    if (recent.length === 0) {
+      archiveRecentEl.innerHTML = `
+        <div class="empty-state" style="padding: 16px; margin: 0;">
+          <div class="empty-text">Nessun documento nel Dossier</div>
+          <div class="empty-sub">Carica o scansiona referti e prescrizioni per organizzarli per zona del corpo.</div>
+        </div>
+      `;
+    } else {
+      archiveRecentEl.innerHTML = recent.map(doc => renderDocCardHTML(doc)).join('');
+    }
+  }
 }
 
 function initDocumentsView() {
@@ -1012,16 +1010,19 @@ function initDocumentsView() {
 async function applyFilters() {
   const searchResultContainer = document.getElementById('archiveFilterResults');
   const grid = document.getElementById('bodyZonesGrid');
+  const recentSection = document.getElementById('archiveRecentDocsSection');
   const activeProfile = getActiveProfileId();
 
   if (!currentSearch && currentFilterCategory === 'Tutti') {
     searchResultContainer.style.display = 'none';
-    grid.style.display = 'grid';
+    if (grid) grid.style.display = 'grid';
+    if (recentSection) recentSection.style.display = 'block';
     return;
   }
 
   searchResultContainer.style.display = 'block';
-  grid.style.display = 'none';
+  if (grid) grid.style.display = 'none';
+  if (recentSection) recentSection.style.display = 'none';
 
   const allDocs = await pulseDB.getAllDocuments();
   const filtered = allDocs.filter(d => {
@@ -1850,8 +1851,11 @@ function renderInteractiveApptCard(a) {
         </div>
       </div>
 
-      <div style="display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid var(--border-subtle); padding-top: 10px;">
-        <button class="btn-secondary-sm" onclick="exportSingleICS('${a.id}')">Salva .ics</button>
+      <div style="display: flex; gap: 8px; margin-top: 12px; border-top: 1px solid var(--border-subtle); padding-top: 10px; align-items: center;">
+        <button class="btn-secondary-sm" onclick="exportSingleICS('${a.id}')" title="Aggiungi Promemoria a Calendario iPhone (.ics)" style="display: inline-flex; align-items: center; gap: 4px;">
+          <span>🔔</span>
+          <span>Salva .ics</span>
+        </button>
         ${a.docId ? `<button class="btn-secondary-sm" onclick="openDocById('${a.docId}')">📄 Impegnativa</button>` : ''}
         <button class="btn-secondary-sm" style="color: var(--accent-coral);" onclick="deleteAppt('${a.id}')">Elimina</button>
       </div>
@@ -2874,10 +2878,220 @@ async function deleteRecipeDoc(docId) {
   }
 }
 
+let currentCabinetFilter = 'all';
+
 async function openCabinetView() {
-  switchTab('archive');
-  await openZoneFolder('pharma');
-  switchPharmaTab('cabinet');
+  openModal('dedicatedCabinetModalOverlay');
+  renderDedicatedCabinet();
+}
+
+function switchCabinetFilter(filter) {
+  currentCabinetFilter = filter;
+  ['cabFilterAll', 'cabFilterExpiring', 'cabFilterExpired'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.remove('active');
+  });
+
+  if (filter === 'all') {
+    const btn = document.getElementById('cabFilterAll');
+    if (btn) btn.classList.add('active');
+  } else if (filter === 'expiring') {
+    const btn = document.getElementById('cabFilterExpiring');
+    if (btn) btn.classList.add('active');
+  } else if (filter === 'expired') {
+    const btn = document.getElementById('cabFilterExpired');
+    if (btn) btn.classList.add('active');
+  }
+
+  renderDedicatedCabinet();
+}
+
+function handleDedicatedCabinetAdd(e) {
+  e.preventDefault();
+  const nameInput = document.getElementById('dedicatedCabName');
+  const expiryInput = document.getElementById('dedicatedCabExpiry');
+  const qtyInput = document.getElementById('dedicatedCabQty');
+
+  const name = nameInput.value.trim();
+  const expiry = expiryInput.value;
+  const qty = qtyInput.value.trim() || '1 confezione';
+
+  if (!name || !expiry) {
+    alert('Inserisci il nome del farmaco e la data di scadenza.');
+    return;
+  }
+
+  const newItem = {
+    id: 'cab_' + Date.now(),
+    profileId: getActiveProfileId(),
+    name: name,
+    expiryDate: expiry,
+    quantity: qty,
+    notes: ''
+  };
+
+  const cabinet = JSON.parse(localStorage.getItem('pulse_cabinet') || '[]');
+  cabinet.push(newItem);
+  localStorage.setItem('pulse_cabinet', JSON.stringify(cabinet));
+
+  nameInput.value = '';
+  expiryInput.value = '';
+  qtyInput.value = '1 confezione';
+
+  showToast('Farmaco aggiunto all\'armadietto', '💊');
+  renderDedicatedCabinet();
+  renderMedicineCabinetInFolder();
+  renderBentoWidgets();
+  checkLocalRemindersAndAlerts();
+}
+
+function renderDedicatedCabinet() {
+  const container = document.getElementById('dedicatedCabinetList');
+  const subtitleEl = document.getElementById('dedicatedCabinetSubtitle');
+  if (!container) return;
+
+  const activeProfile = getActiveProfileId();
+  const allCabinet = JSON.parse(localStorage.getItem('pulse_cabinet') || '[]');
+  const profileCabinet = allCabinet.filter(c => !c.profileId || c.profileId === activeProfile);
+
+  const now = new Date();
+  const todayIso = now.toISOString().split('T')[0];
+  const in60Days = new Date(Date.now() + 86400000 * 60).toISOString().split('T')[0];
+
+  // Ordina per scadenza più vicina
+  profileCabinet.sort((a, b) => (a.expiryDate || '9999-99-99').localeCompare(b.expiryDate || '9999-99-99'));
+
+  let expiredCount = 0;
+  let expiringCount = 0;
+  profileCabinet.forEach(item => {
+    if (item.expiryDate) {
+      if (item.expiryDate < todayIso) {
+        expiredCount++;
+      } else if (item.expiryDate <= in60Days) {
+        expiringCount++;
+      }
+    }
+  });
+
+  if (subtitleEl) {
+    subtitleEl.innerText = `${profileCabinet.length} ${profileCabinet.length === 1 ? 'farmaco' : 'farmaci'} · ${expiringCount + expiredCount} avvisi scadenza`;
+  }
+
+  // Filtra
+  let displayList = profileCabinet;
+  if (currentCabinetFilter === 'expiring') {
+    displayList = profileCabinet.filter(item => item.expiryDate && item.expiryDate >= todayIso && item.expiryDate <= in60Days);
+  } else if (currentCabinetFilter === 'expired') {
+    displayList = profileCabinet.filter(item => item.expiryDate && item.expiryDate < todayIso);
+  }
+
+  if (displayList.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state" style="padding: 24px 16px; margin: 0;">
+        <div class="empty-text">Nessun farmaco in questo elenco</div>
+        <div class="empty-sub">Aggiungi i tuoi medicinali usando il form in alto per monitorare scorte e scadenze.</div>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = displayList.map(item => {
+    let statusClass = 'status-ok';
+    let statusText = 'Scadenza regolare';
+    let statusColor = 'var(--accent-teal)';
+    let statusBg = 'rgba(0, 199, 190, 0.12)';
+    let borderStyle = '1px solid var(--border-glass)';
+
+    if (item.expiryDate) {
+      if (item.expiryDate < todayIso) {
+        statusClass = 'status-expired';
+        statusText = 'SCADUTO';
+        statusColor = 'var(--accent-coral)';
+        statusBg = 'rgba(224, 108, 117, 0.18)';
+        borderStyle = '1px solid rgba(224, 108, 117, 0.45)';
+      } else if (item.expiryDate <= in60Days) {
+        statusClass = 'status-expiring';
+        statusText = 'In scadenza';
+        statusColor = 'var(--accent-amber)';
+        statusBg = 'rgba(255, 149, 0, 0.16)';
+        borderStyle = '1px solid rgba(255, 149, 0, 0.4)';
+      }
+    }
+
+    return `
+      <div class="glass-card" style="padding: 12px 14px; border: ${borderStyle};">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+          <div style="min-width: 0;">
+            <div style="font-size: 15px; font-weight: 800; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              ${escapeHTML(item.name)}
+            </div>
+            <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">
+              Scadenza: <strong>${item.expiryDate || 'Non indicata'}</strong>
+            </div>
+          </div>
+          <span style="font-size: 10px; font-weight: 800; text-transform: uppercase; padding: 2px 7px; border-radius: 6px; color: ${statusColor}; background: ${statusBg}; flex: none;">
+            ● ${statusText}
+          </span>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-subtle);">
+          <!-- Controlli Quantità - / + -->
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button onclick="updateCabinetQtyDelta('${item.id}', -1)" class="btn-secondary-sm" style="width: 26px; height: 26px; min-width: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px;" title="Riduci quantità">-</button>
+            <span style="font-size: 12px; font-weight: 700; color: var(--text-primary); min-width: 50px; text-align: center;">${escapeHTML(item.quantity || '1 cnf')}</span>
+            <button onclick="updateCabinetQtyDelta('${item.id}', 1)" class="btn-secondary-sm" style="width: 26px; height: 26px; min-width: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px;" title="Aumenta quantità">+</button>
+          </div>
+
+          <!-- Azioni: Campanella .ics & Elimina -->
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <button onclick="exportCabinetItemICS('${item.id}')" class="btn-secondary-sm" title="Aggiungi Promemoria Scadenza a Calendario iPhone (.ics)" style="padding: 5px 9px; font-size: 11px; display: inline-flex; align-items: center; gap: 4px; color: var(--accent-amber);">
+              <span>🔔</span>
+              <span>Allarme .ics</span>
+            </button>
+            <button onclick="deleteCabinetItem('${item.id}')" class="btn-secondary-sm" style="padding: 5px 8px; font-size: 11px; color: var(--accent-coral);" title="Elimina farmaco">
+              ✕
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function exportCabinetItemICS(itemId) {
+  const allCabinet = JSON.parse(localStorage.getItem('pulse_cabinet') || '[]');
+  const item = allCabinet.find(c => c.id === itemId);
+  if (!item || !item.expiryDate) {
+    showToast('Nessuna data di scadenza impostata', '⚠️');
+    return;
+  }
+
+  const expDate = new Date(item.expiryDate);
+  expDate.setHours(9, 0, 0, 0); // ore 09:00
+  const endDate = new Date(expDate.getTime() + 30 * 60 * 1000); // 30 min
+  const formatICSDate = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+  const icsContent = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Pulse Health App//IT', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+    'BEGIN:VEVENT', `UID:cab_${item.id}@pulse.health.local`, `DTSTAMP:${formatICSDate(new Date())}`, `DTSTART:${formatICSDate(expDate)}`, `DTEND:${formatICSDate(endDate)}`,
+    `SUMMARY:Scadenza Farmaco: ${item.name}`,
+    `DESCRIPTION:Il medicinale ${item.name} (${item.quantity || 'in armadietto'}) scade il ${item.expiryDate}. Controlla o rinnova la confezione con Pulse.`,
+    'STATUS:CONFIRMED',
+    'BEGIN:VALARM', 'TRIGGER:-P30D', 'ACTION:DISPLAY', 'DESCRIPTION:Promemoria: Farmaco in Scadenza tra 30 giorni (Pulse)', 'END:VALARM',
+    'BEGIN:VALARM', 'TRIGGER:-P7D', 'ACTION:DISPLAY', 'DESCRIPTION:Promemoria Urgente: Farmaco in Scadenza tra 7 giorni (Pulse)', 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR'
+  ].join('\r\n');
+
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `Scadenza_${item.name.replace(/[^a-zA-Z0-9]/g, '_')}.ics`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  showToast('Promemoria scadenza .ics generato (allarme 30gg prima)!', '🔔');
 }
 
 function openCalendarQuickSheet() {
@@ -3036,8 +3250,10 @@ function updateCabinetQtyDelta(id, delta) {
   }
 
   localStorage.setItem('pulse_cabinet', JSON.stringify(cabinet));
+  renderDedicatedCabinet();
   renderMedicineCabinetInFolder();
   renderBentoWidgets();
+  checkLocalRemindersAndAlerts();
 }
 
 function openAddCabinetModal() {
@@ -3052,8 +3268,10 @@ function deleteCabinetItem(id) {
   let cabinet = JSON.parse(localStorage.getItem('pulse_cabinet') || '[]');
   cabinet = cabinet.filter(c => c.id !== id);
   localStorage.setItem('pulse_cabinet', JSON.stringify(cabinet));
+  renderDedicatedCabinet();
   renderMedicineCabinetInFolder();
   renderBentoWidgets();
+  checkLocalRemindersAndAlerts();
 }
 
 // 15. Scheda Vista & Lenti
@@ -4459,6 +4677,121 @@ const FIRST_AID_DATA = [
       'NON attendere la comparsa dei sintomi per allertare il Centro Antiveleni o il 112.'
     ],
     emergencyCall: 'Chiama subito il 112 o il Centro Antiveleni di Niguarda (02 66101029) e segui tassativamente le istruzioni fornite dal tossicologo medico.'
+  },
+  {
+    id: 'hypoglycemia',
+    title: 'Ipoglicemia (Calo Zuccheri)',
+    subtitle: 'Tremore, sudorazione, debolezza',
+    iconColor: '#FF9500',
+    iconBg: 'rgba(255, 149, 0, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity="0.16"/>
+      <path d="M12 6v6l4 2"/>
+    </svg>`,
+    dos: [
+      'Se la persona è cosciente e in grado di deglutire, somministra subito 15g di zuccheri semplici a rapido assorbimento: un bicchiere d\'acqua con 2-3 bustine di zucchero, un succo di frutta o 3-4 caramelle.',
+      'Fai riposare la persona seduta o distesa e attendi 15 minuti.',
+      'Se i sintomi migliorano, fai seguire uno snack con carboidrati complessi (es. 2-3 fette biscottate, cracker o pane) per stabilizzare la glicemia.',
+      'Se la persona è diabetica, controlla la glicemia con il glucometro se disponibile.'
+    ],
+    donts: [
+      'NON somministrare liquidi o cibo per bocca se la persona è confusa, sonnolenta o incosciente (rischio gravissimo di soffocamento/ab ingestis).',
+      'NON dare cibi ricchi di grassi (come cioccolato o biscotti farciti) come prima scelta: i grassi rallentano l\'assorbimento degli zuccheri.',
+      'NON lasciare la persona sola finché i sintomi non sono completamente risolti.'
+    ],
+    emergencyCall: 'Chiama subito il 112 se la persona perde conoscenza, ha convulsioni o se dopo 15 minuti dall\'assunzione di zucchero i sintomi non migliorano.'
+  },
+  {
+    id: 'panic_attack',
+    title: 'Attacco di Panico & Iperventilazione',
+    subtitle: 'Tachicardia, fame d\'aria, ansia',
+    iconColor: '#00C7BE',
+    iconBg: 'rgba(0, 199, 190, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2a10 10 0 0 1 10 10c0 5.5-4.5 10-10 10S2 17.5 2 12A10 10 0 0 1 12 2z" fill="currentColor" fill-opacity="0.16"/>
+      <path d="M8 12s1.5 2 4 2 4-2 4-2"/>
+      <circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/>
+    </svg>`,
+    dos: [
+      'Accompagna la persona in un ambiente tranquillo, silenzioso e all\'aria aperta o ben ventilato.',
+      'Parla con tono calmo, rassicurante e sicuro, ricordandole che si tratta di una crisi passeggera e che non è in pericolo di vita.',
+      'Guida il suo respiro: fai inspirare lentamente con il naso per 4 secondi, trattenere per 2 secondi ed espirare lentamente con la bocca per 6 secondi.',
+      'Invitala a concentrarsi su stimoli esterni concreti (es. appoggiare i piedi a terra, descrivere 3 oggetti visibili).'
+    ],
+    donts: [
+      'NON minimizzare i suoi sintomi con frasi come "non hai niente" o "stai calmo": aumentano la sensazione di isolamento e allarme.',
+      'NON far respirare la persona all\'interno di sacchetti di plastica (rischio di asfissia).',
+      'NON affollarsi intorno alla persona né trasmetterle agitazione o fretta.'
+    ],
+    emergencyCall: 'Chiama il 112 se il dolore toracico è costrittivo e irradiato a braccio o mandibola, o se è la prima volta che si manifesta un episodio simile senza diagnosi precedente.'
+  },
+  {
+    id: 'eye_foreign_body',
+    title: 'Corpo Estraneo nell\'Occhio',
+    subtitle: 'Polvere, ciglia, schegge',
+    iconColor: '#32ADE6',
+    iconBg: 'rgba(50, 173, 230, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" fill="currentColor" fill-opacity="0.16"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>`,
+    dos: [
+      'Lavati accuratamente le mani prima di toccare il contorno occhi.',
+      'Irriga abbondantemente l\'occhio aperto con soluzione fisiologica sterile o un getto delicato di acqua corrente tiepida per diversi minuti.',
+      'Sbatti ripetutamente le palpebre mentre l\'occhio è immerso in acqua tiepida pulita per favorire la naturale espulsione lacrimale.',
+      'Se il corpo estraneo (es. ciglia) galleggia sulla sclera bianca, rimuovilo con un angolo umido di garza sterile.'
+    ],
+    donts: [
+      'NON strofinare l\'occhio per nessun motivo (graffieresti la cornea provocando abrasioni o ulcerazioni permanenti).',
+      'NON usare pinzette, aghi, stuzzicadenti o batuffoli di cotone asciutti sull\'occhio.',
+      'NON tentare di rimuovere corpi estranei conficcati o incastrati nella cornea o nell\'iride.'
+    ],
+    emergencyCall: 'Recati subito al Pronto Soccorso Oculistico o chiama il 112 se il corpo estraneo è una scheggia di metallo/vetro conficcata, se c\'è sangue o se la vista è offuscata.'
+  },
+  {
+    id: 'hypothermia',
+    title: 'Ipotermia / Colpo di Freddo',
+    subtitle: 'Bassa temperatura, brividi intensi',
+    iconColor: '#64A8F0',
+    iconBg: 'rgba(100, 168, 240, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07l14.14-14.14"/>
+    </svg>`,
+    dos: [
+      'Sposta la persona in un ambiente caldo, asciutto e riparato dal vento.',
+      'Rimuovi con delicatezza tutti gli indumenti bagnati o umidi tagliandoli se necessario per evitare movimenti bruschi.',
+      'Copri la persona con coperte calde e asciutte, isolandola anche dal pavimento e coprendole la testa (lasciando libero il viso).',
+      'Se è cosciente e collaborante, offri bevande tiepide dolci (es. the zuccherato o brodo).'
+    ],
+    donts: [
+      'NON applicare fonti di calore diretto intenso (borse d\'acqua bollente, stufe o bagni caldi): provocherebbero shock e arresto cardiaco per vasodilatazione periferica.',
+      'NON massaggiare o strofinare braccia e gambe intorpidite.',
+      'NON somministrare alcolici (l\'alcol causa vasodilatazione e accelera la dispersione termica vitale).'
+    ],
+    emergencyCall: 'Chiama SUBITO il 112 se la persona smette di tremare ma è confusa, rallentata, ha polso flebile o perde conoscenza.'
+  },
+  {
+    id: 'electrocution',
+    title: 'Scossa Elettrica & Folgorazione',
+    subtitle: 'Corrente domestica o industriale',
+    iconColor: '#E06C75',
+    iconBg: 'rgba(224, 108, 117, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor" fill-opacity="0.16"/>
+    </svg>`,
+    dos: [
+      'STACCA IMMEDIATAMENTE l\'interruttore generale della corrente (salvavita) prima di toccare la vittima.',
+      'Se non puoi staccare la corrente, allontana la fonte o la persona usando un oggetto asciutto e non conduttore (es. manico di scopa in legno, plastica spessa).',
+      'Una volta interrotto il contatto elettrico, verifica subito coscienza e respiro.',
+      'Se non respira, chiama il 112 e inizia immediatamente il Massaggio Cardiaco (RCP).',
+      'Se respira ed è cosciente, ponila in posizione comoda e copri le eventuali ustioni da entrata/uscita con teli sterili.'
+    ],
+    donts: [
+      'NON toccare MAI la persona a mani nude finché è in contatto con la corrente elettrica (rimarresti folgorato anche tu).',
+      'NON avvicinarsi in presenza di cavi dell\'alta tensione caduti a terra (mantenere almeno 15 metri di distanza).',
+      'NON applicare oli o unguenti sulle bruciature elettriche.'
+    ],
+    emergencyCall: 'Chiama SUBITO il 112 per qualsiasi folgorazione: la corrente può causare aritmie cardiache gravi e danni interni anche a distanza di ore.'
   }
 ];
 
@@ -4924,5 +5257,140 @@ function saveFeelingSymptomToDiary(symptomTitle) {
 
   if (typeof renderHealthNotes === 'function') {
     renderHealthNotes();
+  }
+}
+
+// ----------------------------------------------------
+// 20. SISTEMA PROMEMORIA & NOTIFICHE LOCALI (ZERO SERVER)
+// ----------------------------------------------------
+function initLocalRemindersSystem() {
+  const toggle = document.getElementById('localNotificationsToggle');
+  const statusText = document.getElementById('localNotifStatusText');
+  const savedPref = localStorage.getItem('pulse_notifications_enabled') === 'true';
+
+  if (toggle) {
+    toggle.checked = savedPref && ('Notification' in window && Notification.permission === 'granted');
+    if (toggle.checked && statusText) {
+      statusText.innerText = 'Attive · Avvisi visite e scadenze farmaci';
+    }
+  }
+}
+
+async function handleNotificationToggle(checked) {
+  const toggle = document.getElementById('localNotificationsToggle');
+  const statusText = document.getElementById('localNotifStatusText');
+
+  if (checked) {
+    if (!('Notification' in window)) {
+      alert('Le notifiche di sistema non sono supportate da questo browser.');
+      if (toggle) toggle.checked = false;
+      return;
+    }
+
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        localStorage.setItem('pulse_notifications_enabled', 'true');
+        showToast('Notifiche locali attivate!', '🔔');
+        if (statusText) statusText.innerText = 'Attive · Avvisi visite e scadenze farmaci';
+        checkLocalRemindersAndAlerts();
+      } else {
+        localStorage.setItem('pulse_notifications_enabled', 'false');
+        if (toggle) toggle.checked = false;
+        if (statusText) statusText.innerText = 'Permesso non concesso nel browser';
+        showToast('Permesso notifiche negato', '⚠️');
+      }
+    } catch (err) {
+      console.warn('Errore richiesta permessi notifiche:', err);
+      if (toggle) toggle.checked = false;
+    }
+  } else {
+    localStorage.setItem('pulse_notifications_enabled', 'false');
+    if (statusText) statusText.innerText = 'Disattivate · Avvisi visite e scadenze farmaci';
+    showToast('Notifiche locali disattivate', '🔕');
+  }
+}
+
+function checkLocalRemindersAndAlerts() {
+  const activeProfile = getActiveProfileId();
+  const now = new Date();
+  const in48h = new Date(Date.now() + 48 * 60 * 60 * 1000);
+  const in30d = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const todayIso = now.toISOString().split('T')[0];
+
+  // 1. Controlla Visite nelle prossime 48 ore
+  const allAppts = JSON.parse(localStorage.getItem('pulse_appointments') || '[]');
+  const profileAppts = allAppts.filter(a => !a.profileId || a.profileId === activeProfile);
+  const imminentAppts = profileAppts.filter(a => {
+    if (!a.datetime) return false;
+    const dt = new Date(a.datetime);
+    return dt >= now && dt <= in48h;
+  });
+
+  // 2. Controlla Farmaci in scadenza entro 30 giorni o già scaduti
+  const allCabinet = JSON.parse(localStorage.getItem('pulse_cabinet') || '[]');
+  const profileCabinet = allCabinet.filter(c => !c.profileId || c.profileId === activeProfile);
+  const expiredMeds = profileCabinet.filter(c => c.expiryDate && c.expiryDate < todayIso);
+  const expiringMeds = profileCabinet.filter(c => c.expiryDate && c.expiryDate >= todayIso && c.expiryDate <= in30d);
+
+  const alertPill = document.getElementById('localReminderAlertPill');
+  const alertText = document.getElementById('localReminderAlertText');
+  const alertIcon = document.getElementById('localReminderAlertIcon');
+
+  let alertMessage = '';
+  let alertIconSymbol = '⚠️';
+
+  if (imminentAppts.length > 0) {
+    const next = imminentAppts[0];
+    const dt = new Date(next.datetime);
+    const timeFormatted = dt.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    const isToday = dt.toDateString() === now.toDateString();
+    alertIconSymbol = '📅';
+    alertMessage = `Visita ${isToday ? 'oggi alle' : 'domani alle'} ${timeFormatted}: ${next.title}`;
+  } else if (expiredMeds.length > 0) {
+    alertIconSymbol = '🚨';
+    alertMessage = `${expiredMeds.length} ${expiredMeds.length === 1 ? 'farmaco scaduto' : 'farmaci scaduti'} in Armadietto (${expiredMeds[0].name})`;
+  } else if (expiringMeds.length > 0) {
+    alertIconSymbol = '💊';
+    alertMessage = `${expiringMeds.length} ${expiringMeds.length === 1 ? 'farmaco' : 'farmaci'} in scadenza entro 30 giorni (${expiringMeds[0].name})`;
+  }
+
+  if (alertMessage && alertPill && alertText) {
+    // Controlla se dismesso per questa sessione
+    if (sessionStorage.getItem('pulse_dismiss_alert') !== alertMessage) {
+      alertText.innerText = alertMessage;
+      if (alertIcon) alertIcon.innerText = alertIconSymbol;
+      alertPill.style.display = 'flex';
+    }
+  } else if (alertPill) {
+    alertPill.style.display = 'none';
+  }
+
+  // Notifica browser se abilitata
+  const isNotifEnabled = localStorage.getItem('pulse_notifications_enabled') === 'true';
+  if (isNotifEnabled && 'Notification' in window && Notification.permission === 'granted' && alertMessage) {
+    const lastNotified = localStorage.getItem('pulse_last_notification_text');
+    if (lastNotified !== alertMessage) {
+      try {
+        new Notification('Pulse Salute', {
+          body: alertMessage,
+          icon: './icons.js' // fallback icon
+        });
+        localStorage.setItem('pulse_last_notification_text', alertMessage);
+      } catch (err) {
+        console.warn('Errore invio notifica:', err);
+      }
+    }
+  }
+}
+
+function dismissLocalReminderAlert() {
+  const alertPill = document.getElementById('localReminderAlertPill');
+  const alertText = document.getElementById('localReminderAlertText');
+  if (alertText && alertText.innerText) {
+    sessionStorage.setItem('pulse_dismiss_alert', alertText.innerText);
+  }
+  if (alertPill) {
+    alertPill.style.display = 'none';
   }
 }
