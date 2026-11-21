@@ -4145,12 +4145,13 @@ async function estimateStorage() {
 
 // Quick Hub
 const DEFAULT_HUB_LINKS = [
-  { id: 'fse', name: 'Fascicolo Sanitario', url: 'https://www.fascicolo-sanitario.it/', iconColor: '#007AFF', letter: 'FSE', iconKey: 'folder' },
-  { id: 'cup', name: 'CUPWeb Prenotazioni', url: 'https://www.cupweb.it/', iconColor: '#00C7BE', letter: 'CUP', iconKey: 'calendar' },
-  { id: 'miodottore', name: 'MioDottore', url: 'https://www.miodottore.it/', iconColor: '#34C759', letter: 'MD', iconKey: 'hospital' },
-  { id: 'farmacie', name: 'Farmacie di Turno', url: 'https://www.farmaciediturno.org/', iconColor: '#FF9500', letter: 'Rx', iconKey: 'pharmacy' },
-  { id: 'apple', name: 'Apple Salute', url: 'https://www.apple.com/it/ios/health/', iconColor: '#FF2D55', letter: '❤️', iconKey: 'heart' },
-  { id: '730', name: 'Spese Sanitarie 730', url: 'https://sistemats1.sanita.finanze.it/', iconColor: '#AF52DE', letter: '730', iconKey: 'shield' }
+  { id: 'fse', name: 'Fascicolo Sanitario', webUrl: 'https://www.fascicolo-sanitario.it/', androidPackage: 'it.lepida.ersalute', iosScheme: null, iconColor: '#007AFF', letter: 'FSE', iconKey: 'folder' },
+  { id: 'cie', name: 'CieID (CIE)', webUrl: 'https://www.cartaidentita.interno.gov.it/', androidPackage: 'it.ipzs.cieid', iosScheme: null, iconColor: '#003366', letter: 'CIE', iconKey: 'shield', emoji: '🪪' },
+  { id: 'io', name: 'App IO', webUrl: 'https://io.italia.it/', androidPackage: 'it.pagopa.io.app', iosScheme: 'ioitalia://', iconColor: '#0066CC', letter: 'IO', iconKey: 'phone', emoji: '🇮🇹' },
+  { id: 'cup', name: 'CUPWeb Prenotazioni', webUrl: 'https://www.cupweb.it/', androidPackage: null, iosScheme: null, iconColor: '#00C7BE', letter: 'CUP', iconKey: 'calendar' },
+  { id: 'miodottore', name: 'MioDottore', webUrl: 'https://www.miodottore.it/', androidPackage: 'it.docplanner', iosScheme: null, iconColor: '#34C759', letter: 'MD', iconKey: 'hospital' },
+  { id: 'farmacie', name: 'Farmacie di Turno', webUrl: 'https://www.farmaciediturno.org/', androidPackage: null, iosScheme: null, iconColor: '#FF9500', letter: 'Rx', iconKey: 'pharmacy' },
+  { id: '730', name: 'Spese Sanitarie 730', webUrl: 'https://sistemats1.sanita.finanze.it/', androidPackage: null, iosScheme: null, iconColor: '#AF52DE', letter: '730', iconKey: 'shield' }
 ];
 
 const HUB_ICONS_CONFIG = [
@@ -4176,16 +4177,59 @@ function getProfileHubLinks(profileId) {
   const saved = localStorage.getItem(key);
   if (saved !== null) {
     try {
-      const parsed = JSON.parse(saved);
+      let parsed = JSON.parse(saved);
       if (Array.isArray(parsed)) {
-        // Fix automatico URL FSE se fosse presente il vecchio URL
         let modified = false;
-        parsed.forEach(l => {
-          if (l.id === 'fse' && (!l.url || l.url.includes('regione.emilia-romagna.it'))) {
-            l.url = 'https://www.fascicolo-sanitario.it/';
+
+        // 1. Rimuovi la vecchia scheda di default 'apple' (Apple Salute) se presente
+        if (parsed.some(l => l.id === 'apple')) {
+          parsed = parsed.filter(l => l.id !== 'apple');
+          modified = true;
+        }
+
+        // 2. Se manca 'cie' nei default, inserisci 'cie'
+        if (!parsed.some(l => l.id === 'cie')) {
+          const cieDef = DEFAULT_HUB_LINKS.find(d => d.id === 'cie');
+          if (cieDef) {
+            const fseIdx = parsed.findIndex(l => l.id === 'fse');
+            if (fseIdx !== -1) {
+              parsed.splice(fseIdx + 1, 0, { ...cieDef });
+            } else {
+              parsed.unshift({ ...cieDef });
+            }
             modified = true;
           }
+        }
+
+        // 3. Se manca 'io' nei default, inserisci 'io'
+        if (!parsed.some(l => l.id === 'io')) {
+          const ioDef = DEFAULT_HUB_LINKS.find(d => d.id === 'io');
+          if (ioDef) {
+            const cieIdx = parsed.findIndex(l => l.id === 'cie');
+            if (cieIdx !== -1) {
+              parsed.splice(cieIdx + 1, 0, { ...ioDef });
+            } else {
+              parsed.push({ ...ioDef });
+            }
+            modified = true;
+          }
+        }
+
+        // 4. Aggiorna webUrl, androidPackage e iosScheme sui default esistenti
+        parsed.forEach(l => {
+          const def = DEFAULT_HUB_LINKS.find(d => d.id === l.id);
+          if (def) {
+            if (l.webUrl !== def.webUrl) { l.webUrl = def.webUrl; modified = true; }
+            if (l.url !== def.webUrl) { l.url = def.webUrl; modified = true; }
+            if (l.androidPackage !== def.androidPackage) { l.androidPackage = def.androidPackage; modified = true; }
+            if (l.iosScheme !== def.iosScheme) { l.iosScheme = def.iosScheme; modified = true; }
+            if (def.emoji && l.emoji !== def.emoji) { l.emoji = def.emoji; modified = true; }
+          } else {
+            // Scheda custom: assicurati che webUrl sia popolato
+            if (!l.webUrl && l.url) { l.webUrl = l.url; modified = true; }
+          }
         });
+
         if (modified) {
           localStorage.setItem(key, JSON.stringify(parsed));
         }
@@ -4199,7 +4243,12 @@ function getProfileHubLinks(profileId) {
   // Se non inizializzato, unifica DEFAULT_HUB_LINKS + eventuali custom salvati in precedenza
   const legacyCustom = JSON.parse(localStorage.getItem('pulse_custom_hub') || '[]');
   const profileLegacy = legacyCustom.filter(l => !l.profileId || l.profileId === profileId);
-  const initialLinks = [...DEFAULT_HUB_LINKS, ...profileLegacy];
+  const initialLinks = DEFAULT_HUB_LINKS.map(d => ({ ...d, url: d.webUrl }));
+  profileLegacy.forEach(l => {
+    if (!initialLinks.some(i => i.id === l.id)) {
+      initialLinks.push({ ...l, webUrl: l.webUrl || l.url });
+    }
+  });
   localStorage.setItem(key, JSON.stringify(initialLinks));
   return initialLinks;
 }
@@ -4207,6 +4256,75 @@ function getProfileHubLinks(profileId) {
 function saveProfileHubLinks(profileId, links) {
   const key = `pulse_hub_links_${profileId}`;
   localStorage.setItem(key, JSON.stringify(links));
+}
+
+function openHealthPortal(portalId, event) {
+  if (event) {
+    event.preventDefault();
+  }
+
+  const activeProfile = getActiveProfileId();
+  const allLinks = getProfileHubLinks(activeProfile);
+  const portal = allLinks.find(l => l.id === portalId) || DEFAULT_HUB_LINKS.find(l => l.id === portalId);
+  const targetUrl = (portal && (portal.webUrl || portal.url)) || '';
+  if (!targetUrl) return;
+
+  const ua = navigator.userAgent || '';
+  const isAndroid = /Android/i.test(ua);
+  const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+
+  // 1. Su Android (Android Intent con fallback automatico)
+  if (isAndroid && portal && portal.androidPackage) {
+    try {
+      const urlObj = new URL(targetUrl);
+      const hostAndPath = urlObj.host + urlObj.pathname + (urlObj.search || '');
+      const intentUrl = `intent://${hostAndPath}#Intent;scheme=https;package=${portal.androidPackage};S.browser_fallback_url=${encodeURIComponent(targetUrl)};end`;
+      window.location.href = intentUrl;
+      return;
+    } catch (e) {
+      console.warn('Errore costruzione Android Intent URI:', e);
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+  }
+
+  // 2. Su iPhone / iOS (Universal Link & URL Scheme)
+  if (isIOS) {
+    if (portal && portal.iosScheme) {
+      let isHidden = false;
+      const onVisibilityChange = () => {
+        if (document.hidden || document.visibilityState === 'hidden') {
+          isHidden = true;
+        }
+      };
+      const onPageHide = () => {
+        isHidden = true;
+      };
+
+      document.addEventListener('visibilitychange', onVisibilityChange, { once: true });
+      window.addEventListener('pagehide', onPageHide, { once: true });
+
+      // Tentativo apertura diretta con URL scheme
+      window.location.href = portal.iosScheme;
+
+      // Fallback a webUrl se l'app non è installata
+      setTimeout(() => {
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+        window.removeEventListener('pagehide', onPageHide);
+        if (!isHidden && (!document.hidden && document.visibilityState !== 'hidden')) {
+          window.location.href = targetUrl;
+        }
+      }, 1200);
+      return;
+    }
+
+    // Per app con Universal Links (FSE, CieID) o siti web
+    window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    return;
+  }
+
+  // 3. Su Desktop / PC o fallback
+  window.open(targetUrl, '_blank', 'noopener,noreferrer');
 }
 
 function renderHubIconSelector() {
@@ -4250,7 +4368,9 @@ function handleAddHubPortal(e) {
   let url = document.getElementById('hubPortalUrlInput').value.trim();
   if (!name || !url) return;
 
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+  // Supporto sia indirizzi web sia URL Scheme di app (es. ioitalia://, whatsapp://, mailto:, tel:)
+  const hasScheme = /^[a-zA-Z0-9_\-\+]+:\/\//i.test(url) || /^(mailto|tel|sms):/i.test(url);
+  if (!hasScheme) {
     url = 'https://' + url;
   }
 
@@ -4263,6 +4383,9 @@ function handleAddHubPortal(e) {
     profileId: activeProfile,
     name: name,
     url: url,
+    webUrl: url,
+    androidPackage: null,
+    iosScheme: url.includes('://') && !url.startsWith('http') ? url : null,
     iconKey: iconConfig.key,
     emoji: iconConfig.emoji,
     iconColor: iconConfig.color,
@@ -4299,10 +4422,11 @@ function renderQuickHub() {
 
   container.innerHTML = allLinks.map(link => {
     const displayBadge = link.emoji ? `<span style="font-size: 20px;">${link.emoji}</span>` : `<span style="font-weight: 800; font-size: 15px;">${link.letter}</span>`;
+    const targetUrl = link.webUrl || link.url || '#';
     
     return `
       <div style="position: relative;">
-        <a href="${escapeHTML(link.url)}" target="_blank" rel="noopener noreferrer" class="glass-card" style="padding: 18px 10px 14px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; text-align: center; gap: 8px; border-radius: var(--radius-md); height: 100%; box-sizing: border-box;">
+        <a href="${escapeHTML(targetUrl)}" onclick="openHealthPortal('${link.id}', event)" target="_blank" rel="noopener noreferrer" class="glass-card" style="padding: 18px 10px 14px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; text-align: center; gap: 8px; border-radius: var(--radius-md); height: 100%; box-sizing: border-box;">
           <div class="squircle-icon-badge" style="width: 44px; height: 44px; min-width: 44px; border-radius: 13px; background: ${link.iconColor}18; border: 1px solid ${link.iconColor}33; color: ${link.iconColor};">
             ${displayBadge}
           </div>
