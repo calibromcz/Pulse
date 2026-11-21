@@ -4145,7 +4145,7 @@ async function estimateStorage() {
 
 // Quick Hub
 const DEFAULT_HUB_LINKS = [
-  { id: 'fse', name: 'Fascicolo Sanitario', url: 'https://www.fascicolosanitario.regione.emilia-romagna.it/', iconColor: '#007AFF', letter: 'FSE', iconKey: 'folder' },
+  { id: 'fse', name: 'Fascicolo Sanitario', url: 'https://www.fascicolo-sanitario.it/', iconColor: '#007AFF', letter: 'FSE', iconKey: 'folder' },
   { id: 'cup', name: 'CUPWeb Prenotazioni', url: 'https://www.cupweb.it/', iconColor: '#00C7BE', letter: 'CUP', iconKey: 'calendar' },
   { id: 'miodottore', name: 'MioDottore', url: 'https://www.miodottore.it/', iconColor: '#34C759', letter: 'MD', iconKey: 'hospital' },
   { id: 'farmacie', name: 'Farmacie di Turno', url: 'https://www.farmaciediturno.org/', iconColor: '#FF9500', letter: 'Rx', iconKey: 'pharmacy' },
@@ -4169,6 +4169,44 @@ let selectedHubIconKey = 'globe';
 function initQuickHub() {
   renderQuickHub();
   renderHubIconSelector();
+}
+
+function getProfileHubLinks(profileId) {
+  const key = `pulse_hub_links_${profileId}`;
+  const saved = localStorage.getItem(key);
+  if (saved !== null) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        // Fix automatico URL FSE se fosse presente il vecchio URL
+        let modified = false;
+        parsed.forEach(l => {
+          if (l.id === 'fse' && (!l.url || l.url.includes('regione.emilia-romagna.it'))) {
+            l.url = 'https://www.fascicolo-sanitario.it/';
+            modified = true;
+          }
+        });
+        if (modified) {
+          localStorage.setItem(key, JSON.stringify(parsed));
+        }
+        return parsed;
+      }
+    } catch (e) {
+      console.warn('Errore lettura pulse_hub_links:', e);
+    }
+  }
+
+  // Se non inizializzato, unifica DEFAULT_HUB_LINKS + eventuali custom salvati in precedenza
+  const legacyCustom = JSON.parse(localStorage.getItem('pulse_custom_hub') || '[]');
+  const profileLegacy = legacyCustom.filter(l => !l.profileId || l.profileId === profileId);
+  const initialLinks = [...DEFAULT_HUB_LINKS, ...profileLegacy];
+  localStorage.setItem(key, JSON.stringify(initialLinks));
+  return initialLinks;
+}
+
+function saveProfileHubLinks(profileId, links) {
+  const key = `pulse_hub_links_${profileId}`;
+  localStorage.setItem(key, JSON.stringify(links));
 }
 
 function renderHubIconSelector() {
@@ -4217,10 +4255,10 @@ function handleAddHubPortal(e) {
   }
 
   const activeProfile = getActiveProfileId();
-  const customLinks = JSON.parse(localStorage.getItem('pulse_custom_hub') || '[]');
+  const links = getProfileHubLinks(activeProfile);
   const iconConfig = HUB_ICONS_CONFIG.find(c => c.key === selectedHubIconKey) || HUB_ICONS_CONFIG[0];
 
-  customLinks.push({
+  links.push({
     id: 'custom_' + Date.now(),
     profileId: activeProfile,
     name: name,
@@ -4231,20 +4269,24 @@ function handleAddHubPortal(e) {
     letter: iconConfig.emoji || name.substring(0, 2).toUpperCase()
   });
 
-  localStorage.setItem('pulse_custom_hub', JSON.stringify(customLinks));
+  saveProfileHubLinks(activeProfile, links);
   closeModal('addHubModalOverlay');
   renderQuickHub();
   showToast(`"${name}" aggiunto ai Portali Salute!`, '🔗');
 }
 
 function deleteCustomHubLink(linkId, e) {
-  if (e) e.stopPropagation();
-  if (confirm('Rimuovere questo portale dai collegamenti rapidi?')) {
-    let customLinks = JSON.parse(localStorage.getItem('pulse_custom_hub') || '[]');
-    customLinks = customLinks.filter(l => l.id !== linkId);
-    localStorage.setItem('pulse_custom_hub', JSON.stringify(customLinks));
+  if (e) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+  if (confirm('Rimuovere questo portale dalla lista?')) {
+    const activeProfile = getActiveProfileId();
+    let links = getProfileHubLinks(activeProfile);
+    links = links.filter(l => l.id !== linkId);
+    saveProfileHubLinks(activeProfile, links);
     renderQuickHub();
-    showToast('Collegamento rimosso', '🗑️');
+    showToast('Portale rimosso', '🗑️');
   }
 }
 
@@ -4253,27 +4295,25 @@ function renderQuickHub() {
   if (!container) return;
 
   const activeProfile = getActiveProfileId();
-  const allCustom = JSON.parse(localStorage.getItem('pulse_custom_hub') || '[]');
-  const profileCustom = allCustom.filter(l => !l.profileId || l.profileId === activeProfile);
-  const allLinks = [...DEFAULT_HUB_LINKS, ...profileCustom];
+  const allLinks = getProfileHubLinks(activeProfile);
 
   container.innerHTML = allLinks.map(link => {
-    const isCustom = link.id && link.id.startsWith('custom_');
     const displayBadge = link.emoji ? `<span style="font-size: 20px;">${link.emoji}</span>` : `<span style="font-weight: 800; font-size: 15px;">${link.letter}</span>`;
     
     return `
       <div style="position: relative;">
-        <a href="${escapeHTML(link.url)}" target="_blank" rel="noopener noreferrer" class="glass-card" style="padding: 14px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; text-align: center; gap: 8px; border-radius: var(--radius-md); height: 100%;">
+        <a href="${escapeHTML(link.url)}" target="_blank" rel="noopener noreferrer" class="glass-card" style="padding: 18px 10px 14px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; text-align: center; gap: 8px; border-radius: var(--radius-md); height: 100%; box-sizing: border-box;">
           <div class="squircle-icon-badge" style="width: 44px; height: 44px; min-width: 44px; border-radius: 13px; background: ${link.iconColor}18; border: 1px solid ${link.iconColor}33; color: ${link.iconColor};">
             ${displayBadge}
           </div>
-          <div style="font-size: 12px; font-weight: 600; color: var(--text-primary); line-height: 1.2; word-break: break-word;">${escapeHTML(link.name)}</div>
+          <div style="font-size: 12px; font-weight: 600; color: var(--text-primary); line-height: 1.25; word-break: break-word;">${escapeHTML(link.name)}</div>
         </a>
-        ${isCustom ? `
-          <button type="button" onclick="deleteCustomHubLink('${link.id}', event)" style="position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%; background: var(--bg-card-solid); border: 1px solid rgba(224, 108, 117, 0.4); color: var(--accent-coral); font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-sm); z-index: 5;" title="Elimina portale">
-            ×
-          </button>
-        ` : ''}
+        <button type="button" onclick="deleteCustomHubLink('${link.id}', event)" class="hub-card-delete-btn" aria-label="Elimina ${escapeHTML(link.name)}" title="Rimuovi ${escapeHTML(link.name)}">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
     `;
   }).join('') + `

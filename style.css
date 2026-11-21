@@ -2099,6 +2099,38 @@ body::after {
   background: linear-gradient(90deg, transparent, rgba(180, 205, 255, 0.16) 20%, rgba(180, 205, 255, 0.16) 80%, transparent);
 }
 
+/* Pulsante Elimina Portale Salute */
+.hub-card-delete-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--bg-card-secondary);
+  border: 1px solid var(--border-glass);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.hub-card-delete-btn:hover {
+  background: rgba(255, 45, 85, 0.14);
+  border-color: rgba(255, 45, 85, 0.35);
+  color: var(--accent-coral);
+  transform: scale(1.08);
+}
+
+.hub-card-delete-btn:active {
+  transform: scale(0.92);
+}
+
 /* Fullscreen Image Lightbox Overlay */
 .doc-fullscreen-lightbox {
   position: fixed;
