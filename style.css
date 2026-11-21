@@ -1854,6 +1854,13 @@ body::after {
   transition: transform 0.2s var(--spring-easing), opacity 0.2s ease;
 }
 
+.emergency-call-pill.compact {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
 .emergency-call-pill:active {
   transform: scale(0.94);
 }
@@ -1890,14 +1897,31 @@ body::after {
 /* First Aid Modal & Cards */
 .first-aid-sheet {
   max-width: 580px;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  padding-bottom: 0 !important;
+  overflow: hidden !important;
 }
 
 .first-aid-sticky-header {
+  flex-shrink: 0;
   position: sticky;
   top: 0;
   background: var(--bg-card-solid);
-  padding-bottom: 8px;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 10px 16px;
+  border-bottom: 1px solid var(--border-subtle);
   z-index: 10;
+}
+
+#firstAidIndexView, #firstAidDetailView {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 16px calc(24px + env(safe-area-inset-bottom, 16px)) 16px;
 }
 
 .first-aid-grid {

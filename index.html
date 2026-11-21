@@ -337,13 +337,13 @@
             </div>
           </div>
 
-          <!-- Barra di Ricerca Sintomo -->
+          <!-- Barra di Ricerca Sintomo (Testo Libero & Frasi Complete) -->
           <div style="position: relative; margin-bottom: 10px;">
-            <input type="text" id="feelingSearchInput" class="form-input" placeholder="Scrivi un sintomo (es. mal di testa, gola...)" style="padding-left: 36px; padding-right: 36px; font-size: 13px; height: 38px; border-radius: var(--radius-md);" onkeydown="if(event.key === 'Enter') handleFeelingSearch(this.value)">
-            <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5;" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+            <input type="text" id="feelingSearchInput" class="form-input" placeholder="Come ti senti? (es. mi fa male lo sterno e ho vertigini...)" style="padding-left: 36px; padding-right: 58px; font-size: 16px; height: 42px; border-radius: var(--radius-md); width: 100%; box-sizing: border-box;" onkeydown="if(event.key === 'Enter') handleFeelingSearch(this.value)">
+            <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5;" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
             </svg>
-            <button onclick="handleFeelingSearch(document.getElementById('feelingSearchInput').value)" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--accent-teal); font-weight: 700; font-size: 12px; padding: 4px 6px;">Cerca</button>
+            <button onclick="handleFeelingSearch(document.getElementById('feelingSearchInput').value)" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--accent-teal); font-weight: 700; font-size: 13px; padding: 6px 8px;">Cerca</button>
           </div>
 
           <!-- Chip Rapidi Scorrevoli Orizzontalmente -->
@@ -1339,38 +1339,38 @@
 
   <!-- MODAL: MANUALE DI PRIMO SOCCORSO (100% Offline) -->
   <div id="firstAidModalOverlay" class="modal-overlay">
-    <div class="bottom-sheet first-aid-sheet" style="max-height: 90vh;">
+    <div class="bottom-sheet first-aid-sheet">
       <div class="sheet-handle"></div>
       
-      <!-- Header Fisso del Manuale -->
+      <!-- Header Fisso del Manuale (sempre visibile) -->
       <div class="first-aid-sticky-header">
         <div class="sheet-header" style="margin-bottom: 10px;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 20px;">🩺</span>
-            <h2 class="sheet-title" id="firstAidHeaderTitle" style="font-size: 18px; margin: 0;">Primo Soccorso</h2>
+            <h2 class="sheet-title" id="firstAidHeaderTitle" style="font-size: 18px; margin: 0; font-weight: 800;">Primo Soccorso</h2>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <!-- Pulsante Rapido Fisso 112 -->
-            <a href="tel:112" class="emergency-call-pill" title="Chiama Subito il 112">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Pulsante Rapido Fisso 112 Compatto -->
+            <a href="tel:112" class="emergency-call-pill compact" title="Chiama subito il 112">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
               </svg>
-              <span>Chiama 112</span>
+              <span>112</span>
             </a>
-            <button class="sheet-close-btn" onclick="closeAllModals()">✕</button>
+            <button class="sheet-close-btn" onclick="closeAllModals()" aria-label="Chiudi manuale">✕</button>
           </div>
         </div>
 
-        <!-- Barra di ricerca rapida istantanea -->
-        <div id="firstAidSearchWrap" style="position: relative; margin-bottom: 10px;">
-          <input type="text" id="firstAidSearchInput" class="form-input" placeholder="Cerca es. ustione, soffocamento, taglio..." style="padding-left: 36px; font-size: 13px;" oninput="filterFirstAidTopics(this.value)">
+        <!-- Barra di ricerca rapida istantanea (font-size: 16px per iOS Safari) -->
+        <div id="firstAidSearchWrap" style="position: relative; margin-bottom: 8px;">
+          <input type="text" id="firstAidSearchInput" class="form-input" placeholder="Cerca emergenza, sintomo o manovra..." style="padding-left: 36px; font-size: 16px; height: 42px; border-radius: 12px; width: 100%; box-sizing: border-box;" oninput="filterFirstAidTopics(this.value)">
           <svg style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5;" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
           </svg>
         </div>
       </div>
 
-      <!-- VISTA 1: Griglia Indice delle 9 Schede -->
+      <!-- VISTA 1: Griglia Indice delle Schede -->
       <div id="firstAidIndexView">
         <div class="first-aid-grid" id="firstAidCardsGrid"></div>
         <div class="first-aid-disclaimer">
@@ -1380,7 +1380,7 @@
 
       <!-- VISTA 2: Dettaglio della Scheda Attiva -->
       <div id="firstAidDetailView" style="display: none;">
-        <button class="btn-secondary-sm" onclick="showFirstAidIndex()" style="margin-bottom: 14px; padding: 6px 12px; font-size: 12px;">
+        <button class="btn-secondary-sm" onclick="showFirstAidIndex()" style="margin-bottom: 14px; padding: 6px 12px; font-size: 12px; border-radius: 8px;">
           ← Tutte le Guide
         </button>
         <div id="firstAidDetailContent"></div>

@@ -485,7 +485,12 @@ async function renderHome() {
           <div class="hero-oggi-title" style="font-size: 15px; font-weight: 700;">Nessuna visita imminente</div>
           <div class="hero-oggi-sub">Pianifica controlli o visite specialistiche</div>
         </div>
-        <button class="btn-secondary-sm" onclick="openNewApptModal()" style="padding: 4px 10px; font-size: 12px; margin-left: 8px;">+ Aggiungi</button>
+        <button class="btn-secondary-sm" onclick="openNewApptModal()" aria-label="Aggiungi visita" style="width: 36px; height: 36px; min-width: 36px; border-radius: 10px; padding: 0; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; font-weight: 700; color: var(--accent-blue); margin-left: 8px;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
       </div>
     `;
   }
@@ -5051,6 +5056,429 @@ const FIRST_AID_DATA = [
     ],
     emergencyCall: 'Chiama SUBITO il 112 per qualsiasi folgorazione: la corrente può causare aritmie cardiache gravi e danni interni anche a distanza di ore.'
   }
+,
+{
+    id: 'chest_pain',
+    title: 'Dolore Toracico & Infarto',
+    subtitle: 'Sospetta sindrome coronarica acuta',
+    iconColor: '#E06C75',
+    iconBg: 'rgba(224, 108, 117, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="currentColor" fill-opacity="0.16"/>
+    </svg>`,
+    dos: [
+      'Fai sedere o semisedere la persona con le spalle rialzate (posizione semiseduta a 45 gradi con ginocchia flesse).',
+      'Allenta cravatta, colletto, cintura e abiti costrittivi per favorire la respirazione diaframmatica.',
+      'Mantieni la calma assoluta, rassicura la persona e falla respirare lentamente evitando sforzi o agitazione.',
+      'Chiama IMMEDIATAMENTE il 112 specificando dolore toracico oppressivo, irradiazione (braccio sx, collo, mandibola) e sudorazione fredda.',
+      'Se ha prescritto nitrati sublinguali (es. carvasin/trinitrina) e la pressione non è bassa, aiutala ad assumerli.'
+    ],
+    donts: [
+      'NON far camminare o muovere la persona nemmeno di un metro.',
+      'NON somministrare cibo, bevande, caffè o stimolanti.',
+      'NON aspettare che il dolore passi da solo sperando sia un semplice reflusso gastrico.'
+    ],
+    emergencyCall: 'Chiama SUBITO il 112 in vivavoce. Se la persona diventa incosciente e non respira normalmente, inizia immediatamente il Massaggio Cardiaco (RCP).'
+  },
+  {
+    id: 'stroke',
+    title: 'Sospetto Ictus (Test FAST)',
+    subtitle: 'Faccia, Braccia, Linguaggio, Tempo',
+    iconColor: '#AF52DE',
+    iconBg: 'rgba(175, 82, 222, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2a10 10 0 1 0 10 10H12V2z" fill="currentColor" fill-opacity="0.16"/>
+      <path d="M12 12L2.5 7.5M12 12v9"/>
+    </svg>`,
+    dos: [
+      'F - Face (Faccia): chiedi di sorridere e controlla se un angolo della bocca o una parte del viso cade o resta paralizzata.',
+      'A - Arms (Braccia): chiedi di sollevare entrambe le braccia ad occhi chiusi per 10 secondi e osserva se un braccio ricade verso il basso.',
+      'S - Speech (Linguaggio): chiedi di ripetere una frase semplice e valuta se le parole sono impastate, incomprensibili o prive di senso.',
+      'T - Time (Tempo): se noti anche un solo segno positivo, chiama SUBITO il 112 indicando con precisione l\'orario esatto in cui sono comparsi i sintomi.',
+      'Adagia la persona su un fianco in Posizione Laterale di Sicurezza (se non cosciente) o semiseduta con testa leggermente sollevata.'
+    ],
+    donts: [
+      'NON dare da bere, da mangiare né farmaci (aspirina o antipertensivi) per via del rischio elevato di disfagia e soffocamento.',
+      'NON far rialzare la persona.',
+      'NON attendere per verificare se i sintomi migliorano spontaneamente: ogni minuto perso distrugge milioni di neuroni.'
+    ],
+    emergencyCall: 'Chiama IMMEDIATAMENTE il 112: comunica che sospetti un Ictus e riferisci l\'ora di esordio (fondamentale per la trombolisi entro le 4.5 ore).'
+  },
+  {
+    id: 'anaphylaxis',
+    title: 'Shock Anafilattico & Adrenalina',
+    subtitle: 'Reazione allergica grave sistemica',
+    iconColor: '#E06C75',
+    iconBg: 'rgba(224, 108, 117, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" fill="currentColor" fill-opacity="0.16"/>
+    </svg>`,
+    dos: [
+      'Riconosci i segnali d\'allarme: gonfiore a labbra, lingua o gola, difficoltà respiratoria grave, sibilo, orticaria diffusa e calo di pressione.',
+      'Se la persona ha un autoiniettore di Adrenalina (es. Fastjekt, Jext, Emerade), usalo SUBITO nella parte antero-laterale della coscia (anche attraverso i vestiti).',
+      'Mantieni premuto l\'iniettore saldamente contro la coscia per 5-10 secondi, quindi massaggia il punto di iniezione per 10 secondi.',
+      'Fai sdraiare la persona con le gambe sollevate se ha vertigini o ipotensione, oppure semiseduta se fa fatica a respirare.',
+      'Chiama il 112 specificando che è in corso uno shock anafilattico e che è stata somministrata adrenalina.'
+    ],
+    donts: [
+      'NON far alzare in piedi o camminare la persona (il rapido svuotamento venoso può indurre arresto cardiaco improvviso).',
+      'NON esitare a somministrare l\'adrenalina: il ritardo è il fattore di mortalità principale.',
+      'NON somministrare liquidi o cibo per bocca.'
+    ],
+    emergencyCall: 'Chiama IMMEDIATAMENTE il 112 dopo la somministrazione: l\'effetto dell\'adrenalina può svanire dopo 10-15 minuti e potrebbe rendersi necessaria una seconda dose.'
+  },
+  {
+    id: 'pediatric_choking',
+    title: 'Disostruzione Bambino & Lattante',
+    subtitle: 'Manovre pediatriche vie aeree',
+    iconColor: '#E5A95C',
+    iconBg: 'rgba(229, 169, 92, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="7" r="4" fill="currentColor" fill-opacity="0.16"/>
+      <path d="M5.5 21v-3a6.5 6.5 0 0 1 13 0v3"/>
+    </svg>`,
+    dos: [
+      'NEL LATTANTE (< 1 ANNO): Poni il bimbo a pancia in giù lungo il tuo avambraccio, con la testa più in basso del tronco sostenendogli la mandibola con le dita.',
+      'Applica 5 pacche interscapolari vigorose tra le scapole con via di fuga laterale.',
+      'Ruota il lattante a pancia in su e pratica 5 compressioni toraciche lente e profonde al centro dello sterno con due dita.',
+      'NEL BAMBINO (> 1 ANNO): Inginocchiati dietro al bimbo e alterna 5 colpi dorsali a 5 compressioni subombelicali (Manovra di Heimlich per bambini).',
+      'Alterna i cicli di 5 colpi e 5 compressioni finché l\'oggetto estraneo non viene espulso.'
+    ],
+    donts: [
+      'NON scuotere violentemente il bambino.',
+      'NON eseguire manovre alla cieca inserendo dita nella cavità orale se non vedi chiaramente il corpo estraneo affiorante.',
+      'NON praticare compressioni addominali nel lattante sotto 1 anno (rischio grave di lesioni a fegato e milza).'
+    ],
+    emergencyCall: 'Se il bambino o lattante perde conoscenza, adagialo su un piano rigido, chiama subito il 112 in vivavoce e inizia la rianimazione cardiopolmonare pediatrica (5 ventilazioni iniziali + 30:2).'
+  },
+  {
+    id: 'asthma_attack',
+    title: 'Crisi d\'Asma Acuta',
+    subtitle: 'Difficoltà respiratoria e sibilo espiratorio',
+    iconColor: '#64A8F0',
+    iconBg: 'rgba(100, 168, 240, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 12h12M6 8h12M6 16h8" stroke-width="2"/>
+      <circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity="0.16"/>
+    </svg>`,
+    dos: [
+      'Fai sedere la persona con il busto proteso leggermente in avanti, appoggiando le braccia su un tavolo o sulle ginocchia.',
+      'Aiutala ad assumere SUBITO il suo inalatore broncodilatatore ad azione rapida (es. Ventolin / Salbutamolo, preferibilmente tramite distanziatore): 2-4 erogazioni distanziate di 1 minuto.',
+      'Rassicura e mantieni la calma: incoraggia respirazioni lente a labbra socchiuse.',
+      'Allontana la persona da allergeni, fumo, polvere, correnti d\'aria fredda o animali.'
+    ],
+    donts: [
+      'NON far sdraiare la persona supina (la posizione orizzontale peggiora gravemente l\'insufficienza respiratoria).',
+      'NON costringerla a bere o mangiare durante l\'attacco.',
+      'NON lasciare sola la persona.'
+    ],
+    emergencyCall: 'Chiama il 112 se non risponde all\'inalatore dopo 5 minuti, se le labbra diventano bluastre/cianotiche, se non riesce a pronunciare frasi intere o se compaiono rientramenti al collo/sterno.'
+  },
+  {
+    id: 'drowning',
+    title: 'Annegamento & Ipossia in Acqua',
+    subtitle: 'Soccorso in acqua e primo intervento a riva',
+    iconColor: '#00C7BE',
+    iconBg: 'rgba(0, 199, 190, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 12c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 16c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2" fill="currentColor" fill-opacity="0.16"/>
+    </svg>`,
+    dos: [
+      'Estrai la persona dall\'acqua garantendo prima di tutto la tua sicurezza (usa salvagente o corda se possibile).',
+      'Adagiala supina su un terreno solido e valuta immediatamente coscienza e respiro per 10 secondi.',
+      'Se non respira: chiama subito il 112 e inizia con 5 INSUFFLAZIONI di soccorso (perché l\'arresto da annegamento è ipossico).',
+      'Continua alternando 30 compressioni toraciche e 2 insufflazioni fino alla ripresa o all\'arrivo dell\'ambulanza.',
+      'Se riprende a respirare, ponila in Posizione Laterale di Sicurezza e coprila per contrastare l\'ipotermia.'
+    ],
+    donts: [
+      'NON perdere tempo tentando di svuotare l\'acqua dai polmoni con manovre di Heimlich o sollevamenti strani.',
+      'NON tuffarti per salvare un annegato senza un supporto galleggiante se non sei un bagnino brevettato (il panico della vittima può trascinarti sotto).',
+      'NON sottovalutare l\'annegamento secondario: anche se la persona sembra stare bene, deve essere valutata in ospedale.'
+    ],
+    emergencyCall: 'Chiama il 112 in qualsiasi caso di annegamento o quasi-annegamento con inalazione di acqua: l\'edema polmonare ritardato può manifestarsi anche dopo 24 ore.'
+  },
+  {
+    id: 'co_poisoning',
+    title: 'Monossido di Carbonio (CO)',
+    subtitle: 'Stufe, caldaie, bracieri, gas inodore',
+    iconColor: '#E5A95C',
+    iconBg: 'rgba(229, 169, 92, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4" stroke-width="2"/>
+      <circle cx="12" cy="12" r="3" fill="currentColor" fill-opacity="0.16"/>
+    </svg>`,
+    dos: [
+      'Spalanca immediatamente tutte le finestre e porte dell\'ambiente per creare forte ventilazione d\'aria fresca.',
+      'Evacua subito tutte le persone e gli animali presenti all\'esterno all\'aria aperta.',
+      'Spegni immediatamente l\'apparecchio incriminato (stufa, caldaia, braciere, generatore a motore) solo se puoi farlo senza esporti a pericoli.',
+      'In caso di persone prive di sensi all\'aperto, verifica il respiro e, se assente, inizia la RCP 30:2.'
+    ],
+    donts: [
+      'NON accendere luci, fiammiferi, interruttori o cellulari nella stanza (rischio esplosione in presenza di fughe di gas associate).',
+      'NON rientrare mai nell\'edificio prima che i Vigili del Fuoco abbiano bonificato e verificato i livelli di CO.',
+      'NON sottovalutare sintomi lievi come cefalea frontale, nausea, vertigini e sonnolenza condivisi da più persone nella stessa stanza.'
+    ],
+    emergencyCall: 'Chiama SUBITO il 112 e i Vigili del Fuoco (115): segnala sospetta intossicazione da monossido. Le vittime necessitano spesso di ossigenoterapia iperbarica tempestiva.'
+  },
+  {
+    id: 'severe_bleeding',
+    title: 'Emorragia Massiva & Laccio',
+    subtitle: 'Sanguinamento arterioso a getto',
+    iconColor: '#E06C75',
+    iconBg: 'rgba(224, 108, 117, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2a5 5 0 0 0-5 5c0 4 5 10 5 10s5-6 5-10a5 5 0 0 0-5-5z" fill="currentColor" fill-opacity="0.16"/>
+    </svg>`,
+    dos: [
+      'Applica una pressione diretta fortissima sulla ferita con entrambe le mani usando garze, teli o una maglietta pulita, caricando il peso del busto.',
+      'Se il sanguinamento massivo è su un arto (braccio o gamba) e non si arresta con la compressione diretta, applica un laccio emostatico (Tourniquet omologato) 5-7 cm sopra la ferita (mai sull\'articolazione).',
+      'Stringi la bacchetta del tourniquet fino al completo arresto del flusso ematico e bloccala nell\'apposito fermo.',
+      'Annota l\'orario esatto di applicazione del laccio (es. "T 14:35") sulla fronte del paziente o sulla cinghia del laccio con un pennarello.',
+      'Copri la persona con una coperta termica per prevenire l\'ipotermia da shock emorragico.'
+    ],
+    donts: [
+      'NON allentare né rimuovere mai il laccio emostatico una volta posizionato (deve essere rimosso solo dal chirurgo in ospedale).',
+      'NON usare fili di ferro, spaghi o lacci stretti non idonei che tagliano cute e muscoli.',
+      'NON ritardare la compressione: un\'emorragia arteriosa massiva può essere fatale in meno di 3 minuti.'
+    ],
+    emergencyCall: 'Chiama IMMEDIATAMENTE il 112 specificando "emorragia massiva arteriosa" e comunica l\'ora in cui hai applicato il laccio emostatico.'
+  },
+  {
+    id: 'traumatic_amputation',
+    title: 'Amputazione Traumatica',
+    subtitle: 'Gestione ferita e salvataggio moncone',
+    iconColor: '#E06C75',
+    iconBg: 'rgba(224, 108, 117, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" fill="currentColor" fill-opacity="0.16"/>
+      <line x1="9" y1="9" x2="15" y2="15"/>
+    </svg>`,
+    dos: [
+      'SUL PAZIENTE: Arresta immediatamente l\'emorragia con compressione diretta o laccio emostatico (tourniquet) sopra la ferita.',
+      'SUL MONCONE AMPUTATO: Avvolgi la parte amputata in una garza sterile asciutta o in un telo pulito.',
+      'Inserisci il moncone avvolto all\'interno di un sacchetto di plastica impermeabile sigillato.',
+      'Immergi il sacchetto sigillato in un secondo contenitore con acqua e cubetti di ghiaccio (temperatura fredda intorno a 4 °C).',
+      'Consegna il contenitore con il moncone direttamente all\'équipe dell\'ambulanza del 112.'
+    ],
+    donts: [
+      'NON mettere mai il moncone a contatto diretto con il ghiaccio o con l\'acqua (il congelamento brucerebbe i tessuti e impedirebbe il reimpianto).',
+      'NON lavare o disinfettare con sostanze chimiche aggressive il moncone.',
+      'NON abbandonare la ricerca della parte amputata prima dell\'arrivo dei soccorsi.'
+    ],
+    emergencyCall: 'Chiama SUBITO il 112: segnala amputazione per attivare il trasporto d\'urgenza verso un centro di chirurgia ricostruttiva e microchirurgia della mano.'
+  },
+  {
+    id: 'dental_avulsion',
+    title: 'Dente Avulso da Trauma',
+    subtitle: 'Come salvare un dente permanente caduto',
+    iconColor: '#64A8F0',
+    iconBg: 'rgba(100, 168, 240, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2C8 2 6 5 6 9c0 6 3 13 6 13s6-7 6-13c0-4-2-7-6-7z" fill="currentColor" fill-opacity="0.16"/>
+    </svg>`,
+    dos: [
+      'Recupera subito il dente prendendolo ESCLUSIVAMENTE per la corona (la parte bianca visibile), senza mai toccare la radice.',
+      'Se è sporco di terra, sciacqualo molto delicatamente per 10 secondi sotto acqua corrente fredda o soluzione fisiologica.',
+      'Se possibile, reinserisci delicatamente il dente nel suo alveolo gengivale e fai stringere una garza pulita tra i denti.',
+      'Se non puoi reinserirlo, conservalo in un bicchiere di latte fresco intero, soluzione salina sterile, o nella saliva del paziente.',
+      'Raggiungi un dentista o un pronto soccorso odontoiatrico entro 60 minuti dal trauma.'
+    ],
+    donts: [
+      'NON toccare o strofinare mai la radice del dente (distruggeresti le cellule del legamento parodontale necessarie al reimpianto).',
+      'NON conservare il dente asciutto in un fazzoletto di carta.',
+      'NON tentare di reinserire denti da latte nei bambini piccoli (rischi di danneggiare il dente definitivo sottostante).'
+    ],
+    emergencyCall: 'Contatta d\'urgenza un dentista o recati al Pronto Soccorso Ospedaliero: se reimpiantato entro 30-60 minuti, il dente ha oltre l\'85% di probabilità di attecchire.'
+  },
+  {
+    id: 'chemical_burn',
+    title: 'Ustioni Chimiche & Caustici',
+    subtitle: 'Acidi, candeggina, soda caustica, solventi',
+    iconColor: '#E5A95C',
+    iconBg: 'rgba(229, 169, 92, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10 2v7.31L4.69 18.5A2 2 0 0 0 6.42 21h11.16a2 2 0 0 0 1.73-2.5L14 9.31V2" fill="currentColor" fill-opacity="0.16"/>
+    </svg>`,
+    dos: [
+      'Sciacqua IMMEDIATAMENTE la zona colpita con abbondante acqua corrente tiepida o fredda per almeno 20-30 minuti continui.',
+      'Se la sostanza è in polvere, spazzolala via delicatamente prima di bagnare con l\'acqua.',
+      'Rimuovi con cautela indumenti, scarpe e gioielli contaminati dalla sostanza chimica continuando a irrigare.',
+      'Se la sostanza è finita negli occhi, tieni aperte le palpebre e lava continuamente dall\'interno verso l\'esterno dell\'occhio.',
+      'Conserva l\'etichetta o il flacone del prodotto per mostrarlo ai soccorritori o al Centro Antiveleni.'
+    ],
+    donts: [
+      'NON tentare di neutralizzare l\'acido con una base o viceversa (la reazione termica esotermica aggraverebbe l\'ustione tissutale).',
+      'NON applicare pomate, oli o unguenti sulla ferita chimica.',
+      'NON strofinare l\'occhio o la pelle contaminata.'
+    ],
+    emergencyCall: 'Chiama il 112 e il Centro Antiveleni (es. Niguarda 02 66101029 o Bologna 051 6478955) tenendo a portata di mano il contenitore della sostanza.'
+  },
+  {
+    id: 'jellyfish_sting',
+    title: 'Puntura di Medusa & Tracina',
+    subtitle: 'Contatto urticante marino e spine velenose',
+    iconColor: '#00C7BE',
+    iconBg: 'rgba(0, 199, 190, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2a8 8 0 0 0-8 8c0 3 2 5 2 7h12c0-2 2-4 2-7a8 8 0 0 0-8-8z" fill="currentColor" fill-opacity="0.16"/>
+      <path d="M9 17v5M12 17v5M15 17v5"/>
+    </svg>`,
+    dos: [
+      'PER LA MEDUSA: Sciacqua la parte colpita ESCLUSIVAMENTE con abbondante acqua di mare tiepida (mai acqua dolce).',
+      'Rimuovi con delicatezza eventuali tentacoli o residui attaccati alla cute usando il bordo di una carta di credito o una pinzetta.',
+      'Applica un gel astringente a base di cloruro d\'alluminio al 5% se disponibile.',
+      'PER LA TRACINA (pesce ragno): Immergi subito il piede in acqua molto calda (la massima tollerabile, circa 40-45 °C) per almeno 30-60 minuti: la tossina della tracina è termolabile e si disattiva con il calore.'
+    ],
+    donts: [
+      'NON usare acqua dolce, alcol, aceto o ammoniaca sulla medusa (stimolerebbero le cellule urticanti rimaste a scaricare altro veleno).',
+      'NON strofinare con la sabbia o con un asciugamano.',
+      'NON mettere ghiaccio sulla puntura di tracina (il freddo prolunga il dolore atroce).'
+    ],
+    emergencyCall: 'Chiama il 112 se compaiono difficoltà respiratorie, sudorazione profusa, vertigini, nausea o se la vittima manifesta reazione allergica generalizzata.'
+  },
+  {
+    id: 'viper_bite',
+    title: 'Morso di Vipera',
+    subtitle: 'Due fori distanziati di 6-8 mm, gonfiore',
+    iconColor: '#E06C75',
+    iconBg: 'rgba(224, 108, 117, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 3v4M16 3v4M4 11h16a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z" fill="currentColor" fill-opacity="0.16"/>
+    </svg>`,
+    dos: [
+      'Fai stendere la persona a terra e falla rimanere ASSOLUTAMENTE immobile: il movimento accelera la circolazione linfatica del veleno.',
+      'Mantieni la calma e rassicura la vittima: il veleno di vipera agisce molto lentamente nell\'arco di diverse ore.',
+      'Rimuovi subito anelli, bracciali o scarpe dall\'arto colpito prima che sopraggiunga l\'edema.',
+      'Lava la ferita delicatamente con acqua e sapone o acqua ossigenata (non con alcol).',
+      'Applica una fasciatura compressiva elastica moderata (come per una distorsione) su tutto l\'arto partendo dalla ferita verso la radice.'
+    ],
+    donts: [
+      'NON incidere o tagliare la ferita con lame o bisturi.',
+      'NON tentare di succhiare il veleno con la bocca.',
+      'NON applicare lacci emostatici arteriosi stretti (rischio di necrosi e gangrena dell\'arto).',
+      'NON somministrare siero antiofidico fai-da-te (può causare shock anafilattico fatale, va usato solo in ospedale).'
+    ],
+    emergencyCall: 'Chiama SUBITO il 112 per il soccorso organizzato (anche elisoccorso se in montagna). Comunica l\'ora del morso e la comparsa di sintomi.'
+  },
+  {
+    id: 'animal_bite',
+    title: 'Morso di Cane o Gatto',
+    subtitle: 'Rischio infezione profonda e tetano',
+    iconColor: '#E5A95C',
+    iconBg: 'rgba(229, 169, 92, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity="0.16"/>
+      <path d="M9 10h.01M15 10h.01M9.5 15a3.5 3.5 0 0 0 5 0"/>
+    </svg>`,
+    dos: [
+      'Lava immediatamente e accuratamente la ferita sotto abbondante acqua corrente tiepida e sapone per almeno 10-15 minuti.',
+      'Disinfetta a fondo con un disinfettante iodato o clorexidina (i morsi di gatto iniettano batteri come Pasteurella molto in profondità).',
+      'Applica una garza sterile e comprimi se è presente sanguinamento.',
+      'Verifica la data dell\'ultimo vaccino antitetanico (deve essere stato fatto entro gli ultimi 10 anni, o 5 in caso di ferita a rischio).',
+      'Raccogli informazioni sullo stato vaccinale dell\'animale (soprattutto per la rabbia se all\'estero o fauna selvatica).'
+    ],
+    donts: [
+      'NON chiudere la ferita ermeticamente con cerotti a nastro senza aver consultato un medico (rischio ascesso anaerobico profondo).',
+      'NON trascurare graffi o morsi apparentemente superficiali di felini.',
+      'NON provocare o inseguire l\'animale feritore.'
+    ],
+    emergencyCall: 'Recati al Pronto Soccorso o dal medico se il morso è profondo, vicino a tendini o articolazioni, sul volto o se l\'animale mostrava comportamenti anomali.'
+  },
+  {
+    id: 'tick_bite',
+    title: 'Puntura di Zecca',
+    subtitle: 'Rimozione corretta e prevenzione Lyme',
+    iconColor: '#30D158',
+    iconBg: 'rgba(48, 209, 88, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="5" fill="currentColor" fill-opacity="0.16"/>
+      <path d="M12 7V3M8 12H3M16 12h5M9 16l-3 4M15 16l3 4M9 8L6 4M15 8l3-4"/>
+    </svg>`,
+    dos: [
+      'Usa una pinzetta sottile a punte piatte, afferrando la zecca il più vicino possibile alla superficie della cute.',
+      'Tira delicatamente verso l\'alto con un movimento costante e continuo senza strappare o torcere bruscamente.',
+      'Disinfetta l\'area cutanea con acqua ossigenata o disinfettante incolore SOLO DOPO aver rimosso la zecca.',
+      'Segna sul calendario la data esatta della rimozione.',
+      'Osserva la zona per 30-40 giorni: consulta il medico se compare una macchia rossa a cerchio concentrico in espansione (eritema migrante) o febbre.'
+    ],
+    donts: [
+      'NON cospargere MAI la zecca con alcol, olio, acetone, vaselina, smalto o bruciarla con un fiammifero (il soffocamento induce il rigurgito del patogeno Borrelia nel circolo sanguigno).',
+      'NON schiacciare il corpo della zecca tra le dita.',
+      'NON assumere antibiotici preventivi senza espressa indicazione del medico.'
+    ],
+    emergencyCall: 'Contatta il tuo Medico di Base o la Guardia Medica se la testa della zecca resta conficcata nella cute o alla comparsa di eritema a bersaglio o febbre.'
+  },
+  {
+    id: 'hyperglycemia',
+    title: 'Crisi Iperglicemica',
+    subtitle: 'Zuccheri alti nel sangue & chetoacidosi',
+    iconColor: '#AF52DE',
+    iconBg: 'rgba(175, 82, 222, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke-width="2"/>
+    </svg>`,
+    dos: [
+      'Riconosci i segnali: sete insaziabile, minzione frequente, respiro profondo e affannoso con alito fruttato (odore di mela marcia/acetone), sonnolenza.',
+      'Se disponibile, esegui subito un controllo della glicemia capillare con il glucometro.',
+      'Se la persona è cosciente e orientata, incoraggiala a bere acqua a temperatura ambiente per contrastare la disidratazione.',
+      'Se diabetica con piano terapeutico noto, verifica se deve assumere il bolo correttivo di insulina rapida concordato con il diabetologo.'
+    ],
+    donts: [
+      'NON somministrare MAI zucchero, succhi di frutta o dolci se il dubbio è tra ipo e iperglicemia e la glicemia risulta alta (> 250-300 mg/dl).',
+      'NON somministrare insulina a una persona che non conosci o senza dosaggio prescritto.',
+      'NON dare da bere a una persona confusa, soporosa o priva di sensi.'
+    ],
+    emergencyCall: 'Chiama il 112 se la glicemia supera i 350-400 mg/dl, se compaiono vomito persistente, stato confusionale, disidratazione severa o perdita di coscienza.'
+  },
+  {
+    id: 'recovery_position',
+    title: 'Posizione Laterale (PLS)',
+    subtitle: 'Persona incosciente che respira',
+    iconColor: '#30D158',
+    iconBg: 'rgba(48, 209, 88, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 18h16M4 14h16M4 10h16M4 6h16" stroke-width="2"/>
+    </svg>`,
+    dos: [
+      'Inginocchiati a fianco della persona distesa supina; stendi le sue gambe e togli occhiali o oggetti ingombranti dalle tasche.',
+      'Braccio vicino a te: piegalo ad angolo retto con il gomito flesso e il palmo rivolto verso l\'alto.',
+      'Braccio opposto: portalo sul petto appoggiando il dorso della sua mano contro la guancia opposta.',
+      'Gamba opposta: con l\'altra mano afferra la gamba opposta sopra il ginocchio e piegala sollevando il piede da terra.',
+      'Tira il ginocchio piegato verso di te facendola ruotare su un fianco; inclina delicatamente la testa all\'indietro e apri la bocca verso il basso per drenare secrezioni.',
+      'Controlla costantemente il respiro ogni minuto.'
+    ],
+    donts: [
+      'NON usare la PLS in caso di trauma cranico, caduta dall\'alto o sospetto danno alla colonna vertebrale a meno che le vie aeree non siano ostruite da vomito.',
+      'NON mettere cuscini sotto la testa che fletterebbero il collo in avanti ostruendo la trachea.',
+      'NON allontanarti dalla persona.'
+    ],
+    emergencyCall: 'Chiama subito il 112 non appena hai posizionato la persona in PLS e mantieniti pronto a iniziare il massaggio cardiaco se il respiro dovesse arrestarsi.'
+  },
+  {
+    id: 'first_aid_kit',
+    title: 'Kit di Primo Soccorso Ideale',
+    subtitle: 'Composizione cassetta domestica e auto',
+    iconColor: '#30D158',
+    iconBg: 'rgba(48, 209, 88, 0.14)',
+    iconSvg: `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="7" width="20" height="14" rx="2" fill="currentColor" fill-opacity="0.16"/>
+      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16M12 11v6M9 14h6"/>
+    </svg>`,
+    dos: [
+      'MATERIALE MEDICAZIONE: Garze sterili (10x10 cm), bende elastiche orlate, cerotti assortiti resistenti all\'acqua, cerotto a nastro in rotolo.',
+      'STRUMENTI & PROTEZIONE: Forbici da medicazione con punte arrotondate (tipo Lister), pinzetta sterile per schegge/zecche, 2 paia di guanti monouso in nitrile.',
+      'IGIENE & LAVAGGIO: Flaconcini di soluzione fisiologica sterile per lavaggi oculari e ferite, disinfettante incolore non alcolico (clorexidina o iodopovidone).',
+      'TERMOTERAPIA: Buste di ghiaccio istantaneo monouso, coperta termica isotermica (oro/argento), termometro digitale.',
+      'MANUTENZIONE: Controlla scadenze dei disinfettanti e reintegra il materiale consumato ogni 6 mesi.'
+    ],
+    donts: [
+      'NON conservare la cassetta in luoghi umidi o esposti a sole diretto (es. bagni caldi o cruscotto auto esposto).',
+      'NON tenere farmaci soggetti a prescrizione o scaduti all\'interno della cassetta di emergenza comune.',
+      'NON chiudere la cassetta con lucchetti o chiavi inaccessibili agli altri membri della famiglia.'
+    ],
+    emergencyCall: 'Il Kit serve per il primo soccorso rapido: per qualsiasi situazione grave o con perdita di coscienza, chiama subito il 112 prima di agire.'
+  }
+
 ];
 
 function openFirstAidModal() {
@@ -5196,14 +5624,42 @@ function openFirstAidDetail(id) {
 }
 
 // ----------------------------------------------------
-// 19. "COME TI SENTI OGGI?" (DATABASE RIMEDI LOCALE & MATCHING)
+// 19. "COME TI SENTI OGGI?" (DATABASE RIMEDI, NLP ENGINE & MATCHING)
 // ----------------------------------------------------
 const FEELING_REMEDIES_DB = [
   {
+    id: 'chest_discomfort',
+    title: 'Petto & Sterno',
+    emoji: '🫀',
+    keywords: ['sterno', 'petto', 'torace', 'costole', 'peso petto', 'dolore petto', 'oppressione', 'intercostale'],
+    cabinetKeywords: ['tachipirina', 'paracetamolo', 'ibuprofene', 'moment', 'gaviscon', 'maalox', 'riopan'],
+    remedies: [
+      'Interrompi qualsiasi sforzo fisico e siediti in posizione comoda semiseduta appoggiando la schiena.',
+      'Allenta indumenti stretti, colletti o cinture e respira lentamente e profondamente.',
+      'Valuta se il dolore peggiora con la tosse, con la pressione delle dita sul costato (tipico dolore muscolo-scheletrico/intercostale) o dopo i pasti (reflusso gastroesofageo).',
+      'ATTENZIONE: Se il dolore è oppressivo a morsa, irradia a braccio sinistro, spalla, mandibola o si accompagna a sudorazione fredda, vertigini o fiato corto, chiama subito il 112.'
+    ],
+    pharmacyNote: 'Non sottovalutare mai i dolori toracici: chiedi sempre consiglio al tuo Medico o al 112 prima di assumere farmaci.'
+  },
+  {
+    id: 'dizziness',
+    title: 'Vertigini & Giramenti di Testa',
+    emoji: '💫',
+    keywords: ['vertigini', 'giramenti', 'testa che gira', 'sbandamento', 'instabilita', 'equilibrio', 'vuoto'],
+    cabinetKeywords: ['magnesio', 'potassio', 'polase', 'microser', 'vertiserc', 'tachipirina'],
+    remedies: [
+      'Siediti o sdraiati immediatamente con gli occhi aperti fissando un punto fermo davanti a te per evitare cadute o svenimenti.',
+      'Bevi un abbondante bicchiere d\'acqua con un pizzico di sale o limone: un calo pressorio o disidratazione è tra le cause più frequenti.',
+      'Evita cambi repentini di posizione (alzarsi di scatto dal letto o dalla sedia); rialzati sempre lentamente.',
+      'Se le vertigini sono legate a cervicale o tensione nucale, applica calore secco sul collo.'
+    ],
+    pharmacyNote: 'Se accompagnate da nausea intensa, acufeni o febbre, contatta il medico per una valutazione vestibolare o pressoria.'
+  },
+  {
     id: 'headache',
-    title: 'Mal di testa',
+    title: 'Mal di testa & Emicrania',
     emoji: '🤕',
-    keywords: ['testa', 'cefalea', 'emicrania', 'pulsante', 'frontale', 'tempie'],
+    keywords: ['testa', 'cefalea', 'emicrania', 'pulsante', 'frontale', 'tempie', 'dolore testa'],
     cabinetKeywords: ['tachipirina', 'paracetamolo', 'ibuprofene', 'moment', 'oki', 'brufen', 'aspirina', 'ketoprofene', 'novalgina', 'voltaren'],
     remedies: [
       'Bevi subito un abbondante bicchiere d\'acqua fresca: la disidratazione è la causa scatenante più comune.',
@@ -5215,9 +5671,9 @@ const FEELING_REMEDIES_DB = [
   },
   {
     id: 'stomach',
-    title: 'Stomaco & Acidità',
+    title: 'Stomaco & Acidità / Reflusso',
     emoji: '🍵',
-    keywords: ['stomaco', 'nausea', 'acidita', 'acidità', 'reflusso', 'bruciore stomaco', 'digestione', 'pesantezza'],
+    keywords: ['stomaco', 'nausea', 'acidita', 'acidità', 'reflusso', 'bruciore stomaco', 'digestione', 'pesantezza', 'pirosi', 'gastrite'],
     cabinetKeywords: ['gaviscon', 'maalox', 'biochetasi', 'fermenti', 'pantoprazolo', 'omeprazolo', 'riopan', 'buscopan', 'citrosodina', 'geffer'],
     remedies: [
       'Bevi a piccoli sorsi una tisana tiepida di camomilla, alloro, finocchio o zenzero per calmare gli spasmi gastrici.',
@@ -5225,27 +5681,41 @@ const FEELING_REMEDIES_DB = [
       'Consuma una piccola porzione di cibo asciutto e leggero (es. fette biscottate integrali o cracker senza sale) che assorbe l\'eccesso di succhi gastrici.',
       'Applica una borsa dell\'acqua calda sull\'addome se avverti crampi o tensione da freddo.'
     ],
-    pharmacyNote: 'Eventuale antiacido o procinetico da banco (es. barriera protettiva o citrati): chiedi sempre consiglio al farmacista.'
+    pharmacyNote: 'Eventuale antiacido o barriera protettiva da banco (es. alginati o citrati): chiedi consiglio al farmacista.'
+  },
+  {
+    id: 'nausea',
+    title: 'Nausea & Conati',
+    emoji: '🤢',
+    keywords: ['nausea', 'vomito', 'conati', 'stomaco sottosopra', 'senso di vomito', 'disgusto', 'mal d\'auto'],
+    cabinetKeywords: ['biochetasi', 'plasil', 'travelgum', 'zenzero', 'geffer', 'peridon'],
+    remedies: [
+      'Sgranocchia una piccola quantità di zenzero fresco candito o bevi una tisana tiepida allo zenzero e limone.',
+      'Evita cibi liquidi abbondanti; preferisci piccoli morsi di pane tostato o grissini secchi.',
+      'Respira aria fresca e profonda alla finestra con inspirazioni dal naso ed espirazioni lente dalla bocca.',
+      'Applica una leggera digitopressione sul punto P6 (tre dita sotto la piega del polso, al centro dell\'avambraccio).'
+    ],
+    pharmacyNote: 'Reidratati a piccoli sorsi per prevenire la disidratazione; chiedi consiglio per antiemetici o sali reidratanti.'
   },
   {
     id: 'sore_throat',
-    title: 'Mal di gola',
+    title: 'Mal di gola & Bruciore',
     emoji: '🧣',
-    keywords: ['gola', 'bruciore', 'faringe', 'deglutire', 'abbassamento voce', 'laringe'],
+    keywords: ['gola', 'bruciore', 'faringe', 'deglutire', 'abbassamento voce', 'laringe', 'placche'],
     cabinetKeywords: ['benagol', 'tantum', 'froben', 'sciroppo', 'borocillina', 'neoborocillina', 'flurbiprofene', 'golamir', 'paracetamolo', 'oki'],
     remedies: [
       'Fai gargarismi con un bicchiere di acqua tiepida e mezzo cucchiaino di sale o bicarbonato 3 volte al giorno.',
-      'Consuma un cucchiaino di miele (preferibilmente eucalipto o timo) sciolto in acqua tiepida o tisana, noto per le sue proprietà lenitive naturali.',
+      'Consuma un cucchiaino di miele (preferibilmente eucalipto o timo) sciolto in acqua tiepida o tisana lenitiva.',
       'Mantieni idratata la mucosa bevendo liquidi a temperatura ambiente ed evitando bevande troppo calde o gassate.',
       'Usa un umidificatore o posiziona vaschette d\'acqua sui termosifoni per evitare che l\'aria secca irriti ulteriormente la faringe.'
     ],
-    pharmacyNote: 'Eventuale spray o pastiglie lenitive/antinfiammatorie da banco a base di flurbiprofene o propoli: chiedi consiglio al farmacista.'
+    pharmacyNote: 'Eventuale spray o pastiglie lenitive da banco a base di flurbiprofene o propoli: chiedi consiglio al farmacista.'
   },
   {
     id: 'fever',
     title: 'Febbre & Brividi',
     emoji: '🌡️',
-    keywords: ['febbre', 'temperatura', 'brividi', 'caldo', 'alterazione', 'linee'],
+    keywords: ['febbre', 'temperatura', 'brividi', 'caldo', 'alterazione', 'linee', 'termometro', 'febbre alta'],
     cabinetKeywords: ['tachipirina', 'paracetamolo', 'efferalgan', 'aspirina', 'ibuprofene', 'termo', 'termometro'],
     remedies: [
       'Riposa completamente a letto in un ambiente ben aerato con temperatura intorno ai 20 °C.',
@@ -5253,13 +5723,13 @@ const FEELING_REMEDIES_DB = [
       'Indossa abiti leggeri in cotone traspirante: coprirsi eccessivamente intrappola il calore corporeo.',
       'Applica spugnature di acqua tiepida (non ghiacciata) su fronte, tempie e polsi se la temperatura causa fastidio elevato.'
     ],
-    pharmacyNote: 'Eventuale antipiretico da banco (preferibilmente paracetamolo a dosaggio adeguato): chiedi sempre al medico o farmacista in base al peso e ai sintomi.'
+    pharmacyNote: 'Eventuale antipiretico da banco (preferibilmente paracetamolo a dosaggio adeguato al peso): chiedi consiglio al farmacista.'
   },
   {
     id: 'fatigue',
-    title: 'Stanchezza & Astenia',
+    title: 'Stanchezza & Spostatezza',
     emoji: '⚡',
-    keywords: ['stanchezza', 'astenia', 'spossatezza', 'sonnolenza', 'energie', 'affaticamento'],
+    keywords: ['stanchezza', 'astenia', 'spossatezza', 'sonnolenza', 'energie', 'affaticamento', 'fiacchezza', 'debilitato'],
     cabinetKeywords: ['magnesio', 'potassio', 'supradyn', 'polase', 'vitamina', 'carnitina', 'multivitaminico', 'b12', 'ferro'],
     remedies: [
       'Reidrata l\'organismo con un bicchiere d\'acqua con spremuta di mezzo limone per un apporto immediato di minerali ed elettroliti.',
@@ -5267,27 +5737,27 @@ const FEELING_REMEDIES_DB = [
       'Consuma un piccolo snack nutriente a base di frutta fresca e una manciata di mandorle o noci ricche di magnesio.',
       'Pianifica una sessione di riposo rigenerante (power nap) di non più di 20 minuti nel primo pomeriggio.'
     ],
-    pharmacyNote: 'Eventuale integratore di magnesio, potassio o vitamine del gruppo B: chiedi consiglio al farmacista per valutare carenze nutrizionali o stagionali.'
+    pharmacyNote: 'Eventuale integratore di magnesio, potassio o vitamine del gruppo B per colmare carenze nutrizionali stagionali.'
   },
   {
     id: 'insomnia',
-    title: 'Insonnia & Sonno agitato',
+    title: 'Insonnia & Difficoltà a Dormire',
     emoji: '🌙',
-    keywords: ['insonnia', 'sonno', 'dormire', 'risvegli', 'notte', 'agitazione', 'agitato'],
+    keywords: ['insonnia', 'sonno', 'dormire', 'risvegli', 'notte', 'agitazione', 'agitato', 'non dormo', 'veglia'],
     cabinetKeywords: ['melatonina', 'valeriana', 'sedivitax', 'passiflora', 'biancospino', 'magnesio', 'armonia', 'novanight'],
     remedies: [
-      'Spegni smartphone, tablet e schermi TV almeno 45 minuti prima di andare a dormire per non inibire la melatonina naturale.',
+      'Spegni smartphone, tablet e schermi TV almeno 45 minuti prima di coricarti per consentire il picco naturale di melatonina.',
       'Bevi una tisana rilassante a base di camomilla, tiglio, passiflora, melissa o valeriana a temperatura tiepida.',
       'Mantieni la camera da letto buia, silenziosa e fresca (temperatura ideale 18-19 °C).',
       'Pratica 5 minuti di respirazione guidata (es. tecnica 4-7-8: inspira per 4 sec, trattieni per 7 sec, espira per 8 sec).'
     ],
-    pharmacyNote: 'Eventuale integratore di melatonina o estratti fitoterapici da banco: chiedi consiglio al farmacista sull\'orario corretto di assunzione.'
+    pharmacyNote: 'Eventuale integratore di melatonina pura o fitoterapici da banco: chiedi consiglio sui corretti orari di assunzione.'
   },
   {
     id: 'cold',
     title: 'Raffreddore & Naso Chiuso',
     emoji: '🤧',
-    keywords: ['raffreddore', 'naso', 'mucose', 'starnuti', 'catarro', 'congestione', 'chiuso'],
+    keywords: ['raffreddore', 'naso', 'mucose', 'starnuti', 'catarro', 'congestione', 'chiuso', 'muco', 'scolo'],
     cabinetKeywords: ['rinazina', 'actifed', 'fluimucil', 'fisiologica', 'aerosol', 'paracetamolo', 'zerinol', 'vichy', 'narhinel'],
     remedies: [
       'Esegui lavaggi nasali frequenti con soluzione fisiologica o ipertonica sterile per liberare le cavità nasali e rimuovere il muco in eccesso.',
@@ -5295,13 +5765,41 @@ const FEELING_REMEDIES_DB = [
       'Dormi con un cuscino extra sotto la testa per mantenere sollevate le vie respiratorie e facilitare il drenaggio durante la notte.',
       'Bevi tisane calde con limone e miele per fluidificare le secrezioni.'
     ],
-    pharmacyNote: 'Eventuale spray nasale salino o decongestionante da banco (da non usare per più di 4-5 giorni): chiedi consiglio al farmacista.'
+    pharmacyNote: 'Spray nasale salino o decongestionante da banco (da non usare per più di 4-5 giorni consecutivi): chiedi consiglio al farmacista.'
+  },
+  {
+    id: 'cough_dry',
+    title: 'Tosse Secca & Stizzosa',
+    emoji: '💨',
+    keywords: ['tosse secca', 'tosse stizzosa', 'prurito gola', 'colpi di tosse', 'tosse notturna', 'tossetta'],
+    cabinetKeywords: ['bisolvon', 'sekisan', 'grintuss', 'sinecod', 'sciroppo tosse', 'miele', 'flurbiprofene'],
+    remedies: [
+      'Assumi un cucchiaio di miele puro (o sciolto in latte/tisana tiepida): forma un film protettivo sulla mucosa faringea.',
+      'Idratati costantemente a piccoli sorsi per evitare la secchezza dell\'albero bronchiale.',
+      'Umidifica l\'aria della stanza ed evita sbalzi di temperatura e fumo passivo.',
+      'Fai inalazioni con soluzione fisiologica sterile tramite nebulizzatore o aerosol.'
+    ],
+    pharmacyNote: 'Eventuale sciroppo sedativo della tosse da banco o a base di piantaggine e altea: chiedi consiglio al farmacista.'
+  },
+  {
+    id: 'cough_productive',
+    title: 'Tosse Grassa & Catarro',
+    emoji: '🫁',
+    keywords: ['tosse grassa', 'catarro', 'bronchi', 'espettorato', 'muco petto', 'tosse con catarro'],
+    cabinetKeywords: ['fluimucil', 'bronchenolo', 'fluifort', 'bisolvon', 'acetylcisteina', 'sciroppo', 'aerosol'],
+    remedies: [
+      'Bevi almeno 2 litri d\'acqua al giorno: la corretta idratazione è il miglior fluidificante naturale per il muco bronchiale.',
+      'Fai fumenti caldi con bicarbonato o lavaggi nasali profondi per favorire l\'espettorazione naturale.',
+      'Non sopprimere la tosse grassa: è un meccanismo difensivo fisiologico per liberare le vie aeree.',
+      'Mantieni una posizione leggermente inclinata durante il sonno.'
+    ],
+    pharmacyNote: 'Eventuale mucolitico o fluidificante da banco (es. N-acetilcisteina o carbocisteina): chiedi consiglio al farmacista.'
   },
   {
     id: 'neck_pain',
-    title: 'Cervicale & Rigidità Collo',
+    title: 'Cervicale & Collo Bloccato',
     emoji: '💆',
-    keywords: ['cervicale', 'collo', 'spalle', 'trapezio', 'rigidita', 'rigidità', 'torcicollo'],
+    keywords: ['cervicale', 'collo', 'spalle', 'trapezio', 'rigidita', 'rigidità', 'torcicollo', 'dolore collo'],
     cabinetKeywords: ['voltaren', 'flector', 'arnica', 'fasce', 'termoriscaldanti', 'thermacare', 'oki', 'ibuprofene', 'muscoril', 'artrosilene'],
     remedies: [
       'Applica calore secco sulla zona cervicale (cuscino con noccioli di ciliegio, borsa dell\'acqua calda o fascia termica) per decontrarre la muscolatura.',
@@ -5309,41 +5807,55 @@ const FEELING_REMEDIES_DB = [
       'Regola l\'altezza dello schermo del computer in modo che il terzo superiore sia esattamente all\'altezza dei tuoi occhi.',
       'Fai un automassaggio delicato con olio d\'arnica o di iperico lungo la fascia dei trapezi e alla base della nuca.'
     ],
-    pharmacyNote: 'Eventuale cerotto autoriscaldante o gel antinfiammatorio locale da banco: chiedi consiglio al farmacista.'
+    pharmacyNote: 'Cerotto autoriscaldante o gel antinfiammatorio locale da banco: chiedi consiglio al farmacista.'
+  },
+  {
+    id: 'back_pain',
+    title: 'Mal di Schiena & Lombalgia',
+    emoji: '🧍',
+    keywords: ['schiena', 'lombare', 'lombalgia', 'colpo della strega', 'remi', 'dolore schiena', 'rachide'],
+    cabinetKeywords: ['voltaren', 'flector', 'dicloreum', 'oki', 'brufen', 'ibuprofene', 'thermacare', 'arnica', 'artrosilene'],
+    remedies: [
+      'Riposa in posizione antalgica (es. sdraiato sul fianco con cuscino tra le ginocchia o supino con cuscini sotto le ginocchia).',
+      'Applica impacchi caldi locali per sciogliere le contratture paravertebrali dopo la fase acuta iniziale.',
+      'Evita il riposo a letto prolungato oltre le 48 ore: fare brevi camminate su terreno piano aiuta il recupero.',
+      'Evita di sollevare carichi pesanti e piegati sempre flettendo le ginocchia e non la schiena.'
+    ],
+    pharmacyNote: 'Eventuale antinfiammatorio FANS topico o sistemico da banco: chiedi consiglio al medico o al farmacista.'
   },
   {
     id: 'anxiety',
-    title: 'Ansia & Tensione Nervosa',
+    title: 'Ansia, Tachicardia & Tensione',
     emoji: '🧘',
-    keywords: ['ansia', 'stress', 'panico', 'tachicardia', 'agitazione', 'tensione', 'nervosismo'],
+    keywords: ['ansia', 'stress', 'panico', 'tachicardia', 'agitazione', 'tensione', 'nervosismo', 'palpitazioni', 'batticuore'],
     cabinetKeywords: ['valeriana', 'passiflora', 'biancospino', 'magnesio', 'rescue', 'sedivitax', 'ansiolitico'],
     remedies: [
-      'Siediti comodo e appoggia una mano sulla pancia: esegui respirazioni diaframmatiche lente e profonde (inspira gonfiando l\'addome, espira sgonfiandolo lentamente).',
-      'Bevi un bicchiere d\'acqua fresca a piccoli sorsi e bagna i polsi con acqua corrente per attivare il sistema nervoso parasimpatico.',
+      'Siediti comodo e appoggia una mano sulla pancia: esegui respirazioni diaframmatiche lente e profonde (inspira per 4 sec, espira per 6 sec).',
+      'Bevi un bicchiere d\'acqua fresca a piccoli sorsi e rinfresca polsi e nuca con acqua corrente per attivare il nervo vago.',
       'Fai una pausa da ambienti rumorosi o compiti complessi per 10 minuti camminando con passo calmo.',
       'Bevi una tisana di melissa, biancospino o lavanda, piante note per il supporto al rilassamento e al benessere mentale.'
     ],
-    pharmacyNote: 'Eventuali preparati fitoterapici o magnesio biodisponibile: chiedi consiglio al farmacista per la gestione di picchi di stress passeggeri.'
+    pharmacyNote: 'Preparati fitoterapici o magnesio biodisponibile: chiedi consiglio per gestire picchi di stress passeggeri.'
   },
   {
     id: 'muscle_pain',
     title: 'Dolori Muscolari & Contratture',
     emoji: '🏃',
-    keywords: ['muscolo', 'muscoli', 'contrattura', 'strappo', 'indolenzimento', 'gambe', 'schiena', 'lombare'],
+    keywords: ['muscolo', 'muscoli', 'contrattura', 'strappo', 'indolenzimento', 'gambe', 'polpacci', 'crampi'],
     cabinetKeywords: ['arnica', 'voltaren', 'flector', 'dicloreum', 'oki', 'ibuprofene', 'magnesio', 'fastum', 'artrosilene'],
     remedies: [
       'Riposa il gruppo muscolare dolente evitando sforzi, sollevamento pesi o movimenti bruschi.',
-      'Se il dolore è acuto da trauma recente (prime 24h), applica ghiaccio protetto; se è una contrattura o indolenzimento muscolare cronico, applica impacchi caldi.',
+      'Se il dolore è acuto da trauma recente (prime 24h), applica ghiaccio protetto; se è una contrattura, applica impacchi caldi.',
       'Bevi abbondante acqua e assumi cibi ricchi di potassio e magnesio (come banane, mandorle e spinaci).',
       'Esegui stretching leggerissimo e progressivo senza mai forzare la contrazione del muscolo infiammato.'
     ],
-    pharmacyNote: 'Eventuale gel o cerotto antinfiammatorio a base di ibuprofene/diclofenac o estratto d\'arnica pura: chiedi consiglio al farmacista.'
+    pharmacyNote: 'Gel o cerotto antinfiammatorio a base di FANS o estratto d\'arnica pura: chiedi consiglio al farmacista.'
   },
   {
     id: 'allergy_seasonal',
     title: 'Allergia Stagionale & Rinite',
     emoji: '🌸',
-    keywords: ['allergia', 'pollini', 'occhi rossi', 'starnuto', 'prurito', 'graminacee', 'rinite'],
+    keywords: ['allergia', 'pollini', 'occhi rossi', 'starnuto', 'prurito', 'graminacee', 'rinite', 'istamina'],
     cabinetKeywords: ['antistaminico', 'cetirizina', 'loratadina', 'ebastina', 'collirio', 'flixonase', 'fexofenadina'],
     remedies: [
       'Sciacqua viso e occhi con acqua fredda dopo essere rientrato dall\'esterno per eliminare i pollini depositati sulla cute e sulle ciglia.',
@@ -5351,31 +5863,368 @@ const FEELING_REMEDIES_DB = [
       'Cambia gli abiti usati all\'aperto e lavati i capelli prima di coricarti per non impollinare il cuscino.',
       'Tieni chiuse le finestre nelle ore più calde e ventose della giornata, quando la concentrazione di pollini nell\'aria è massima.'
     ],
-    pharmacyNote: 'Eventuale antistaminico orale o spray nasale prescritto: chiedi sempre indicazione al medico curante o al farmacista.'
+    pharmacyNote: 'Eventuale antistaminico orale o spray nasale prescritto: chiedi indicazione al medico curante o al farmacista.'
+  },
+  {
+    id: 'eye_irritation',
+    title: 'Occhi Rossi & Congiuntivite',
+    emoji: '👁️',
+    keywords: ['occhi', 'occhio', 'congiuntivite', 'bruciore occhi', 'occhi rossi', 'lacrimazione', 'secchezza oculare', 'sabbia occhi'],
+    cabinetKeywords: ['collirio', 'lacrime', 'artificiali', 'iridina', 'eufrasia', 'tobral', 'pensulvit', 'fisiologica'],
+    remedies: [
+      'Instilla gocce di soluzione salina sterile o lacrime artificiali a base di acido ialuronico ed eufrasia per rinfrescare e detergere il film lacrimale.',
+      'Applica impacchi freddi con garze sterili imbevute di camomilla o tè nero tiepido sugli occhi chiusi per 10 minuti.',
+      'Sospendi immediatamente l\'uso delle lenti a contatto fino alla completa risoluzione dell\'irritazione.',
+      'Evita di strofinare gli occhi con le mani per non diffondere batteri o provocare micro-abrasioni corneali.'
+    ],
+    pharmacyNote: 'Collirio lenitivo o decongestionante da banco; se presente secrezione giallastra purulenta, consulta il medico.'
+  },
+  {
+    id: 'ear_pain',
+    title: 'Mal d\'Orecchio & Otite',
+    emoji: '👂',
+    keywords: ['orecchio', 'orecchi', 'otite', 'dolore orecchio', 'fitta orecchio', 'tappato', 'acufene', 'cerume'],
+    cabinetKeywords: ['otopax', 'gocce orecchio', 'paracetamolo', 'tachipirina', 'ibuprofene', 'cerulisina', 'anauran'],
+    remedies: [
+      'Mantieni l\'orecchio rigorosamente asciutto evitando infiltrazioni d\'acqua durante la doccia.',
+      'Applica un panno caldo e asciutto contro l\'orecchio per alleviare la tensione dolorosa con il calore.',
+      'Dormi con la testa leggermente sollevata per ridurre la pressione nell\'orecchio medio.',
+      'Non inserire cotton fioc o oggetti nel condotto uditivo.'
+    ],
+    pharmacyNote: 'Paracetamolo o ibuprofene per lenire il dolore; contatta il medico o l\'otorino per valutare la membrana timpanica.'
+  },
+  {
+    id: 'low_blood_pressure',
+    title: 'Pressione Bassa & Calo Pressorio',
+    emoji: '📉',
+    keywords: ['pressione bassa', 'ipotensione', 'calo pressorio', 'vista annebbiata', 'debolezza improvvisa', 'mancamento'],
+    cabinetKeywords: ['polase', 'magnesio', 'potassio', 'liquorizia', 'carnitina', 'pressione'],
+    remedies: [
+      'Sdraiati immediatamente con le gambe sollevate a 45 gradi su un cuscino (posizione trendelenburg) per favorire il ritorno venoso al cervello.',
+      'Bevi un abbondante bicchiere d\'acqua con un pizzico di sale o mastica un bastoncino di pura liquirizia.',
+      'Evita bagni o docce troppo calde che provocano vasodilatazione periferica immediata.',
+      'Fai movimenti di pompaggio delle caviglie e contrai i polpacci prima di rialzarti in piedi.'
+    ],
+    pharmacyNote: 'Integratori idrosalini con magnesio e potassio: chiedi consiglio al farmacista per i periodi estivi caldi.'
+  },
+  {
+    id: 'cystitis',
+    title: 'Cistite & Bruciore Urinario',
+    emoji: '💧',
+    keywords: ['cistite', 'bruciore pipi', 'urina', 'vescica', 'minzione frequente', 'pesantezza basso ventre'],
+    cabinetKeywords: ['monuril', 'd-mannosio', 'cistiflux', 'mirtillo', 'fermenti', 'buscopan', 'tachipirina'],
+    remedies: [
+      'Bevi subito grandi quantità d\'acqua (almeno 2-2.5 litri distribuiti nella giornata) per diluire e drenare i batteri dalla vescica.',
+      'Assumi integratori naturali a base di D-Mannosio e mirtillo rosso americano (Cranberry) che impediscono l\'adesione di E. coli.',
+      'Evita cibi piccanti, alcolici, caffè, cioccolato e spezie che irritano l\'urotelio vescicale.',
+      'Usa detergenti intimi delicati a pH fisiologico e indossa biancheria intima in puro cotone traspirante.'
+    ],
+    pharmacyNote: 'Se i sintomi persistono con febbre o dolore ai reni, contatta subito il medico per un\'urinocoltura e terapia mirata.'
+  },
+  {
+    id: 'diarrhea',
+    title: 'Diarrea & Disturbi Intestinali',
+    emoji: '🚽',
+    keywords: ['diarrea', 'scariche', 'dissenteria', 'crampi pancia', 'virus intestinale', 'gastroenterite'],
+    cabinetKeywords: ['imodium', 'dissenten', 'fermenti', 'enterogermina', 'yovis', 'codex', 'idravita', 'biochetasi'],
+    remedies: [
+      'Reidrata costantemente l\'organismo bevendo a piccoli sorsi soluzioni reidratanti orali, tè leggero con limone o brodo vegetale.',
+      'Assumi fermenti lattici probiotici vivi ad alta concentrazione per ricolonizzare la flora batterica intestinale compromessa.',
+      'Segui una dieta astringente: riso bollito con la sua acqua di cottura, carote lesse, mela grattugiata, banane e fette biscottate.',
+      'Evita latte, latticini, cibi grassi, fritti e bevande fredde o zuccherate.'
+    ],
+    pharmacyNote: 'Soluzioni elettrolitiche reidratanti e probiotici: chiedi consiglio al farmacista prima di assumere bloccanti della motilità.'
+  },
+  {
+    id: 'constipation',
+    title: 'Stitichezza & Intestino Pigro',
+    emoji: '🌾',
+    keywords: ['stitichezza', 'stipsi', 'intestino pigro', 'gonfiore', 'evacuazione difficile', 'stitico'],
+    cabinetKeywords: ['lattulosio', 'macrogol', 'supposte glicerina', 'microclismi', 'psillio', 'magnesio', 'lassativo'],
+    remedies: [
+      'Bevi un bicchiere di acqua tiepida a digiuno al mattino appena sveglio per stimolare il riflesso gastrocolico.',
+      'Aumenta l\'apporto di fibre solubili nella dieta (semi di lino, kiwi maturi, prugne secche ammollate, crusca d\'avena).',
+      'Cammina per almeno 20-30 minuti al giorno per promuovere la peristalsi intestinale naturale.',
+      'Massaggia delicatamente l\'addome con movimenti circolari in senso orario attorno all\'ombelico.'
+    ],
+    pharmacyNote: 'Integratori di fibre di psillio o osmotici delicati (macrogol): chiedi consiglio al farmacista evitando lassativi irritanti.'
+  },
+  {
+    id: 'insect_bite',
+    title: 'Puntura di Zanzara o Insetto',
+    emoji: '🦟',
+    keywords: ['zanzara', 'puntura insetto', 'vespa', 'ape', 'ponfo', 'prurito puntura', 'gonfiore puntura'],
+    cabinetKeywords: ['polaramin', 'after-bite', 'arnica', 'cortisone', 'lenitivo', 'ammoniaca', 'fenistil'],
+    remedies: [
+      'Applica subito un cubetto di ghiaccio protetto da un fazzoletto sul punto della puntura per 10 minuti per placare prurito e gonfiore.',
+      'Lava delicatamente la zona con acqua fredda e sapone neutro senza strofinare.',
+      'Applica una noce di gel d\'aloe vera pura, crema all\'arnica o un roll-on lenitivo.',
+      'Evita di grattare il ponfo con le unghie per non provocare sovrainfezioni batteriche cutanee.'
+    ],
+    pharmacyNote: 'Gel antistaminico o crema idrocortisone a basso dosaggio da banco per prurito intenso: chiedi consiglio al farmacista.'
+  },
+  {
+    id: 'sunburn',
+    title: 'Scottatura Solare & Eritema',
+    emoji: '☀️',
+    keywords: ['scottatura solare', 'eritema', 'bruciatura sole', 'pelle rossa', 'ustione sole', 'doposole'],
+    cabinetKeywords: ['doposole', 'foille', 'connettivina', 'aloe', 'pantene', 'bepanthenol'],
+    remedies: [
+      'Fai impacchi freschi con teli morbidi bagnati in acqua fredda per estrarre il calore dalla pelle infiammata.',
+      'Applica generose dosi di gel purissimo di aloe vera o creme a base di acido ialuronico ed estratti di calendula.',
+      'Bevi abbondante acqua per reidratare la cute dall\'interno.',
+      'Indossa abiti morbidissimi e larghi in cotone naturale evitando sfregamenti e non esporti nuovamente al sole fino a completa guarigione.'
+    ],
+    pharmacyNote: 'Creme rigeneranti con acido ialuronico o emulsioni lenitive specifiche: chiedi consiglio al farmacista.'
+  },
+  {
+    id: 'canker_sore',
+    title: 'Afte & Afte in Bocca',
+    emoji: '👄',
+    keywords: ['afta', 'afte', 'bocca', 'lingua', 'bruciore bocca', 'gengive', 'ferite bocca', 'ulcere bocca'],
+    cabinetKeywords: ['aftamed', 'alovex', 'curasept', 'collutorio', 'buccogel', 'tachipirina'],
+    remedies: [
+      'Applica un gel protettivo bioadesivo specifico per afte a base di acido ialuronico che isola la lesione dal cibo e dai liquidi.',
+      'Fai sciacqui con acqua tiepida e mezzo cucchiaino di sale o bicarbonato dopo ogni pasto.',
+      'Evita temporaneamente cibi acidi, piccanti, salati, agrumi, pomodori crudi, frutta secca o croste dure.',
+      'Mantieni un\'igiene orale impeccabile usando uno spazzolino a setole ultra-morbide.'
+    ],
+    pharmacyNote: 'Spray o gel orali barriera con acido ialuronico ad alto peso molecolare: chiedi consiglio al farmacista.'
   }
 ];
 
 let _currentActiveFeelingSymptom = null;
 
-function handleFeelingSearch(query) {
-  if (!query || !query.trim()) return;
-  const q = query.trim().toLowerCase();
+function normalizeFeelingText(text) {
+  return (text || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
-  // Cerca per keyword nei disturbi
-  const match = FEELING_REMEDIES_DB.find(item => {
-    if (item.title.toLowerCase().includes(q)) return true;
-    return item.keywords.some(k => q.includes(k) || k.includes(q));
+function parseFeelingQuery(queryText) {
+  const norm = normalizeFeelingText(queryText);
+  if (!norm) return { matches: [], isRedFlag: false, queryText: '' };
+
+  // Controllo Red Flag di Sicurezza (Dolore toracico + vertigini/fiato corto/svenimento o dolore improvviso acuto)
+  const hasChest = /(sterno|petto|torace|cuore|braccio sinistro|cardiaco|costato)/i.test(norm);
+  const hasDizzinessOrBreath = /(vertigin|girament|gira la testa|fiato|respiro|mancanza d aria|sveniment|svenuto|sudor|sudorazion)/i.test(norm);
+  const hasSuddenSevere = /(forte|acuto|improvviso|atroce|morsa|schiaccia|oppressivo|collasso)/i.test(norm);
+  const isRedFlag = (hasChest && (hasDizzinessOrBreath || hasSuddenSevere)) || (hasChest && norm.includes('male'));
+
+  const matched = [];
+  FEELING_REMEDIES_DB.forEach(topic => {
+    const normTitle = normalizeFeelingText(topic.title);
+    if (norm.includes(normTitle)) {
+      matched.push(topic);
+      return;
+    }
+    const hit = topic.keywords.some(kw => {
+      const normKw = normalizeFeelingText(kw);
+      if (normKw.length <= 3) {
+        const re = new RegExp('\\b' + normKw + '\\b', 'i');
+        return re.test(norm);
+      }
+      return norm.includes(normKw);
+    });
+    if (hit) {
+      matched.push(topic);
+    }
   });
 
-  if (match) {
-    openSymptomRemedyDetail(match.id);
+  return {
+    matches: matched,
+    isRedFlag,
+    queryText: queryText.trim()
+  };
+}
+
+function handleFeelingSearch(query) {
+  if (!query || !query.trim()) return;
+  const parsed = parseFeelingQuery(query);
+
+  if (parsed.matches.length === 1 && !parsed.isRedFlag) {
+    // Singolo disturbo trovato, apri direttamente la vista del disturbo
+    openSymptomRemedyDetail(parsed.matches[0].id, parsed.queryText);
+  } else if (parsed.matches.length > 1 || parsed.isRedFlag) {
+    // Multi-sintomo o allerta red flag: apri vista combinata ricca
+    openMultiFeelingModal(parsed);
   } else {
-    // Apri il più simile o il mal di testa come default informativo, impostando il titolo cercato
+    // Nessuna corrispondenza esatta, apri fallback informativo personalizzato
     openCustomSymptomDetail(query.trim());
   }
 }
 
-function openSymptomRemedyDetail(symptomId) {
+function openMultiFeelingModal(parsed) {
+  const activeProfile = getActiveProfileId();
+  const allCabinet = JSON.parse(localStorage.getItem('pulse_cabinet') || '[]');
+  const profileCabinet = allCabinet.filter(c => !c.profileId || c.profileId === activeProfile);
+  const todayIso = new Date().toISOString().split('T')[0];
+
+  // Raccogli tutte le keyword dell'armadietto di tutti i sintomi riconosciuti
+  const allCabinetKeywords = [];
+  parsed.matches.forEach(m => {
+    (m.cabinetKeywords || []).forEach(k => {
+      if (!allCabinetKeywords.includes(k.toLowerCase())) allCabinetKeywords.push(k.toLowerCase());
+    });
+  });
+
+  const matchedCabinetMeds = profileCabinet.filter(item => {
+    const name = (item.name || '').toLowerCase();
+    const notes = (item.notes || '').toLowerCase();
+    const cat = (item.category || '').toLowerCase();
+    return allCabinetKeywords.some(k => name.includes(k) || notes.includes(k) || cat.includes(k));
+  });
+
+  _currentActiveFeelingSymptom = {
+    title: parsed.queryText,
+    isMulti: true,
+    isRedFlag: parsed.isRedFlag,
+    matches: parsed.matches,
+    cabinetMatches: matchedCabinetMeds,
+    queryText: parsed.queryText
+  };
+
+  renderMultiFeelingModal();
+  openModal('feelingRemedyModalOverlay');
+}
+
+function renderMultiFeelingModal() {
+  const data = _currentActiveFeelingSymptom;
+  if (!data) return;
+
+  const emojiEl = document.getElementById('feelingModalEmoji');
+  const titleEl = document.getElementById('feelingModalTitle');
+  const modalContent = document.getElementById('feelingModalContent');
+
+  if (emojiEl) emojiEl.innerText = data.isRedFlag ? '🚨' : '✨';
+  if (titleEl) titleEl.innerText = 'Analisi Sintomi';
+
+  let html = '';
+
+  // 1. Allerta Red Flag se presente
+  if (data.isRedFlag) {
+    html += `
+      <div class="glass-card" style="padding: 14px 16px; background: rgba(255, 45, 85, 0.12); border: 1.5px solid var(--accent-coral);">
+        <div style="display: flex; align-items: flex-start; gap: 10px;">
+          <span style="font-size: 24px;">🚨</span>
+          <div style="flex: 1;">
+            <div style="font-size: 14px; font-weight: 800; color: var(--accent-coral); margin-bottom: 4px;">Sintomi che richiedono attenzione immediata</div>
+            <div style="font-size: 12px; color: var(--text-primary); line-height: 1.45; margin-bottom: 10px;">
+              Il dolore al petto/sterno o la comparsa improvvisa di vertigini, fiato corto o sudorazione fredda possono essere segnali di un'emergenza cardiaca o vascolare. Non attendere che passi da solo.
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="tel:112" class="emergency-call-pill" style="padding: 6px 14px; font-size: 13px; font-weight: 800;">
+                📞 Chiama 112 Ora
+              </a>
+              <button onclick="closeAllModals(); openDoctorModal();" class="btn-secondary-sm" style="padding: 6px 12px; font-size: 12px;">
+                Chiama Medico di Base ›
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // 2. Sintomi Riconosciuti dalla frase
+  if (data.matches && data.matches.length > 0) {
+    html += `
+      <div class="glass-card" style="padding: 14px 16px;">
+        <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent-teal); letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+          <span>🔍</span>
+          <span>DISTURBI RICONOSCIUTI NELLA TUA FRASE (${data.matches.length})</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          ${data.matches.map(item => `
+            <div style="padding: 10px 12px; border-radius: var(--radius-sm); background: var(--bg-card); border: 1px solid var(--border-glass);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="font-size: 18px;">${item.emoji}</span>
+                  <strong style="font-size: 13px; color: var(--text-primary);">${escapeHTML(item.title)}</strong>
+                </div>
+                <button onclick="openSymptomRemedyDetail('${item.id}', '${escapeHTML(data.queryText)}')" class="btn-secondary-sm" style="font-size: 11px; padding: 3px 8px;">
+                  Dettagli ›
+                </button>
+              </div>
+              <ul style="margin: 0; padding-left: 16px; font-size: 12px; color: var(--text-secondary); line-height: 1.45;">
+                ${item.remedies.slice(0, 2).map(r => `<li>${escapeHTML(r)}</li>`).join('')}
+              </ul>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // 3. Riscontro in Armadietto per i disturbi trovati
+  const meds = data.cabinetMatches || [];
+  const todayIso = new Date().toISOString().split('T')[0];
+  html += `
+    <div class="glass-card" style="padding: 14px 16px;">
+      <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent-amber); letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span>💊</span>
+          <span>NEL TUO ARMADIETTO (${meds.length})</span>
+        </div>
+        <button onclick="closeAllModals(); openCabinetView();" class="btn-secondary-sm" style="font-size: 10px; padding: 2px 6px;">Apri Armadietto ›</button>
+      </div>
+      ${meds.length > 0 ? `
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          ${meds.map(med => {
+            const isExpired = med.expiryDate && med.expiryDate < todayIso;
+            return `
+              <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--bg-card); border: 1px solid ${isExpired ? 'rgba(224, 108, 117, 0.4)' : 'var(--border-glass)'};">
+                <div>
+                  <div style="font-size: 13px; font-weight: 700; color: ${isExpired ? 'var(--accent-coral)' : 'var(--text-primary)'}; display: flex; align-items: center; gap: 6px;">
+                    <span>${escapeHTML(med.name)}</span>
+                    ${isExpired ? '<span style="font-size: 10px; font-weight: 800; padding: 1px 5px; border-radius: 4px; background: rgba(224, 108, 117, 0.2); color: var(--accent-coral);">SCADUTO</span>' : ''}
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">
+                    Q.tà: ${escapeHTML(med.quantity || 'Disponibile')} · Scadenza: ${med.expiryDate || 'Non indicata'}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      ` : `
+        <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+          Nessun farmaco corrispondente per questi disturbi salvato nel tuo armadietto.
+        </div>
+      `}
+    </div>
+  `;
+
+  // 4. Bottone Annota nel Diario
+  html += `
+    <div class="feeling-diary-card">
+      <div class="feeling-diary-header-text">
+        <div class="feeling-diary-card-title">Annota nel Diario della Salute</div>
+        <div class="feeling-diary-card-subtitle">Salva questa descrizione nella tua cronologia con data e ora</div>
+      </div>
+      <button id="btnSaveFeelingToDiary" type="button" class="feeling-diary-cta-btn" onclick="saveFeelingSymptomToDiary('${escapeHTML(data.queryText)}')">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+        <span>Annota nel diario della salute</span>
+      </button>
+    </div>
+    <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.4; text-align: center; padding: 4px 10px 10px 10px; opacity: 0.7; margin-top: 4px;">
+      ℹ️ Suggerimenti generali a scopo informativo. Non sostituiscono il parere del medico o del farmacista.
+    </div>
+  `;
+
+  if (modalContent) {
+    modalContent.innerHTML = html;
+  }
+}
+
+function openSymptomRemedyDetail(symptomId, originalQuery) {
   const item = FEELING_REMEDIES_DB.find(s => s.id === symptomId);
   if (!item) return;
 
@@ -5384,10 +6233,12 @@ function openSymptomRemedyDetail(symptomId) {
     emoji: item.emoji,
     remedies: item.remedies,
     pharmacyNote: item.pharmacyNote,
-    cabinetKeywords: item.cabinetKeywords
+    cabinetKeywords: item.cabinetKeywords,
+    originalQuery: originalQuery || item.title
   };
 
-  renderFeelingRemedyModal();
+  renderSingleFeelingModal();
+  openModal('feelingRemedyModalOverlay');
 }
 
 function openCustomSymptomDetail(customTitle) {
@@ -5401,137 +6252,133 @@ function openCustomSymptomDetail(customTitle) {
       'Se il disturbo è accompagnato da dolore localizzato, mantieni a riposo la parte interessata.'
     ],
     pharmacyNote: 'Per una valutazione specifica e un rimedio mirato, consulta sempre il tuo Medico di Base o chiedi consiglio al farmacista.',
-    cabinetKeywords: ['tachipirina', 'paracetamolo', 'ibuprofene', 'arnica', 'moment']
+    cabinetKeywords: ['tachipirina', 'paracetamolo', 'ibuprofene', 'arnica', 'moment'],
+    originalQuery: customTitle
   };
 
-  renderFeelingRemedyModal();
+  renderSingleFeelingModal();
+  openModal('feelingRemedyModalOverlay');
 }
 
-function renderFeelingRemedyModal() {
+function renderSingleFeelingModal() {
   if (!_currentActiveFeelingSymptom) return;
   const data = _currentActiveFeelingSymptom;
 
   const emojiEl = document.getElementById('feelingModalEmoji');
   const titleEl = document.getElementById('feelingModalTitle');
-  const remediesList = document.getElementById('feelingRemediesList');
-  const pharmacyNote = document.getElementById('feelingPharmacyNote');
-  const cabinetList = document.getElementById('feelingCabinetMatchList');
-  const saveDiaryBtn = document.getElementById('btnSaveFeelingToDiary');
+  const modalContent = document.getElementById('feelingModalContent');
 
   if (emojiEl) emojiEl.innerText = data.emoji || '🌿';
   if (titleEl) titleEl.innerText = data.title;
 
-  if (remediesList) {
-    remediesList.innerHTML = data.remedies.map(r => `<li>${escapeHTML(r)}</li>`).join('');
-  }
-
-  if (pharmacyNote) {
-    pharmacyNote.innerText = data.pharmacyNote;
-  }
-
-  // Matching con l'Armadietto del profileId attivo
-  if (cabinetList) {
-    const activeProfile = getActiveProfileId();
-    const allCabinet = JSON.parse(localStorage.getItem('pulse_cabinet') || '[]');
-    const profileCabinet = allCabinet.filter(c => !c.profileId || c.profileId === activeProfile);
-    const keywords = data.cabinetKeywords || [];
-    const todayIso = new Date().toISOString().split('T')[0];
-
-    const matched = profileCabinet.filter(item => {
-      const name = (item.name || '').toLowerCase();
-      const notes = (item.notes || '').toLowerCase();
-      const cat = (item.category || '').toLowerCase();
-      const symptomTitle = (data.title || '').toLowerCase();
-
-      // Corrispondenza per categoria farmaco
-      const matchCat = cat && (
-        (symptomTitle.includes('testa') && cat.includes('testa')) ||
-        (symptomTitle.includes('gola') && cat.includes('gola')) ||
-        (symptomTitle.includes('febbre') && cat.includes('febbre')) ||
-        (symptomTitle.includes('stomaco') && cat.includes('stomaco')) ||
-        (symptomTitle.includes('cervicale') && (cat.includes('dolori') || cat.includes('testa'))) ||
-        (symptomTitle.includes('muscol') && cat.includes('dolori')) ||
-        (symptomTitle.includes('allergia') && cat.includes('allergie')) ||
-        (symptomTitle.includes('stanchezza') && cat.includes('integratori')) ||
-        (symptomTitle.includes('insonnia') && (cat.includes('integratori') || cat.includes('generale'))) ||
-        (symptomTitle.includes('raffreddore') && cat.includes('respiro'))
-      );
-
-      return matchCat || keywords.some(k => name.includes(k) || notes.includes(k));
-    });
-
-    if (matched.length > 0) {
-      cabinetList.innerHTML = `
-        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">
-          Trovati <strong>${matched.length}</strong> farmaci o dispositivi compatibili in casa:
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-          ${matched.map(med => {
-            const isExpired = med.expiryDate && med.expiryDate < todayIso;
-            return `
-              <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--bg-card); border: 1px solid ${isExpired ? 'rgba(224, 108, 117, 0.4)' : 'var(--border-glass)'};">
-                <div>
-                  <div style="font-size: 13px; font-weight: 700; color: ${isExpired ? 'var(--accent-coral)' : 'var(--text-primary)'}; display: flex; align-items: center; gap: 6px;">
-                    <span>${escapeHTML(med.name)}</span>
-                    ${isExpired ? '<span style="font-size: 10px; font-weight: 800; padding: 1px 5px; border-radius: 4px; background: rgba(224, 108, 117, 0.2); color: var(--accent-coral);">SCADUTO</span>' : ''}
-                  </div>
-                  <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">
-                    Q.tà: ${escapeHTML(med.quantity || 'Disponibile')} · Scadenza: ${med.expiryDate || 'Non indicata'}
-                  </div>
-                </div>
-                <button onclick="closeAllModals(); openCabinetView();" class="btn-secondary-sm" style="padding: 4px 8px; font-size: 11px; flex: none;">
-                  Dettagli ›
-                </button>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      `;
-    } else {
-      cabinetList.innerHTML = `
-        <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-          <span>Nessun farmaco corrispondente per questo disturbo salvato nel tuo armadietto.</span>
-          <button onclick="closeAllModals(); openCabinetView();" class="btn-secondary-sm" style="padding: 4px 8px; font-size: 11px; flex: none;">
-            Apri Armadietto ›
-          </button>
-        </div>
-      `;
-    }
-  }
-
-  // Bottone Salva nel Diario
-  if (saveDiaryBtn) {
-    saveDiaryBtn.onclick = () => {
-      saveFeelingSymptomToDiary(data.title);
-    };
-  }
-
-  openModal('feelingRemedyModalOverlay');
-}
-
-function saveFeelingSymptomToDiary(symptomTitle) {
   const activeProfile = getActiveProfileId();
-  let notes = JSON.parse(localStorage.getItem('pulse_notes') || '[]');
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  const allCabinet = JSON.parse(localStorage.getItem('pulse_cabinet') || '[]');
+  const profileCabinet = allCabinet.filter(c => !c.profileId || c.profileId === activeProfile);
+  const keywords = data.cabinetKeywords || [];
+  const todayIso = new Date().toISOString().split('T')[0];
 
-  const newNote = {
-    id: 'note_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-    profileId: activeProfile,
-    title: `Sintomo: ${symptomTitle}`,
-    tag: 'Sintomo',
-    text: `Avvertito alle ore ${timeStr}. Consultati rimedi naturali e controllo armadietto.`,
-    date: now.toISOString()
-  };
+  const matched = profileCabinet.filter(item => {
+    const name = (item.name || '').toLowerCase();
+    const notes = (item.notes || '').toLowerCase();
+    const cat = (item.category || '').toLowerCase();
+    const symptomTitle = (data.title || '').toLowerCase();
 
-  notes.unshift(newNote);
-  localStorage.setItem('pulse_notes', JSON.stringify(notes));
+    const matchCat = cat && (
+      (symptomTitle.includes('testa') && cat.includes('testa')) ||
+      (symptomTitle.includes('gola') && cat.includes('gola')) ||
+      (symptomTitle.includes('febbre') && cat.includes('febbre')) ||
+      (symptomTitle.includes('stomaco') && cat.includes('stomaco')) ||
+      (symptomTitle.includes('cervicale') && (cat.includes('dolori') || cat.includes('testa'))) ||
+      (symptomTitle.includes('muscol') && cat.includes('dolori')) ||
+      (symptomTitle.includes('allergia') && cat.includes('allergie')) ||
+      (symptomTitle.includes('stanchezza') && cat.includes('integratori')) ||
+      (symptomTitle.includes('insonnia') && (cat.includes('integratori') || cat.includes('generale'))) ||
+      (symptomTitle.includes('raffreddore') && cat.includes('respiro')) ||
+      (symptomTitle.includes('petto') && cat.includes('generale'))
+    );
 
-  showToast(`Sintomo "${symptomTitle}" salvato nel Diario!`, '📝');
-  closeAllModals();
+    return matchCat || keywords.some(k => name.includes(k) || notes.includes(k));
+  });
 
-  if (typeof renderHealthNotes === 'function') {
-    renderHealthNotes();
+  let html = `
+    <!-- Sezione A: Rimedi Naturali & Azioni Pratiche -->
+    <div class="glass-card" style="padding: 14px 16px;">
+      <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent-teal); letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+        <span>🍃</span>
+        <span>RIMEDI NATURALI & AZIONI PRATICHE</span>
+      </div>
+      <ul id="feelingRemediesList" style="margin: 0; padding-left: 18px; font-size: 13px; color: var(--text-primary); line-height: 1.5; display: flex; flex-direction: column; gap: 6px;">
+        ${data.remedies.map(r => `<li>${escapeHTML(r)}</li>`).join('')}
+      </ul>
+      ${data.pharmacyNote ? `<div id="feelingPharmacyNote" style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border-subtle); font-size: 12px; color: var(--text-secondary); font-style: italic;">${escapeHTML(data.pharmacyNote)}</div>` : ''}
+    </div>
+
+    <!-- Sezione B: Nel tuo Armadietto -->
+    <div class="glass-card" style="padding: 14px 16px;">
+      <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent-amber); letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span>💊</span>
+          <span>NEL TUO ARMADIETTO (${matched.length})</span>
+        </div>
+        <button onclick="closeAllModals(); openCabinetView();" class="btn-secondary-sm" style="font-size: 10px; padding: 2px 6px;">Vedi tutto ›</button>
+      </div>
+      <div id="feelingCabinetMatchList">
+        ${matched.length > 0 ? `
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${matched.map(med => {
+              const isExpired = med.expiryDate && med.expiryDate < todayIso;
+              return `
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--bg-card); border: 1px solid ${isExpired ? 'rgba(224, 108, 117, 0.4)' : 'var(--border-glass)'};">
+                  <div>
+                    <div style="font-size: 13px; font-weight: 700; color: ${isExpired ? 'var(--accent-coral)' : 'var(--text-primary)'}; display: flex; align-items: center; gap: 6px;">
+                      <span>${escapeHTML(med.name)}</span>
+                      ${isExpired ? '<span style="font-size: 10px; font-weight: 800; padding: 1px 5px; border-radius: 4px; background: rgba(224, 108, 117, 0.2); color: var(--accent-coral);">SCADUTO</span>' : ''}
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 1px;">
+                      Q.tà: ${escapeHTML(med.quantity || 'Disponibile')} · Scadenza: ${med.expiryDate || 'Non indicata'}
+                    </div>
+                  </div>
+                  <button onclick="closeAllModals(); openCabinetView();" class="btn-secondary-sm" style="padding: 4px 8px; font-size: 11px; flex: none;">
+                    Dettagli ›
+                  </button>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        ` : `
+          <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+            <span>Nessun farmaco corrispondente per questo disturbo salvato nel tuo armadietto.</span>
+            <button onclick="closeAllModals(); openCabinetView();" class="btn-secondary-sm" style="padding: 4px 8px; font-size: 11px; flex: none;">
+              Apri Armadietto ›
+            </button>
+          </div>
+        `}
+      </div>
+    </div>
+
+    <!-- Sezione C: Azione Rapida Annota nel Diario -->
+    <div class="feeling-diary-card">
+      <div class="feeling-diary-header-text">
+        <div class="feeling-diary-card-title">Annota nel Diario della Salute</div>
+        <div class="feeling-diary-card-subtitle">Salva questo sintomo nella tua cronologia con data e ora</div>
+      </div>
+      <button id="btnSaveFeelingToDiary" type="button" class="feeling-diary-cta-btn" onclick="saveFeelingSymptomToDiary('${escapeHTML(data.originalQuery || data.title)}')">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+        <span>Annota nel diario della salute</span>
+      </button>
+    </div>
+
+    <!-- Sezione D: Disclaimer Discreto -->
+    <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.4; text-align: center; padding: 4px 10px 10px 10px; opacity: 0.7; margin-top: 4px;">
+      ℹ️ Suggerimenti generali a scopo informativo. Non sostituiscono il parere del medico o del farmacista.
+    </div>
+  `;
+
+  if (modalContent) {
+    modalContent.innerHTML = html;
   }
 }
 
